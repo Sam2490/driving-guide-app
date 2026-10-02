@@ -88,7 +88,7 @@ describe('level challenge', () => {
 });
 
 describe('nearby schools', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => [L.requestForegroundPermissionsAsync, L.hasServicesEnabledAsync, L.getCurrentPositionAsync].forEach((f) => f.mockReset()));
   it('explains first, then lists schools by distance when allowed', async () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
     L.hasServicesEnabledAsync.mockResolvedValue(true);
@@ -120,5 +120,20 @@ describe('nearby schools', () => {
     await fireEvent.press(screen.getByText('متابعة'));
     await settle();
     await waitFor(() => expect(screen.getByText('خدمات الموقع متوقفة. شغّل الموقع وحاول مرة أخرى.')).toBeTruthy());
+  });
+});
+
+describe('English exam', () => {
+  it('shows the question and answers in English with A-D letters', async () => {
+    await open('/settings');
+    await fireEvent.press(screen.getByRole('tab', { name: 'English' }));
+    await settle();
+    await open('/test');
+    await fireEvent.press(screen.getByText('Start exam'));
+    await settle();
+    expect(screen.getByText('Question 1 of 30')).toBeTruthy();
+    const radios = screen.getAllByRole('radio');
+    expect(radios[0].props.accessibilityLabel).toMatch(/^A\. /);
+    expect(radios[0].props.accessibilityLabel).not.toMatch(/[\u0600-\u06FF]/);
   });
 });

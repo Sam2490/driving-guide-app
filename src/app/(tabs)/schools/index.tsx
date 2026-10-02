@@ -8,15 +8,16 @@ import { SCHOOLS, SCHOOLS_CHECKED } from '@/data/schools';
 import { CITIES } from '@/data/cities';
 import { citiesIn, filterSchools, nearbySchools, regionsOf, type NearbySchool } from '@/features/schools/search';
 import { getPositionOnce, type LocationResult } from '@/services/location';
+import { cityName, regionName, schoolText } from '@/data/localize';
 
 function Select({ label, value, onPress }: { label: string; value: string; onPress: () => void }) {
-  const { c } = useApp();
+  const { c, lang } = useApp();
   const d = useDir();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}`} onPress={onPress} style={[styles.select, { backgroundColor: c.fill, borderColor: c.ln, flexDirection: d.row }]}>
       <View style={{ flex: 1 }}>
         <T size={12} muted>{label}</T>
-        <T size={15} weight="medium" content numberOfLines={1}>{value}</T>
+        <T size={15} weight="medium" content={lang === 'ar'} numberOfLines={1}>{value}</T>
       </View>
       <View style={{ transform: [{ rotate: '-90deg' }] }}><Icon name="go" size={16} color={c.tx2} /></View>
     </Pressable>
@@ -26,14 +27,22 @@ function Select({ label, value, onPress }: { label: string; value: string; onPre
 type Loc = { phase: 'idle' } | { phase: 'explain' } | { phase: 'locating' } | { phase: 'done'; list: NearbySchool[] } | { phase: 'error'; result: Exclude<LocationResult, { status: 'ok' }> };
 
 export default function Schools() {
-  const { t, c } = useApp();
+  const { t, c, lang } = useApp();
   const [region, setRegion] = useState('');
   const [city, setCity] = useState('');
   const [q, setQ] = useState('');
   const [picker, setPicker] = useState<null | 'region' | 'city'>(null);
   const [loc, setLoc] = useState<Loc>({ phase: 'idle' });
 
-  const list = useMemo(() => filterSchools(SCHOOLS, CITIES, { region, city, query: q }), [region, city, q]);
+  const list = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    const base = filterSchools(SCHOOLS, CITIES, { region, city });
+    if (!s) return base;
+    return base.filter((x) => {
+      const tx = schoolText(x, lang);
+      return `${x.name} ${x.description} ${tx.name} ${tx.description} ${x.cities.map((ct) => `${ct} ${cityName(ct, lang)}`).join(' ')}`.toLowerCase().includes(s);
+    });
+  }, [region, city, q, lang]);
   const regions = regionsOf(CITIES);
   const cities = citiesIn(CITIES, region || undefined).filter((x) => SCHOOLS.some((s) => s.cities.includes(x.name)));
 
@@ -79,8 +88,8 @@ export default function Schools() {
       ) : (
         <View style={{ gap: 12 }}>
           <Row gap={10}>
-            <View style={{ flex: 1 }}><Select label={t.schools.region} value={region || t.schools.allReg} onPress={() => setPicker('region')} /></View>
-            <View style={{ flex: 1 }}><Select label={t.schools.city} value={city || t.schools.allCity} onPress={() => setPicker('city')} /></View>
+            <View style={{ flex: 1 }}><Select label={t.schools.region} value={region ? regionName(region, lang) : t.schools.allReg} onPress={() => setPicker('region')} /></View>
+            <View style={{ flex: 1 }}><Select label={t.schools.city} value={city ? cityName(city, lang) : t.schools.allCity} onPress={() => setPicker('city')} /></View>
           </Row>
           <SearchBox value={q} onChange={setQ} placeholder={t.schools.search} />
           <T size={14} muted>{t.schools.count(list.length)}</T>
@@ -108,7 +117,7 @@ export default function Schools() {
         visible={picker === 'region'}
         title={t.schools.region}
         value={region}
-        items={[{ value: '', label: t.schools.allReg }, ...regions.map((r) => ({ value: r, label: r }))]}
+        items={[{ value: '', label: t.schools.allReg }, ...regions.map((r) => ({ value: r, label: regionName(r, lang) }))]}
         onPick={(v) => { setRegion(v); setCity(''); }}
         onClose={() => setPicker(null)}
       />
@@ -116,7 +125,7 @@ export default function Schools() {
         visible={picker === 'city'}
         title={t.schools.city}
         value={city}
-        items={[{ value: '', label: t.schools.allCity }, ...cities.map((x) => ({ value: x.name, label: x.name }))]}
+        items={[{ value: '', label: t.schools.allCity }, ...cities.map((x) => ({ value: x.name, label: cityName(x.name, lang) }))]}
         onPick={setCity}
         onClose={() => setPicker(null)}
       />

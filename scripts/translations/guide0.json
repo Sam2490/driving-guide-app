@@ -1,0 +1,198 @@
+{
+ "t00": {
+  "en": {
+   "title": "Driving licence and its categories",
+   "blocks": [
+    {"text": "Private: age 18 or over (a temporary permit for a maximum of one year from age 17), completing training at a driving school, passing the theory and practical tests, paying the fees, and settling any previous violations."},
+    {"text": "The private licence is valid for up to 10 years and allows carrying a maximum of 9 people including the driver, and driving small vehicles weighing no more than 3500 kg."},
+    {"text": "Public: age 20 or over, valid for 5 years. Category 1: taxi (up to 8 passengers); Category 2: light transport (up to 3500 kg) or heavy transport (more than that); Category 3: buses (small: 15 passengers or fewer; large: more)."},
+    {"text": "Public works vehicles: age 20, valid for 5 years. Motorcycle: age 18, valid for 10 years."},
+    {"text": "Non-Saudis must have legal residency, be free of diseases and disabilities that prevent driving, and have no court ruling for certain crimes (assault or drugs) unless their record has been officially cleared."},
+    {"text": "The licence contains: name, ID number, date of birth, restrictions, type, blood group, issue and expiry dates, and nationality."}
+   ]
+  },
+  "ur": {
+   "title": "ڈرائیونگ لائسنس اور اس کی اقسام",
+   "blocks": [
+    {"text": "پرائیویٹ: عمر 18 سال یا اس سے زیادہ (17 سال کی عمر سے زیادہ سے زیادہ ایک سال کے لیے عارضی اجازت نامہ)، ڈرائیونگ اسکول میں تربیت مکمل کرنا، تھیوری اور عملی ٹیسٹ پاس کرنا، فیس ادا کرنا، اور پچھلی خلاف ورزیوں کے جرمانے ادا کرنا۔"},
+    {"text": "پرائیویٹ لائسنس 10 سال تک کارآمد ہوتا ہے، اس سے ڈرائیور سمیت زیادہ سے زیادہ 9 افراد کو لے جانے اور 3500 کلوگرام سے زیادہ وزن نہ رکھنے والی چھوٹی گاڑیاں چلانے کی اجازت ملتی ہے۔"},
+    {"text": "پبلک: عمر 20 سال یا اس سے زیادہ اور 5 سال کی مدت۔ کیٹیگری 1 ٹیکسی (8 مسافروں تک)، کیٹیگری 2 ہلکی ٹرانسپورٹ (3500 کلوگرام تک) یا بھاری ٹرانسپورٹ (اس سے زیادہ)، کیٹیگری 3 بسیں (چھوٹی 15 یا کم مسافر، بڑی اس سے زیادہ)۔"},
+    {"text": "پبلک ورکس کی گاڑیاں: 20 سال عمر اور 5 سال مدت۔ موٹر سائیکل: 18 سال عمر اور 10 سال مدت۔"},
+    {"text": "غیر سعودیوں کے لیے قانونی اقامہ، ڈرائیونگ میں رکاوٹ بننے والی بیماریوں اور معذوریوں سے پاک ہونا، اور بعض جرائم (حملہ یا منشیات) میں عدالتی فیصلہ نہ ہونا شرط ہے، الا یہ کہ ان کا ریکارڈ باضابطہ طور پر صاف ہو چکا ہو۔"},
+    {"text": "لائسنس میں یہ معلومات ہوتی ہیں: نام، شناختی نمبر، تاریخ پیدائش، پابندیاں، قسم، بلڈ گروپ، اجرا اور اختتام کی تاریخ، اور قومیت۔"}
+   ]
+  }
+ },
+ "t01": {
+  "en": {
+   "title": "Speed and stopping distance",
+   "blocks": [
+    {"text": "Always adjust your speed to the conditions so that you can stop in time. Speed, and failing to adjust it, is a major cause of road accidents."},
+    {"text": "Stopping distance = reaction distance + braking distance. The usual reaction time is one second."},
+    {"text": "Reaction = (speed ÷ 10) × 3 · Braking = (speed ÷ 10) × (speed ÷ 10) on a dry road."},
+    {"table": [
+     ["Speed", "Reaction", "Braking", "Stopping"],
+     ["30 km/h", "9 m", "9 m", "18 m"],
+     ["50 km/h", "15 m", "25 m", "40 m"],
+     ["60 km/h", "18 m", "36 m", "54 m"],
+     ["80 km/h", "24 m", "64 m", "88 m"],
+     ["100 km/h", "30 m", "100 m", "130 m"],
+     ["120 km/h", "36 m", "144 m", "180 m"]
+    ]},
+    {"text": "Reaction distance gets longer with high speed, distraction and fatigue, and drugs, alcohol or medicines that cause drowsiness."},
+    {"text": "Braking distance gets longer with speed, a heavy load, poor road conditions (sand, wet surface), and poor tyres or brakes."},
+    {"text": "To reduce it: slow down, pay more attention, and rest your foot over the brake pedal without pressing."},
+    {"text": "If your speed is just 10 km/h higher (from 50 to 60), you may hit at about 40 km/h instead of stopping, and the impact is like falling from a height of 6.5 metres without a seat belt."}
+   ]
+  },
+  "ur": {
+   "title": "رفتار اور رکنے کا فاصلہ",
+   "blocks": [
+    {"text": "اپنی رفتار ہمیشہ حالات کے مطابق رکھیں تاکہ آپ بروقت رک سکیں۔ تیز رفتاری اور اسے حالات کے مطابق نہ رکھنا ٹریفک حادثات کی ایک بڑی وجہ ہے۔"},
+    {"text": "رکنے کا فاصلہ = ردِعمل کا فاصلہ + بریک کا فاصلہ۔ ردِعمل کا عام وقت ایک سیکنڈ ہے۔"},
+    {"text": "ردِعمل = (رفتار ÷ 10) × 3 · بریک = (رفتار ÷ 10) × (رفتار ÷ 10) خشک سڑک پر۔"},
+    {"table": [
+     ["رفتار", "ردِعمل", "بریک", "رکنا"],
+     ["30 کلومیٹر فی گھنٹہ", "9 میٹر", "9 میٹر", "18 میٹر"],
+     ["50 کلومیٹر فی گھنٹہ", "15 میٹر", "25 میٹر", "40 میٹر"],
+     ["60 کلومیٹر فی گھنٹہ", "18 میٹر", "36 میٹر", "54 میٹر"],
+     ["80 کلومیٹر فی گھنٹہ", "24 میٹر", "64 میٹر", "88 میٹر"],
+     ["100 کلومیٹر فی گھنٹہ", "30 میٹر", "100 میٹر", "130 میٹر"],
+     ["120 کلومیٹر فی گھنٹہ", "36 میٹر", "144 میٹر", "180 میٹر"]
+    ]},
+    {"text": "تیز رفتاری، توجہ بٹنے اور تھکاوٹ، اور منشیات، شراب یا غنودگی پیدا کرنے والی دواؤں سے ردِعمل کا فاصلہ بڑھ جاتا ہے۔"},
+    {"text": "رفتار، بھاری بوجھ، خراب سڑک (ریت، گیلا پن)، اور خراب ٹائر یا بریک سے بریک کا فاصلہ بڑھ جاتا ہے۔"},
+    {"text": "اسے کم کرنے کے لیے: رفتار کم کریں، توجہ بڑھائیں، اور پاؤں دبائے بغیر بریک کے اوپر رکھیں۔"},
+    {"text": "اگر آپ کی رفتار صرف 10 کلومیٹر فی گھنٹہ زیادہ ہو (50 سے 60)، تو رکنے کے بجائے آپ تقریباً 40 کلومیٹر فی گھنٹہ کی رفتار سے ٹکرا سکتے ہیں، اور اس کا اثر سیٹ بیلٹ کے بغیر 6.5 میٹر کی بلندی سے گرنے جیسا ہے۔"}
+   ]
+  }
+ },
+ "t02": {
+  "en": {
+   "title": "Traffic accidents",
+   "blocks": [
+    {"text": "Reasons for the high number of accidents: speeding, not following the rules, using a mobile phone and not wearing a seat belt, sudden lane changes, and the condition of the vehicle and the road."},
+    {"text": "Minor accident: damage not exceeding 5,000 SAR or an injury that does not require hospital. Major accident: deaths or serious injuries."},
+    {"text": "Legal liability depends on the share of fault: 100%, 75%, 50% or 25%."},
+    {"text": "In an accident with injuries: call the traffic police (993 / 911) and the Red Crescent (997). In an accident with damage only: use the Najm app and photograph the accident from all angles."},
+    {"text": "Do not move the vehicles unless they block traffic or threaten safety, or the accident is minor and both parties agree."},
+    {"text": "Leaving the accident scene without a reason counts as fleeing. The penalty can reach 2,000 SAR and/or 3 months in prison. Detention in accidents involving death or serious injury does not exceed 72 hours."}
+   ]
+  },
+  "ur": {
+   "title": "ٹریفک حادثات",
+   "blocks": [
+    {"text": "حادثات بڑھنے کی وجوہات: تیز رفتاری، قوانین کی پابندی نہ کرنا، موبائل فون کا استعمال اور سیٹ بیلٹ نہ باندھنا، اچانک لین تبدیل کرنا، اور گاڑی اور سڑک کی حالت۔"},
+    {"text": "معمولی حادثہ: نقصان 5000 ریال سے زیادہ نہ ہو یا ایسی چوٹ جس کے لیے اسپتال جانے کی ضرورت نہ ہو۔ بڑا حادثہ: اموات یا شدید چوٹیں۔"},
+    {"text": "قانونی ذمہ داری غلطی کے تناسب کے مطابق ہوتی ہے: 100%، 75%، 50% یا 25%۔"},
+    {"text": "زخمیوں والے حادثے میں: ٹریفک پولیس (993 / 911) اور ہلال احمر (997) کو کال کریں۔ صرف نقصان والے حادثے میں: «نجم» ایپ استعمال کریں اور حادثے کی ہر زاویے سے تصویریں لیں۔"},
+    {"text": "گاڑیوں کو اس وقت تک نہ ہٹائیں جب تک وہ ٹریفک میں رکاوٹ نہ بنیں یا حفاظت کے لیے خطرہ نہ ہوں، یا حادثہ معمولی ہو اور دونوں فریق متفق ہوں۔"},
+    {"text": "بغیر وجہ حادثے کی جگہ چھوڑنا فرار شمار ہوتا ہے۔ سزا 2000 ریال اور/یا 3 ماہ قید تک ہو سکتی ہے۔ موت یا شدید چوٹ والے حادثات میں حراست 72 گھنٹے سے زیادہ نہیں ہوتی۔"}
+   ]
+  }
+ },
+ "t03": {
+  "en": {
+   "title": "Violations and fines",
+   "blocks": [
+    {"table": [
+     ["Category", "Fine (SAR)", "Examples"],
+     ["1", "100–150", "Parking outside designated places, no valid insurance"],
+     ["2", "150–300", "Not using the indicator, not wearing a seat belt, not carrying the licence, too short a safe distance, reversing more than 20 m"],
+     ["3", "300–500", "Being distracted from the road, sudden braking, expired licence, not using a child seat"],
+     ["4", "500–900", "Not stopping at a \"Stop\" sign, right-of-way violation, phone in hand, driving in a tunnel without lights"],
+     ["5", "1000–2000", "Stopping on a railway line, driving without a front plate, overtaking where prohibited, not wearing a helmet"],
+     ["6", "3000–6000", "Red light, overtaking a school bus, driving against traffic, racing"],
+     ["7", "5000–10000", "Driving under the influence of alcohol or drugs, plates that do not belong to the vehicle"]
+    ]},
+    {"text": "Speeding (on roads up to 120 km/h): over by 10–20 → 150–300 SAR, 20–30 → 300–500, 30–40 → 800–1000, 40–50 → 1200–1500, more than 50 → 1500–2000."},
+    {"text": "On 140 km/h roads: over by 5–10 → 300–500, 10–20 → 800–1000, 20–30 → 1200–1500, more than 30 → 1500–2000."},
+    {"text": "Drifting (tafheet): first time, vehicle impounded for 15 days and a 20,000 SAR fine; second time, one month and 40,000; third time, vehicle confiscated and 60,000."},
+    {"text": "The violator stays inside their vehicle until the traffic officer arrives. The minimum fine can be paid within 30 days; after that the maximum applies. Check and pay through Absher."}
+   ]
+  },
+  "ur": {
+   "title": "خلاف ورزیاں اور جرمانے",
+   "blocks": [
+    {"table": [
+     ["کیٹیگری", "جرمانہ (ریال)", "مثالیں"],
+     ["1", "100–150", "مقررہ جگہوں کے علاوہ پارکنگ، کارآمد انشورنس نہ ہونا"],
+     ["2", "150–300", "انڈیکیٹر استعمال نہ کرنا، سیٹ بیلٹ نہ باندھنا، لائسنس ساتھ نہ رکھنا، محفوظ فاصلہ کم رکھنا، 20 میٹر سے زیادہ ریورس کرنا"],
+     ["3", "300–500", "سڑک سے توجہ ہٹانا، اچانک بریک لگانا، میعاد ختم لائسنس، بچوں کی سیٹ استعمال نہ کرنا"],
+     ["4", "500–900", "«رکیں» کے نشان پر نہ رکنا، ترجیح کی خلاف ورزی، ہاتھ میں موبائل، سرنگ میں لائٹس کے بغیر چلانا"],
+     ["5", "1000–2000", "ریلوے لائن پر رکنا، اگلی نمبر پلیٹ کے بغیر چلانا، ممنوعہ اوورٹیک، ہیلمٹ نہ پہننا"],
+     ["6", "3000–6000", "سرخ سگنل توڑنا، اسکول بس کو اوورٹیک کرنا، الٹی سمت چلانا، ریس لگانا"],
+     ["7", "5000–10000", "نشہ آور چیز یا منشیات کے زیر اثر ڈرائیونگ، ایسی نمبر پلیٹیں جو گاڑی کی نہ ہوں"]
+    ]},
+    {"text": "رفتار کی حد سے تجاوز (120 کلومیٹر فی گھنٹہ تک والی سڑکوں پر): 10–20 سے زیادہ ← 150–300 ریال، 20–30 ← 300–500، 30–40 ← 800–1000، 40–50 ← 1200–1500، 50 سے زیادہ ← 1500–2000۔"},
+    {"text": "140 کلومیٹر فی گھنٹہ والی سڑکوں پر: 5–10 سے زیادہ ← 300–500، 10–20 ← 800–1000، 20–30 ← 1200–1500، 30 سے زیادہ ← 1500–2000۔"},
+    {"text": "ڈرفٹنگ (تفحیط): پہلی بار گاڑی 15 دن کے لیے ضبط اور 20 ہزار ریال جرمانہ، دوسری بار ایک مہینہ اور 40 ہزار، تیسری بار گاڑی کی ضبطی اور 60 ہزار۔"},
+    {"text": "خلاف ورزی کرنے والا ٹریفک اہلکار کے پہنچنے تک اپنی گاڑی میں رہے۔ کم از کم جرمانہ 30 دن کے اندر ادا کیا جا سکتا ہے، اس کے بعد زیادہ سے زیادہ جرمانہ لازم ہوگا۔ معلومات اور ادائیگی ابشر کے ذریعے۔"}
+   ]
+  }
+ },
+ "t04": {
+  "en": {
+   "title": "Violation points and licence suspension",
+   "blocks": [
+    {"table": [
+     ["Points", "Violation"],
+     ["24", "Driving under the influence of alcohol or drugs"],
+     ["24", "Drifting (tafheet)"],
+     ["12", "Not stopping at a red light"],
+     ["12", "Driving against the direction of traffic"],
+     ["8", "Reckless driving between vehicles"],
+     ["8", "Not obeying a traffic officer's instructions"],
+     ["8", "Driving a vehicle without brakes or lights"],
+     ["6", "Not coming to a complete stop at a \"Stop\" sign"],
+     ["6", "Not respecting the right of way"],
+     ["6", "Exceeding the speed limit by more than 25 km/h"],
+     ["6", "Not giving way at a roundabout"],
+     ["6", "Overtaking in prohibited places"],
+     ["6", "Stopping on railway tracks"],
+     ["4", "Exceeding the speed limit by no more than 25 km/h"],
+     ["4", "Driving in lanes not designated for the vehicle"],
+     ["4", "Overtaking a school bus while it is loading"],
+     ["4", "Not covering or securing loads"],
+     ["4", "Modifying the body without official procedures"],
+     ["2", "Not wearing a seat belt"],
+     ["2", "Using a hand-held mobile phone"],
+     ["2", "Not wearing a helmet on a motorcycle"]
+    ]},
+    {"text": "On reaching 24 points the licence is suspended: the first time in a Hijri year for 3 months, the second for 6 months, the third for one year, and the fourth is permanent revocation."},
+    {"text": "Driving while the licence is suspended is referred to court, and the driver may be required to take a 15-day rehabilitation programme. After permanent revocation, the driver can apply for a new licence after one year, with a one-month rehabilitation programme and passing both tests."}
+   ]
+  },
+  "ur": {
+   "title": "خلاف ورزی کے پوائنٹس اور لائسنس کی منسوخی",
+   "blocks": [
+    {"table": [
+     ["پوائنٹس", "خلاف ورزی"],
+     ["24", "نشہ آور چیز یا منشیات کے زیر اثر ڈرائیونگ"],
+     ["24", "ڈرفٹنگ (تفحیط)"],
+     ["12", "سرخ سگنل پر نہ رکنا"],
+     ["12", "ٹریفک کی الٹی سمت میں ڈرائیونگ"],
+     ["8", "گاڑیوں کے درمیان لاپروائی سے ڈرائیونگ"],
+     ["8", "ٹریفک اہلکار کی ہدایات پر عمل نہ کرنا"],
+     ["8", "بریک یا لائٹس کے بغیر گاڑی چلانا"],
+     ["6", "«رکیں» کے نشان پر مکمل طور پر نہ رکنا"],
+     ["6", "ترجیح کا احترام نہ کرنا"],
+     ["6", "رفتار کی حد سے 25 کلومیٹر فی گھنٹہ سے زیادہ تجاوز"],
+     ["6", "گول چکر میں ترجیح نہ دینا"],
+     ["6", "ممنوعہ جگہوں پر اوورٹیک کرنا"],
+     ["6", "ریلوے لائن پر رکنا"],
+     ["4", "رفتار کی حد سے 25 کلومیٹر فی گھنٹہ تک تجاوز"],
+     ["4", "غیر مخصوص لین میں ڈرائیونگ"],
+     ["4", "سواریاں چڑھاتے وقت اسکول بس کو اوورٹیک کرنا"],
+     ["4", "سامان کو نہ ڈھانپنا یا نہ باندھنا"],
+     ["4", "قانونی کارروائی کے بغیر گاڑی کے ڈھانچے میں تبدیلی"],
+     ["2", "سیٹ بیلٹ نہ باندھنا"],
+     ["2", "ہاتھ میں موبائل فون استعمال کرنا"],
+     ["2", "موٹر سائیکل پر ہیلمٹ نہ پہننا"]
+    ]},
+    {"text": "24 پوائنٹس پورے ہونے پر لائسنس معطل کر دیا جاتا ہے: ہجری سال میں پہلی بار 3 ماہ، دوسری بار 6 ماہ، تیسری بار ایک سال، اور چوتھی بار مستقل منسوخی۔"},
+    {"text": "لائسنس معطلی کے دوران ڈرائیونگ کا معاملہ عدالت بھیجا جاتا ہے، اور ڈرائیور کو 15 دن کا بحالی پروگرام لازمی کیا جا سکتا ہے۔ مستقل منسوخی کے بعد ایک سال بعد نئے لائسنس کے لیے درخواست دی جا سکتی ہے، ایک ماہ کے بحالی پروگرام اور دونوں ٹیسٹ پاس کرنے کے ساتھ۔"}
+   ]
+  }
+ }
+}

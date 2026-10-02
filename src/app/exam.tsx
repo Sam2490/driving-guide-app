@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp, useDir } from '@/state/AppProvider';
 import { Button, Dialog, IconButton, ProgressBar, Row, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
-import { AR_LETTERS, OptionButton, QuestionBody } from '@/components/Quiz';
+import { OptionButton, QuestionBody } from '@/components/Quiz';
 import { answeredCount, formatClock, remainingSeconds, selectAnswer } from '@/features/quiz/engine';
 
 export default function ExamScreen() {
@@ -99,7 +99,7 @@ export default function ExamScreen() {
         <QuestionBody q={q} />
         <View style={{ gap: 10, marginTop: 6 }}>
           {q.options.map((o, k) => (
-            <OptionButton key={o.id} option={o} letter={AR_LETTERS[k]} state={exam.answers[q.id] === o.id ? 'selected' : 'idle'} onPress={() => setExam(selectAnswer(exam, q.id, o.id))} />
+            <OptionButton key={o.id} q={q} option={o} index={k} state={exam.answers[q.id] === o.id ? 'selected' : 'idle'} onPress={() => setExam(selectAnswer(exam, q.id, o.id))} />
           ))}
         </View>
       </ScrollView>

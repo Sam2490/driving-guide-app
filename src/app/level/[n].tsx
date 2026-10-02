@@ -6,7 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { useApp, useDir } from '@/state/AppProvider';
 import { Button, Card, Dialog, IconButton, Pips, Ring, Row, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
-import { AR_LETTERS, OptionButton, OptionContent, QuestionBody } from '@/components/Quiz';
+import { OptionButton, OptionContent, QuestionBody } from '@/components/Quiz';
 import { QUESTIONS } from '@/data/questions';
 import { answerRun, ATTEMPTS, completeLevel, isFailed, isUnlocked, levelCount, levelQuestions, startRun, type Run } from '@/features/levels/levels';
 
@@ -155,7 +155,7 @@ export default function LevelScreen() {
         <View style={{ gap: 10, marginTop: 6 }}>
           {q.options.map((o, k) => {
             const state = checked ? (o.id === q.correctAnswerId ? 'ok' : o.id === sel ? 'bad' : 'dim') : sel === o.id ? 'selected' : 'idle';
-            return <OptionButton key={o.id} option={o} letter={AR_LETTERS[k]} state={state} disabled={!!checked} onPress={() => setSel(o.id)} />;
+            return <OptionButton key={o.id} q={q} option={o} index={k} state={state} disabled={!!checked} onPress={() => setSel(o.id)} />;
           })}
         </View>
       </ScrollView>
@@ -166,7 +166,7 @@ export default function LevelScreen() {
             <View style={{ flex: 1, gap: 4 }}>
               <T size={17} weight="bold" color={checked.good ? c.ok : c.bad}>{checked.good ? L.good : L.bad}</T>
               {checked.good ? <T size={14} muted>{`+${checked.gain} ${L.xp}`}</T> : (
-                <View style={{ gap: 4 }}><T size={14} muted>{L.right}</T><OptionContent option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} /></View>
+                <View style={{ gap: 4 }}><T size={14} muted>{L.right}</T><OptionContent q={q} option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} /></View>
               )}
             </View>
           </Row>

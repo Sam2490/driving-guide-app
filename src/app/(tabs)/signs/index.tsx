@@ -6,6 +6,7 @@ import { useApp, useDir } from '@/state/AppProvider';
 import { Chip, EmptyState, Row, SearchBox, T, TAB_BAR_SPACE } from '@/components/ui';
 import { SignImage } from '@/components/Media';
 import { SIGNS, SIGN_GROUPS } from '@/data/signs';
+import { signName } from '@/data/localize';
 import type { Sign } from '@/data/types';
 
 export default function Signs() {
@@ -16,12 +17,12 @@ export default function Signs() {
   const [q, setQ] = useState('');
   const [practice, setPractice] = useState(false);
   const [shown, setShown] = useState<Record<string, boolean>>({});
-  const name = useCallback((s: Sign) => (lang === 'ar' ? s.nameAr : s.nameEn), [lang]);
+  const name = useCallback((s: Sign) => signName(s, lang), [lang]);
   const groupName = (g: string) => (lang === 'ar' ? g : t.signs.groups[g] ?? g);
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return SIGNS.filter((x) => (!group || x.group === group) && (!s || `${x.nameAr} ${x.nameEn}`.toLowerCase().includes(s)));
-  }, [group, q]);
+    return SIGNS.filter((x) => (!group || x.group === group) && (!s || `${x.nameAr} ${x.nameEn} ${signName(x, lang)}`.toLowerCase().includes(s)));
+  }, [group, q, lang]);
 
   const header = (
     <View style={{ gap: 12, paddingBottom: 12 }}>
@@ -63,7 +64,7 @@ export default function Signs() {
               style={({ pressed }) => [styles.tile, { backgroundColor: c.card, borderColor: c.ln, opacity: pressed ? 0.85 : 1 }]}
             >
               <View style={[styles.img, { backgroundColor: c.fill }]}><SignImage id={item.id} size={92} /></View>
-              <T size={13.5} center content={lang === 'ar'} latin={lang === 'ur' && !hidden} color={hidden ? c.ac : c.tx} numberOfLines={3}>{hidden ? t.signs.reveal : name(item)}</T>
+              <T size={13.5} center content={lang === 'ar'} color={hidden ? c.ac : c.tx} numberOfLines={3}>{hidden ? t.signs.reveal : name(item)}</T>
             </Pressable>
           );
         }}

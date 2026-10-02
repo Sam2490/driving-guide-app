@@ -1,0 +1,114 @@
+{
+  "t05": {
+    "en": {
+      "title": "Parts of the road and guide signs",
+      "blocks": [
+        {"text": "A main road is entered and exited through entrances and exits, and a service road serves the adjacent properties. The traffic island (median) separates the two directions, and the merging lane lets you join the road's traffic."},
+        {"text": "Guide signs: blue with white letters (cities and villages outside the city), green (streets and districts inside cities), white with black letters (important facilities such as airports), brown (farms, resorts, museums and religious places)."},
+        {"text": "Temporary work zone signs have the same shapes but are yellow with a red border."}
+      ]
+    },
+    "ur": {
+      "title": "سڑک کے حصے اور رہنمائی کے نشانات",
+      "blocks": [
+        {"text": "مین روڈ میں داخلے اور اس سے نکلنے کے لیے داخلی اور خارجی راستے استعمال ہوتے ہیں، اور سروس روڈ آس پاس کی جائیدادوں کے لیے ہوتی ہے۔ ٹریفک آئی لینڈ (درمیانی پٹی) دونوں سمتوں کو الگ کرتی ہے، اور ضم ہونے والی لین سڑک کی ٹریفک میں شامل ہونے کی اجازت دیتی ہے۔"},
+        {"text": "رہنمائی کے بورڈ: نیلے رنگ پر سفید حروف (شہر سے باہر کے شہر اور گاؤں)، سبز (شہروں کے اندر سڑکیں اور محلے)، سفید رنگ پر سیاہ حروف (اہم سہولیات جیسے ہوائی اڈے)، بھورے (فارم، ریزورٹ، عجائب گھر اور مذہبی مقامات)۔"},
+        {"text": "عارضی کام کے علاقوں کے نشانات انہی شکلوں کے ہوتے ہیں لیکن پیلے رنگ کے اور سرخ کنارے کے ساتھ۔"}
+      ]
+    }
+  },
+  "t06": {
+    "en": {
+      "title": "Road users and behaviour",
+      "blocks": [
+        {"text": "Rules of behaviour: drive safely, respectfully, cautiously and lawfully, and obey traffic officers' orders even if they contradict the usual rules (e.g. a green light while a traffic officer orders you to stop)."},
+        {"text": "Pedestrians: a steady green allows crossing, a flashing green means red is about to come so the road must be cleared, and red prohibits crossing. At pedestrian crossings, reduce speed, be ready to stop and do not obstruct anyone who has started crossing."},
+        {"text": "Emergency vehicles: give way immediately, do not drive behind them at less than 50 m, do not pull out of parking spaces before they pass, and clear intersections."},
+        {"text": "School buses: they stop for students to get on and off, and overtaking them while they are stopped is prohibited."},
+        {"text": "Official motorcades: give way to them and do not cut through them."},
+        {"text": "Assess the people around you by age, attentiveness and intention. Children act spontaneously and do not judge danger, and elderly people may become confused and have poor hearing or eyesight. If you are not sure, make eye contact."}
+      ]
+    },
+    "ur": {
+      "title": "سڑک استعمال کرنے والے اور رویہ",
+      "blocks": [
+        {"text": "رویے کے اصول: محفوظ، باادب، محتاط اور قانونی ڈرائیونگ کریں، اور ٹریفک اہلکار کے احکامات پر عمل کریں چاہے وہ عام اصولوں کے خلاف ہوں (جیسے سبز سگنل ہو اور ٹریفک اہلکار آپ کو رکنے کا حکم دے)۔"},
+        {"text": "پیدل چلنے والے: مسلسل سبز بتی سڑک پار کرنے کی اجازت دیتی ہے، جلتی بجھتی سبز بتی کا مطلب ہے کہ سرخ بتی قریب ہے اس لیے سڑک خالی کی جائے، اور سرخ بتی پار کرنے سے روکتی ہے۔ پیدل چلنے والوں کی گزرگاہ پر رفتار کم کریں، رکنے کے لیے تیار رہیں اور جس نے سڑک پار کرنا شروع کر دیا ہو اس کے راستے میں رکاوٹ نہ بنیں۔"},
+        {"text": "ایمرجنسی گاڑیاں: فوراً راستہ دیں، ان کے پیچھے 50 میٹر سے کم فاصلے پر گاڑی نہ چلائیں، ان کے گزرنے سے پہلے پارکنگ سے باہر نہ نکلیں، اور چوراہے خالی کریں۔"},
+        {"text": "اسکول بسیں: طلبہ کے چڑھنے اور اترنے کے لیے رکتی ہیں، اور رکی ہوئی اسکول بس کو اوورٹیک کرنا منع ہے۔"},
+        {"text": "سرکاری قافلے: انہیں راستہ دیں اور ان کے بیچ سے نہ گزریں۔"},
+        {"text": "اپنے اردگرد کے لوگوں کا اندازہ ان کی عمر، توجہ اور ارادے کے مطابق لگائیں۔ بچے بے ساختہ حرکت کرتے ہیں اور خطرے کا اندازہ نہیں لگاتے، اور بزرگ گھبرا سکتے ہیں اور انہیں کم سنائی یا کم دکھائی دے سکتا ہے۔ اگر آپ کو یقین نہ ہو تو آنکھوں سے رابطہ کریں۔"}
+      ]
+    }
+  },
+  "t07": {
+    "en": {
+      "title": "Driver obligations and prohibitions",
+      "blocks": [
+        {"text": "Do not drive while injured, ill, exhausted, distracted or agitated, or under the influence of alcohol, drugs or medication (read the medicine leaflet)."},
+        {"text": "Before driving: clean the windows, lights and mirrors; check the tyres, lights and brakes; adjust your seating position and mirrors, and fasten your seat belt."},
+        {"text": "While driving: stay on the paved part of the road, in the appropriate lane and within the permitted speed, and signal before turning."},
+        {"text": "Prohibited: hazard lights except in emergencies, switching off the engine while moving, noise, curtains and advertisements on the vehicle, letting the vehicle roll, carrying people outside their seats, washing the vehicle on a public road, throwing litter, and taking part in processions without permission."},
+        {"text": "In case of a breakdown: clear the road and secure the vehicle. By day, place a warning triangle at the stopping distance; at night, add red lights."},
+        {"text": "When leaving the vehicle: switch off the engine, remove the key and lock the vehicle, and open the doors carefully on the kerb side."}
+      ]
+    },
+    "ur": {
+      "title": "ڈرائیور کی ذمہ داریاں اور ممنوعات",
+      "blocks": [
+        {"text": "زخمی، بیمار، بہت تھکے ہوئے، توجہ بٹی ہوئی یا غصے کی حالت میں گاڑی نہ چلائیں، اور نہ ہی شراب، منشیات یا دوا کے اثر میں (دوا کا پرچہ پڑھیں)۔"},
+        {"text": "ڈرائیونگ سے پہلے: کھڑکیاں، لائٹس اور شیشے صاف کریں، ٹائر، لائٹس اور بریک چیک کریں، بیٹھنے کی پوزیشن اور شیشے درست کریں اور سیٹ بیلٹ باندھیں۔"},
+        {"text": "ڈرائیونگ کے دوران: سڑک کے پکے حصے پر، مناسب لین میں اور مقررہ رفتار کے اندر چلیں، اور مڑنے سے پہلے انڈیکیٹر دیں۔"},
+        {"text": "ممنوعات: ایمرجنسی کے علاوہ ہیزرڈ لائٹس، چلتے ہوئے انجن بند کرنا، شور، گاڑی پر پردے اور اشتہارات، گاڑی کو لڑھکنے دینا، لوگوں کو سیٹوں کے علاوہ جگہ پر بٹھا کر لے جانا، عام سڑک پر گاڑی دھونا، کچرا پھینکنا، اور اجازت کے بغیر جلوسوں میں شامل ہونا۔"},
+        {"text": "گاڑی خراب ہونے پر: سڑک خالی کریں اور گاڑی کو محفوظ کریں۔ دن میں رکنے کے فاصلے پر وارننگ ٹرائینگل رکھیں، اور رات میں سرخ لائٹس بھی لگائیں۔"},
+        {"text": "گاڑی چھوڑتے وقت: انجن بند کریں، چابی نکالیں اور گاڑی لاک کریں، اور فٹ پاتھ کی طرف سے دروازے احتیاط سے کھولیں۔"}
+      ]
+    }
+  },
+  "t08": {
+    "en": {
+      "title": "Carrying passengers and seat belts",
+      "blocks": [
+        {"text": "Passengers may only be carried in vehicles designed for them; it is prohibited to carry them in the vehicle's rear cargo bed, on any external part, or in trucks."},
+        {"text": "Seat belts are mandatory for the driver and all passengers, and the driver must remind passengers. Exemptions are for health reasons with medical proof and official permission, or because of body size."},
+        {"text": "Children under 12 need a booster seat so that the belt sits below the shoulder. A child under 10 may not sit in the front seat unless there are no rear seats (and with a suitable child seat)."},
+        {"text": "Leaving children under 10 in the vehicle without an adult is a violation."}
+      ]
+    },
+    "ur": {
+      "title": "مسافروں کو لے جانا اور سیٹ بیلٹ",
+      "blocks": [
+        {"text": "مسافروں کو صرف ان کے لیے مخصوص گاڑیوں میں لے جانے کی اجازت ہے، اور گاڑی کے پچھلے کھلے حصے، کسی بیرونی حصے یا ٹرکوں میں لے جانا منع ہے۔"},
+        {"text": "سیٹ بیلٹ ڈرائیور اور تمام مسافروں کے لیے لازمی ہے، اور ڈرائیور کو مسافروں کو یاد دلانا چاہیے۔ طبی ثبوت اور سرکاری اجازت کے ساتھ صحت کی وجوہات پر، یا جسامت کی وجہ سے، چھوٹ ہے۔"},
+        {"text": "12 سال سے کم عمر بچوں کو بوسٹر سیٹ کی ضرورت ہے تاکہ بیلٹ کندھے سے نیچے رہے۔ 10 سال سے کم عمر بچہ اگلی سیٹ پر نہیں بیٹھ سکتا سوائے اس کے کہ پچھلی سیٹیں موجود نہ ہوں (اور مناسب چائلڈ سیٹ کے ساتھ)۔"},
+        {"text": "10 سال سے کم عمر بچوں کو کسی بالغ کے بغیر گاڑی میں چھوڑنا خلاف ورزی ہے۔"}
+      ]
+    }
+  },
+  "t09": {
+    "en": {
+      "title": "Driving and changing lanes",
+      "blocks": [
+        {"text": "On a two-lane road with a broken line: use the right lane and do not cross the line except to overtake. Crossing a double solid line is prohibited."},
+        {"text": "On multi-lane roads, slow vehicles keep to the far right unless they are preparing to turn left."},
+        {"text": "Keep to the far right if you want to turn right, if vehicles are overtaking you, if your speed is lower, if visibility is poor, or if vehicles are coming from the opposite direction."},
+        {"text": "Driving on the left is permitted to overtake, to avoid an accident, or if part of the right side is closed by instructions."},
+        {"text": "Narrow sections (bottlenecks): keep right and leave side clearance for oncoming traffic, stop if necessary, and use the horn only when necessary."},
+        {"text": "Changing lanes: mirrors → signal → shoulder check (blind spot) → adjust speed → move smoothly. The higher the speed, the smoother the steering must be."},
+        {"text": "Relying only on the side mirrors leaves you exposed to the blind spot, so look over your shoulder."}
+      ]
+    },
+    "ur": {
+      "title": "ڈرائیونگ اور لین تبدیل کرنا",
+      "blocks": [
+        {"text": "ٹوٹی ہوئی لکیر والی دو لین سڑک پر: دائیں لین استعمال کریں اور اوورٹیک کے علاوہ لکیر پار نہ کریں۔ دوہری مسلسل لکیر پار کرنا منع ہے۔"},
+        {"text": "کئی لین والی سڑکوں پر سست گاڑیاں بالکل دائیں جانب چلتی ہیں جب تک کہ وہ بائیں مڑنے کی تیاری نہ کر رہی ہوں۔"},
+        {"text": "بالکل دائیں جانب رہیں اگر آپ دائیں مڑنا چاہتے ہوں، یا گاڑیاں آپ کو اوورٹیک کر رہی ہوں، یا آپ کی رفتار کم ہو، یا دکھائی کم ہو، یا مخالف سمت سے گاڑیاں آ رہی ہوں۔"},
+        {"text": "بائیں جانب ڈرائیونگ کی اجازت اوورٹیک کرنے، حادثے سے بچنے، یا ہدایات کے تحت دائیں حصے کا کچھ حصہ بند ہونے کی صورت میں ہے۔"},
+        {"text": "تنگ راستے: دائیں رہیں اور سامنے سے آنے والوں کے لیے ایک طرف جگہ چھوڑیں، ضرورت ہو تو رک جائیں، اور ہارن صرف ضرورت کے وقت استعمال کریں۔"},
+        {"text": "لین تبدیل کرنا: شیشے ← انڈیکیٹر ← کندھے کے اوپر سے دیکھنا (بلائنڈ اسپاٹ) ← رفتار درست کرنا ← آرام سے لین بدلنا۔ رفتار جتنی زیادہ ہو، اسٹیئرنگ اتنا ہی نرم ہونا چاہیے۔"},
+        {"text": "صرف سائیڈ شیشوں پر انحصار آپ کو بلائنڈ اسپاٹ کے خطرے میں ڈالتا ہے، اس لیے کندھے کے اوپر سے دیکھیں۔"}
+      ]
+    }
+  }
+}

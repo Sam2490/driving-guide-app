@@ -5,7 +5,7 @@ import { useApp } from '@/state/AppProvider';
 import { Button, Card, Row, Screen, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { Media } from '@/components/Media';
-import { OptionContent } from '@/components/Quiz';
+import { OptionContent, QuestionText } from '@/components/Quiz';
 import { mistakes } from '@/features/quiz/engine';
 
 export default function Review() {
@@ -23,14 +23,14 @@ export default function Review() {
           <Card key={q.id} style={{ gap: 10 }}>
             <T size={13} muted>{t.test.qOf(n, session.questions.length)}</T>
             {q.image ? <Media image={q.image} height={130} /> : null}
-            <T content size={17} weight="semibold">{q.question}</T>
+            <QuestionText q={q} size={17} />
             <View style={{ backgroundColor: c.badbg, borderRadius: 12, padding: 10, gap: 6 }}>
               <Row gap={6}><Icon name="close" size={16} color={c.bad} /><T size={14} weight="semibold" color={c.bad}>{t.test.yours}</T></Row>
-              {yours ? <OptionContent option={yours} size={64} /> : <T size={15} muted>{t.test.notAnswered}</T>}
+              {yours ? <OptionContent q={q} option={yours} size={64} /> : <T size={15} muted>{t.test.notAnswered}</T>}
             </View>
             <View style={{ backgroundColor: c.okbg, borderRadius: 12, padding: 10, gap: 6 }}>
               <Row gap={6}><Icon name="check" size={16} color={c.ok} /><T size={14} weight="semibold" color={c.ok}>{t.test.correct}</T></Row>
-              <OptionContent option={right} size={64} />
+              <OptionContent q={q} option={right} size={64} />
             </View>
           </Card>
         );

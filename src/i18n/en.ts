@@ -1,5 +1,5 @@
 export const en = {
-  appName: 'Driving Guide',
+  appName: 'دليل القيادة',
   tabs: { home: 'Home', guide: 'Guide', signs: 'Signs', test: 'Test', schools: 'Schools' },
   common: {
     close: 'Close', cancel: 'Cancel', back: 'Back', tryAgain: 'Try again', all: 'All', noResults: 'No results.',
@@ -40,7 +40,7 @@ export const en = {
     title: 'Theory test', modes: ['Mock exam', 'Level challenge'],
     disclaimer: 'Practice simulator, not the official exam.',
     exTitle: 'Mock exam', exSub: (n: number, m: number, p: number) => `${n} questions · ${m} minutes · pass mark ${p}`,
-    rules: ['Answers are shown only after you submit.', 'You can go back and change answers before submitting.', 'Questions and answers are in Arabic.'],
+    rules: ['Answers are shown only after you submit.', 'You can go back and change answers before submitting.'],
     start: 'Start exam', resume: 'Resume exam', qOf: (i: number, n: number) => `Question ${i} of ${n}`,
     prev: 'Previous', next: 'Next', submit: 'Submit', grid: 'All questions', answered: (n: number, m: number) => `${n} of ${m} answered`,
     submitAsk: (n: number) => (n ? `${n} question(s) unanswered. Submit anyway?` : 'Submit your answers?'),
@@ -74,13 +74,14 @@ export const en = {
     note: 'Compiled from public sources, because Absher only shows its list after login, so available branches may differ. Distances are to the city centre. Verify on Absher.',
     checked: (d: string) => `List checked on ${d}`,
   },
-  settings: { title: 'Settings', language: 'Language', theme: 'Appearance', system: 'System', light: 'Light', dark: 'Dark', contentNote: 'Questions, answers and the trainee guide are in Arabic in every language.' },
+  settings: { title: 'Settings', language: 'Language', theme: 'Appearance', system: 'System', light: 'Light', dark: 'Dark', contentNote: 'Questions, answers, the trainee guide, signs and schools follow the language you choose. Arabic is the original; English and Urdu are translations to help you study.' },
   about: {
     title: 'About',
     intro: 'An educational app to prepare for the Saudi driving theory test. It is not an official government app and is not affiliated with the General Directorate of Traffic or Absher.',
     privacyT: 'Privacy', privacy: 'No account, no tracking, no analytics. Your location is used once on your phone when you tap Find nearby, and is never stored or sent. Your language, theme and level progress are saved only on this phone.',
     sourcesT: 'Sources',
     sources: [
+      'English and Urdu: translations of the Arabic questions and guide, made to help you study. The official exam wording may differ.',
       'Trainee guide content: the official traffic theory guide (دليل المتدرب).',
       'License steps, fees and school list: compiled from public sources; verify on Absher.',
       'Question bank: practice questions collected from public practice material.',

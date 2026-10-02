@@ -1,0 +1,114 @@
+{
+ "t10": {
+  "en": {
+   "title": "Turning, roundabouts and reversing",
+   "blocks": [
+    {"text": "Without markings: turn right from the far right with a tight curve. Turn left from the middle of the road (to the right of the dividing line) on two-way roads, and from the far left on one-way roads, with a wide curve. Where there are arrows, use the lane marked with the arrow for your direction."},
+    {"text": "Plan ahead and choose the correct lane before the intersection, signal early and slow down without sudden braking."},
+    {"text": "Roundabout: vehicles inside it have priority. To turn right use the first lane, to turn left use the third, and signal right before your exit. For the second exit, signal at the island of the first exit; for a U-turn, signal at the island of the second exit."},
+    {"text": "Reverse only when necessary and for no more than 20 m. Reversing is prohibited on motorways."},
+    {"text": "U-turns are allowed at intersections unless a sign prohibits them."}
+   ]
+  },
+  "ur": {
+   "title": "مڑنا، گول چکر اور گاڑی پیچھے کرنا",
+   "blocks": [
+    {"text": "نشانات کے بغیر: دائیں مڑنے کے لیے سڑک کے بالکل دائیں جانب سے تنگ موڑ کے ساتھ مڑیں۔ بائیں مڑنے کے لیے دو طرفہ سڑک پر سڑک کے درمیان (درمیانی لائن کے دائیں جانب) سے، اور یک طرفہ سڑک پر بالکل بائیں جانب سے کھلے موڑ کے ساتھ مڑیں۔ تیر کے نشانات ہوں تو وہ لین استعمال کریں جس میں آپ کی سمت کا تیر ہو۔"},
+    {"text": "پہلے سے منصوبہ بندی کریں اور چوراہے سے پہلے صحیح لین منتخب کریں، جلدی انڈیکیٹر دیں اور اچانک بریک لگائے بغیر رفتار کم کریں۔"},
+    {"text": "گول چکر: اندر موجود گاڑیوں کو ترجیح حاصل ہے۔ دائیں مڑنے کے لیے پہلی لین اور بائیں مڑنے کے لیے تیسری لین استعمال کریں، اور اپنے نکلنے کے راستے سے پہلے دایاں انڈیکیٹر دیں۔ دوسرے راستے سے نکلنے کے لیے پہلے راستے کے جزیرے کے پاس انڈیکیٹر دیں، اور یو ٹرن کے لیے دوسرے راستے کے جزیرے کے پاس۔"},
+    {"text": "گاڑی صرف ضرورت کے وقت اور زیادہ سے زیادہ 20 میٹر تک پیچھے کریں۔ ہائی وے پر گاڑی پیچھے کرنا منع ہے۔"},
+    {"text": "چوراہوں پر یو ٹرن کی اجازت ہے، بشرطیکہ کوئی نشان اسے منع نہ کرے۔"}
+   ]
+  }
+ },
+ "t11": {
+  "en": {
+   "title": "Traffic lights and intersections",
+   "blocks": [
+    {"text": "Red: stop at the stop line or where you can see the light, and do not cross the pedestrian crossing. Green: move off carefully and do not enter the intersection if you will get stuck in it. Amber: pay attention and stop if you can do so safely."},
+    {"text": "A flashing amber light means the same as a \"Give way\" sign. A flashing red light means the same as a \"Stop\" sign."},
+    {"text": "Turning right on red: from the far-right lane, with the right indicator on, after stopping for 2–3 seconds, and at less than 15 km/h. It is not allowed if there is a dedicated right-turn lane or a sign prohibiting it."},
+    {"text": "A photo from an automated monitoring camera does not mean an automatic penalty, as every photo is reviewed manually."},
+    {"text": "A traffic police officer has the highest priority, so stop completely and look in all directions for 3 seconds."}
+   ]
+  },
+  "ur": {
+   "title": "ٹریفک سگنل اور چوراہے",
+   "blocks": [
+    {"text": "سرخ: اسٹاپ لائن پر یا جہاں سے سگنل نظر آئے وہاں رکیں اور پیدل چلنے والوں کی گزرگاہ پار نہ کریں۔ سبز: احتیاط سے چلیں اور اگر چوراہے میں پھنس جانے کا خدشہ ہو تو اس میں داخل نہ ہوں۔ پیلا: ہوشیار رہیں اور اگر بغیر خطرے کے ممکن ہو تو رک جائیں۔"},
+    {"text": "وقفے وقفے سے جلنے والی پیلی لائٹ «ترجیح دیں» کے نشان کی طرح ہے۔ وقفے وقفے سے جلنے والی سرخ لائٹ «رکیں» کے نشان کی طرح ہے۔"},
+    {"text": "سرخ سگنل پر دائیں مڑنا: بالکل دائیں لین سے، دایاں انڈیکیٹر دے کر، 2–3 سیکنڈ رک کر، اور 15 کلومیٹر فی گھنٹہ سے کم رفتار پر۔ اگر دائیں مڑنے کے لیے الگ لین ہو یا کوئی نشان اسے منع کرے تو اس کی اجازت نہیں۔"},
+    {"text": "خودکار نگرانی والے کیمرے کی تصویر کا مطلب خودبخود جرمانہ نہیں، کیونکہ ہر تصویر کا دستی جائزہ لیا جاتا ہے۔"},
+    {"text": "ٹریفک پولیس اہلکار کو سب سے زیادہ ترجیح حاصل ہے، اس لیے مکمل طور پر رکیں اور 3 سیکنڈ تک ہر طرف دیکھیں۔"}
+   ]
+  }
+ },
+ "t12": {
+  "en": {
+   "title": "Right-of-way rules",
+   "blocks": [
+    {"text": "Emergency vehicles always have priority."},
+    {"text": "Equal intersection: priority goes to the vehicle closest to the intersection; if both arrive together, to the one coming from the right."},
+    {"text": "A vehicle going straight ahead has priority over one changing direction (turning left or making a U-turn)."},
+    {"text": "Partly blocked road: priority goes to the driver whose side of the road ahead (the right side) is open."},
+    {"text": "Steep slope: the vehicle going downhill keeps close to the right edge and lets the vehicle going uphill pass, stopping if necessary."},
+    {"text": "The main road has priority over a side road, and anyone entering from a side road must give way. A vehicle leaving the main road for a service road has priority."},
+    {"text": "Unclear situation: make eye contact and give up your right of way if that helps safety."},
+    {"text": "Do not enter an intersection if you will get stuck in it, even if the light is green."}
+   ]
+  },
+  "ur": {
+   "title": "ترجیح کے قواعد",
+   "blocks": [
+    {"text": "ایمرجنسی گاڑیوں کو ہمیشہ ترجیح حاصل ہے۔"},
+    {"text": "برابر کا چوراہا: ترجیح اس گاڑی کو ہے جو چوراہے کے زیادہ قریب ہو، اور اگر دونوں ایک ساتھ پہنچیں تو دائیں طرف سے آنے والی گاڑی کو۔"},
+    {"text": "سیدھی جانے والی گاڑی کو سمت بدلنے والی گاڑی (بائیں مڑنے یا یو ٹرن لینے والی) پر ترجیح حاصل ہے۔"},
+    {"text": "جزوی طور پر بند سڑک: ترجیح اس کو ہے جس کے آگے سڑک اس کی دائیں جانب کھلی ہو۔"},
+    {"text": "تیز ڈھلوان: نیچے اترنے والی گاڑی دائیں کنارے کے قریب ہو جائے اور اوپر چڑھنے والی گاڑی کو گزرنے دے، اور ضرورت ہو تو رک جائے۔"},
+    {"text": "مرکزی سڑک کو ذیلی سڑک پر ترجیح حاصل ہے، اور ذیلی سڑک سے داخل ہونے والا ترجیح دے۔ مرکزی سڑک سے سروس روڈ پر نکلنے والے کو ترجیح حاصل ہے۔"},
+    {"text": "غیر واضح صورتحال: آنکھوں سے رابطہ کریں اور اگر اس سے حفاظت میں مدد ملے تو اپنا حق چھوڑ دیں۔"},
+    {"text": "اگر چوراہے میں پھنس جانے کا خدشہ ہو تو اس میں داخل نہ ہوں، چاہے لائٹ سبز ہو۔"}
+   ]
+  }
+ },
+ "t13": {
+  "en": {
+   "title": "Railway crossings",
+   "blocks": [
+    {"text": "The train has priority, and the driver must clear the track immediately when a train approaches. Stopping on the track is prohibited."},
+    {"text": "Stop before the X sign when the light is red or amber, when the barriers are moving or closed, when the attendant signals, or if traffic does not allow you to finish crossing."},
+    {"text": "Wait until the barriers are fully open and the red light is off, and make sure no train is approaching."}
+   ]
+  },
+  "ur": {
+   "title": "ریلوے کراسنگ",
+   "blocks": [
+    {"text": "ٹرین کو ترجیح حاصل ہے، اور ٹرین قریب آنے پر ڈرائیور کو فوراً پٹری خالی کرنی چاہیے۔ پٹری پر رکنا منع ہے۔"},
+    {"text": "X نشان سے پہلے رک جائیں جب لائٹ سرخ یا پیلی ہو، پھاٹک حرکت میں ہوں یا بند ہوں، گارڈ اشارہ کرے، یا ٹریفک آپ کو کراسنگ مکمل کرنے نہ دے۔"},
+    {"text": "پھاٹک مکمل طور پر کھلنے اور سرخ لائٹ بند ہونے تک انتظار کریں، اور یقینی بنائیں کہ کوئی ٹرین قریب نہیں آ رہی۔"}
+   ]
+  }
+ },
+ "t14": {
+  "en": {
+   "title": "Speed and safe distance",
+   "blocks": [
+    {"text": "Light vehicles: follow the speed limit posted on the road; heavy vehicles: 50 km/h maximum inside cities. The sign shows the maximum limit, not a required speed."},
+    {"text": "Reduce speed at intersections, crossings, on slippery roads and bends, in congestion, near pedestrians and animals, and in sandstorms, fog and rain."},
+    {"text": "Keep a safety gap of at least two seconds behind the vehicle in front. Choose a reference point and count \"one thousand and one, one thousand and two\" after the vehicle ahead passes it. Increase the gap in bad weather, with heavy loads and behind motorcycles."},
+    {"text": "Economical driving: look ahead and lift your foot off the accelerator early to slow down without braking, which reduces fuel consumption and brake wear. Avoid unnecessary stops."},
+    {"text": "Unnecessary sudden braking and driving so slowly that it obstructs traffic are prohibited."}
+   ]
+  },
+  "ur": {
+   "title": "رفتار اور محفوظ فاصلہ",
+   "blocks": [
+    {"text": "چھوٹی گاڑیاں: سڑک پر مقرر کردہ رفتار کے مطابق، اور بڑی گاڑیاں شہروں کے اندر زیادہ سے زیادہ 50 کلومیٹر فی گھنٹہ۔ بورڈ پر لکھی رفتار زیادہ سے زیادہ حد ہے، لازمی رفتار نہیں۔"},
+    {"text": "چوراہوں، کراسنگز، پھسلن والی سڑکوں، موڑوں، رش، پیدل چلنے والوں اور جانوروں کے پاس، اور ریت کے طوفان، دھند اور بارش میں رفتار کم کریں۔"},
+    {"text": "اگلی گاڑی کے پیچھے کم از کم دو سیکنڈ کا محفوظ فاصلہ رکھیں۔ کوئی حوالہ نقطہ منتخب کریں اور اگلی گاڑی کے وہاں سے گزرنے کے بعد «ایک ہزار ایک، ایک ہزار دو» گنیں۔ خراب موسم، بھاری بوجھ اور موٹر سائیکلوں کے پیچھے یہ فاصلہ بڑھا دیں۔"},
+    {"text": "کفایتی ڈرائیونگ: آگے دیکھیں اور بریک کے بغیر رفتار کم کرنے کے لیے پہلے سے ایکسیلیٹر سے پاؤں ہٹا لیں، اس سے ایندھن کی کھپت اور بریک کی گھسائی کم ہوتی ہے۔ بلاوجہ رکنے سے بچیں۔"},
+    {"text": "بلا ضرورت اچانک بریک لگانا اور اتنی سست رفتاری جس سے ٹریفک میں رکاوٹ ہو، دونوں منع ہیں۔"}
+   ]
+  }
+ }
+}

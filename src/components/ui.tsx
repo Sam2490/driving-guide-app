@@ -277,7 +277,7 @@ export function PickerSheet({ visible, title, items, value, onPick, onClose }: {
         <ScrollView style={{ maxHeight: 420 }}>
           {items.map((it) => (
             <Pressable key={it.value || '_all'} accessibilityRole="button" accessibilityState={{ selected: it.value === value }} onPress={() => { onPick(it.value); onClose(); }} style={[styles.sheetRow, { flexDirection: d.row, backgroundColor: it.value === value ? c.fill : 'transparent' }]}>
-              <View style={{ flex: 1 }}><T content weight={it.value === value ? 'semibold' : 'regular'} color={it.value === value ? c.ac : c.tx}>{it.label}</T></View>
+              <View style={{ flex: 1 }}><T weight={it.value === value ? 'semibold' : 'regular'} color={it.value === value ? c.ac : c.tx}>{it.label}</T></View>
               {it.value === value ? <Icon name="check" size={18} color={c.ac} /> : null}
             </Pressable>
           ))}
