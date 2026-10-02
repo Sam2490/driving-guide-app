@@ -1,0 +1,33 @@
+# Architecture
+
+```
+UI layer        src/app (screens, Expo Router) + src/components
+Business logic  src/features/quiz (exam engine, randomisation, scoring, timer)
+                src/features/levels (seeded level order, XP, ranks, streak)
+                src/features/schools (filters, haversine distance, nearby sort)
+Data layer      src/data (bundled, offline) + src/services/storage (AsyncStorage, validated)
+Native services src/services/location (expo-location), src/services/maps (Linking)
+State           src/state/AppProvider (language, theme, progress, current exam)
+```
+
+- **Offline first.** All content is bundled; nothing is fetched at runtime. Only Find nearby (GPS) and Directions (map app) need device services.
+- **Question model.** `Question { id, question, image?, options[{id, text|image}], correctAnswerId, lockOrder?, category }`. Options are shuffled by moving whole option objects, so `correctAnswerId` never changes. "All of the above" style questions keep their order (`lockOrder`).
+- **Exam.** 30 random questions, 40 minutes from a stored end time (correct after backgrounding), pass mark 21. Answers are not marked until Submit; Back and a question grid are available.
+- **Level challenge.** Same seed and algorithm as the web app (test checks the order matches), 82 levels × 8 questions, 5 attempts, instant feedback (practice mode).
+- **Right-to-left.** System RTL mirroring is off (`expo-localization` `supportsRTL: false`); the app lays out RTL itself via `useDir()`, so switching language needs no restart. Arabic content (questions, guide, school names) is always right-aligned in IBM Plex Sans Arabic.
+- **Official vs general information.** Guide content is marked as from the official trainee guide; steps, fees and schools are marked as general information to verify on Absher.
+
+## Migration map
+
+| Web (exam.html) | Mobile |
+| --- | --- |
+| htm + React DOM components | React Native components (`View`, `Text`, `Pressable`, `FlatList`) |
+| Tab state in `App` | Expo Router tabs + per-tab stacks |
+| CSS variables, `@media` | `src/theme/colors.ts`, light/dark from settings or system |
+| `<details>` accordions | Native cards / pressable stage headers |
+| `<select>` | Bottom-sheet `PickerSheet` |
+| base64 images, inline SVG signs | WebP files in `assets/` via `expo-image` |
+| `localStorage` (`drv`, `drvg`) | AsyncStorage (`settings.v1`, `levels.v1`), validated on read |
+| `navigator.geolocation` | `expo-location`, foreground, one reading |
+| Google Maps search links | Platform map app (`geo:` / `maps://`) with web fallback |
+| `build()`, `prep()`, seeded `ORDER`, scoring | `src/features/*`, unit-tested |
