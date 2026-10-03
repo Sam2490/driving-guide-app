@@ -32,7 +32,7 @@
       "package": "sa.drivingguide.app",
       "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#060a1c",
+        "backgroundColor": "#006c35",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
