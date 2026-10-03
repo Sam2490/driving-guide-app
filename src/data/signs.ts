@@ -614,14 +614,14 @@ export const SIGNS: Sign[] = [
  {
   "id": "s100",
   "group": "ممنوعات",
-  "nameAr": "ممنوع الوقوف",
+  "nameAr": "ممنوع الانتظار",
   "nameEn": "No parking"
  },
  {
   "id": "s101",
   "group": "ممنوعات",
-  "nameAr": "ممنوع التوقف",
-  "nameEn": "No stopping"
+  "nameAr": "ممنوع الوقوف والانتظار",
+  "nameEn": "No stopping or parking"
  },
  {
   "id": "s102",
