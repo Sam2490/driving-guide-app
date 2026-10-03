@@ -2,7 +2,7 @@ import type { GuideTopic, Lang, Question, QuestionOption, School, Sign } from '.
 import { QUESTION_TEXT } from './i18n/questions';
 import { GUIDE_TEXT } from './i18n/guide';
 import { SIGN_NAMES } from './i18n/signs';
-import { CITY_NAMES, REGION_NAMES, SCHOOL_TEXT } from './i18n/places';
+import { BRAND_NAMES, CITY_NAMES, REGION_NAMES } from './i18n/places';
 
 /** Content in the reader's language; Arabic is the source, English and Urdu are translations. */
 export function questionText(q: Question, lang: Lang): string {
@@ -22,8 +22,9 @@ export function signName(s: Sign, lang: Lang): string {
   return lang === 'ar' ? s.nameAr : SIGN_NAMES[s.id]?.[lang] ?? s.nameEn;
 }
 
-export function schoolText(s: School, lang: Lang): { name: string; description: string } {
-  return lang === 'ar' ? s : SCHOOL_TEXT[s.id]?.[lang] ?? s;
+/** Arabic shows the exact Absher branch name; other languages show the translated school name (the city is shown beside it). */
+export function schoolText(s: School, lang: Lang): { name: string } {
+  return { name: lang === 'ar' ? s.name : BRAND_NAMES[s.brand]?.[lang] ?? s.name };
 }
 
 export function cityName(name: string, lang: Lang): string {

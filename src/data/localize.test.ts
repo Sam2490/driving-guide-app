@@ -40,7 +40,7 @@ describe('translations are complete', () => {
   });
   it.each(LANGS)('signs, schools, cities and regions have %s names', (lang) => {
     for (const s of SIGNS) expect(signName(s, lang)).not.toBe(s.nameAr);
-    for (const s of SCHOOLS) expect(schoolText(s, lang).name).not.toBe(s.name);
+    for (const s of SCHOOLS) expect(schoolText(s, lang).name).toMatch(SCRIPT[lang]);
     for (const c of CITIES) {
       const city = cityName(c.name, lang);
       const region = regionName(c.region, lang);

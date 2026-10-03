@@ -31,9 +31,16 @@ export type Step = { title: string; body: string };
 
 export type School = {
   id: string;
+  /** Branch name exactly as Absher shows it (Arabic). */
   name: string;
+  /** Key of the school brand, used for translated names. */
+  brand: string;
   cities: string[];
-  description: string;
+  region: string;
+  gender: 'men' | 'women';
+  /** 'absher' = listed in Absher's booking; 'public' = from public sources, not verified on Absher. */
+  source: 'absher' | 'public';
+  description?: string;
   /** Optional branch details, added only when verified. */
   address?: string;
   phone?: string;

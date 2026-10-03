@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
-import { Button, Dialog, EmptyState, Notice, PickerSheet, Row, Screen, SearchBox, SourceBadge, T } from '@/components/ui';
+import { Button, Dialog, EmptyState, Notice, PickerSheet, Row, Screen, SearchBox, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { SchoolCard } from '@/components/SchoolCard';
 import { SCHOOLS, SCHOOLS_CHECKED } from '@/data/schools';
@@ -40,7 +40,7 @@ export default function Schools() {
     if (!s) return base;
     return base.filter((x) => {
       const tx = schoolText(x, lang);
-      return `${x.name} ${x.description} ${tx.name} ${tx.description} ${x.cities.map((ct) => `${ct} ${cityName(ct, lang)}`).join(' ')}`.toLowerCase().includes(s);
+      return `${x.name} ${tx.name} ${x.cities.map((ct) => `${ct} ${cityName(ct, lang)}`).join(' ')}`.toLowerCase().includes(s);
     });
   }, [region, city, q, lang]);
   const regions = regionsOf(CITIES);
@@ -97,9 +97,7 @@ export default function Schools() {
           {list.map((s) => <SchoolCard key={s.id} school={s} />)}
         </View>
       )}
-      <SourceBadge kind="general" />
-      <T size={13} muted>{t.schools.note}</T>
-      <T size={12} muted>{t.schools.checked(SCHOOLS_CHECKED)}</T>
+      <T size={13} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>
 
       <Dialog
         visible={loc.phase === 'explain'}

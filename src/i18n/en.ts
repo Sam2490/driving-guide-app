@@ -62,6 +62,7 @@ export const en = {
     ranks: ['Learner', 'Novice driver', 'Confident driver', 'Seasoned driver', 'Road expert', 'Road master'],
   },
   schools: {
+    men: 'Men', women: 'Women', fromAbsher: 'Listed on Absher', publicSource: 'From public sources · not verified on Absher',
     title: 'Driving schools', findNearby: 'Find nearby schools', region: 'Region', city: 'City', allReg: 'All regions', allCity: 'All cities',
     search: 'Search schools…', count: (n: number) => `${n} schools`,
     permTitle: 'Use your location?', permBody: 'Your location is used once, on this phone, to sort schools by distance. It is not saved or sent anywhere.',
@@ -71,7 +72,7 @@ export const en = {
     unavailable: 'Could not get your location. Try again, or choose a region and city.',
     nearbyTitle: 'Nearest schools', km: (k: number) => `${k} km`, toCity: (c: string) => `to ${c} centre`,
     directions: 'Get directions', details: 'View details', branches: 'Cities', mapsFailed: 'Could not open a map app.',
-    note: 'Compiled from public sources, because Absher only shows its list after login, so available branches may differ. Distances are to the city centre. Verify on Absher.',
+    note: (d: string) => `Men's branches as listed in Absher's driving-licence booking (checked ${d}). Women's schools come from public sources. Distances are to the town centre. Book through Absher.`,
     checked: (d: string) => `List checked on ${d}`,
   },
   settings: { title: 'Settings', language: 'Language', theme: 'Appearance', system: 'System', light: 'Light', dark: 'Dark', contentNote: 'Questions, answers, the trainee guide, signs and schools follow the language you choose. Arabic is the original; English and Urdu are translations to help you study.' },

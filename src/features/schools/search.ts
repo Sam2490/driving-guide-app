@@ -26,7 +26,7 @@ export function filterSchools(schools: readonly School[], cities: readonly City[
   return schools
     .map((s) => ({ ...s, cities: s.cities.filter((c) => (!f.city || c === f.city) && (!f.region || byName.get(c)?.region === f.region)) }))
     .filter((s) => s.cities.length > 0)
-    .filter((s) => !q || `${s.name} ${s.description} ${s.cities.join(' ')}`.toLowerCase().includes(q));
+    .filter((s) => !q || `${s.name} ${s.cities.join(' ')}`.toLowerCase().includes(q));
 }
 
 export type NearbySchool = { school: School; city: string; km: number };

@@ -1,3 +1,4 @@
+import { SCHOOLS } from '@/data/schools';
 import { renderRouter, screen, fireEvent, act, waitFor } from 'expo-router/testing-library';
 import * as Location from 'expo-location';
 
@@ -20,7 +21,7 @@ async function open(url: string) {
 }
 
 describe('navigation', () => {
-  it.each(['/', '/guide', '/guide/t00', '/guide/license', '/signs', '/signs/s000', '/test', '/schools', '/schools/sch00', '/settings', '/about', '/level/1'])('renders %s', async (url) => {
+  it.each(['/', '/guide', '/guide/t00', '/guide/license', '/signs', '/signs/s000', '/test', '/schools', '/schools/b01', '/settings', '/about', '/level/1'])('renders %s', async (url) => {
     await open(url);
     expect(screen.toJSON()).toBeTruthy();
   });
@@ -110,7 +111,7 @@ describe('nearby schools', () => {
     await settle();
     await waitFor(() => expect(screen.getByText('يلزم إذن الموقع للعثور على مدارس القيادة القريبة منك.')).toBeTruthy());
     await fireEvent.press(screen.getByText('عرض كل المدارس'));
-    expect(screen.getByText('22 مدرسة')).toBeTruthy();
+    expect(screen.getByText(`${SCHOOLS.length} مدرسة`)).toBeTruthy();
   });
   it('reports GPS turned off', async () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);

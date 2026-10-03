@@ -46,3 +46,18 @@ describe('filters', () => {
     expect(isValidCoords('24', 46)).toBe(false);
   });
 });
+
+describe('Absher branch list', () => {
+  const { BRAND_NAMES } = jest.requireActual('@/data/i18n/places');
+  it('has 64 men\'s branches from Absher in all 13 regions, each in a known town of its region', () => {
+    const absher = SCHOOLS.filter((s) => s.source === 'absher');
+    expect(absher).toHaveLength(64);
+    expect(new Set(absher.map((s) => s.region)).size).toBe(13);
+    for (const s of SCHOOLS) {
+      const city = CITIES.find((c) => c.name === s.cities[0]);
+      expect(city?.region).toBe(s.region);
+      expect(BRAND_NAMES[s.brand]).toBeDefined();
+    }
+    expect(new Set(SCHOOLS.map((s) => s.id)).size).toBe(SCHOOLS.length);
+  });
+});

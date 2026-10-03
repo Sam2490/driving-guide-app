@@ -4,7 +4,6 @@ import { useApp } from '@/state/AppProvider';
 import { Button, Card, EmptyState, Notice, Row, Screen, SourceBadge, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { SCHOOLS, SCHOOLS_CHECKED } from '@/data/schools';
-import { CITIES } from '@/data/cities';
 import { openInMaps } from '@/services/maps';
 import { cityName, regionName, schoolText } from '@/data/localize';
 
@@ -15,30 +14,31 @@ export default function SchoolDetail() {
   const [failed, setFailed] = useState(false);
   const s = SCHOOLS.find((x) => x.id === id);
   if (!s) return <Screen back><EmptyState text={t.common.noResults} /></Screen>;
-  const tx = schoolText(s, lang);
+  const city = s.cities[0];
+  const rows: [string, string][] = [
+    [t.schools.city, cityName(city, lang)],
+    [t.schools.region, regionName(s.region, lang)],
+    ['', s.gender === 'men' ? t.schools.men : t.schools.women],
+  ];
   return (
-    <Screen back title={tx.name} contentTitle={ar}>
-      <SourceBadge kind="general" />
-      <Card><T content={ar} muted>{tx.description}</T></Card>
-      <T size={18} weight="bold">{t.schools.branches}</T>
-      {s.cities.map((ct) => {
-        const region = CITIES.find((x) => x.name === ct)?.region;
-        return (
-          <Card key={ct}>
-            <Row>
-              <Icon name="schools" color={c.ac} />
-              <Row gap={4} style={{ flex: 1, flexWrap: 'wrap' }}>
-                <T size={16} weight="semibold" content={ar}>{cityName(ct, lang)}</T>
-                {region && region !== ct ? <T size={13} muted content={ar}>{`· ${regionName(region, lang)}`}</T> : null}
-              </Row>
-              <Button small title={t.schools.directions} icon="nav" onPress={async () => setFailed(!(await openInMaps(`${s.name} ${ct}`)))} />
-            </Row>
-          </Card>
-        );
-      })}
+    <Screen back title={schoolText(s, lang).name} contentTitle={ar}>
+      {s.source === 'absher' ? (
+        <Row gap={6}><Icon name="check" size={16} color={c.ok} /><T size={13} color={c.ok}>{t.schools.fromAbsher}</T></Row>
+      ) : (
+        <SourceBadge kind="general" />
+      )}
+      {!ar ? <Card><T content muted>{s.name}</T></Card> : null}
+      <Card style={{ gap: 8 }}>
+        {rows.map(([k, v]) => (
+          <Row key={k + v} style={{ justifyContent: 'space-between' }}>
+            {k ? <T size={14} muted>{k}</T> : null}
+            <T size={16} weight="semibold">{v}</T>
+          </Row>
+        ))}
+      </Card>
+      <Button title={t.schools.directions} icon="nav" onPress={async () => setFailed(!(await openInMaps(`${s.name} ${city}`)))} />
       {failed ? <Notice tone="bad" text={t.schools.mapsFailed} /> : null}
-      <T size={13} muted>{t.schools.note}</T>
-      <T size={12} muted>{t.schools.checked(SCHOOLS_CHECKED)}</T>
+      <T size={13} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>
     </Screen>
   );
 }
