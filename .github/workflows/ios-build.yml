@@ -39,16 +39,26 @@ jobs:
       - name: Build for the iOS Simulator
         working-directory: ios
         run: |
+          set -o pipefail
+          ls
           WORKSPACE=$(ls -d *.xcworkspace | head -1)
           SCHEME="${WORKSPACE%.xcworkspace}"
-          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release \
+          echo "::notice::workspace=$WORKSPACE scheme=$SCHEME"
+          if ! xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tail -n 40
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build > xcodebuild.log 2>&1; then
+            grep -E "error:|fatal|BUILD FAILED" xcodebuild.log | head -20 | while read -r l; do echo "::error::$l"; done
+            tail -n 60 xcodebuild.log
+            exit 1
+          fi
+          tail -n 5 xcodebuild.log
 
       - name: Package the .app
         id: app
         run: |
           APP=$(find ios/build/Build/Products/Release-iphonesimulator -maxdepth 1 -name "*.app" | head -1)
+          test -n "$APP" || { echo "::error::No .app produced"; exit 1; }
+          echo "::notice::App size $(du -sh "$APP" | cut -f1)"
           VERSION=$(node -p "require('./app.json').expo.version")
           NAME="driving-guide-ios-simulator-${VERSION}-build${{ github.run_number }}.zip"
           (cd "$(dirname "$APP")" && zip -qr "$GITHUB_WORKSPACE/$NAME" "$(basename "$APP")")
