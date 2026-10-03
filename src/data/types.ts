@@ -1,4 +1,6 @@
-export type Lang = 'ar' | 'en' | 'ur';
+export type Lang = 'ar' | 'en' | 'ur' | 'hi' | 'bn';
+/** Languages that are translations of the Arabic source. */
+export type TLang = Exclude<Lang, 'ar'>;
 
 /** Where a piece of content comes from, so official and general information stay distinct. */
 export type ContentSource = 'official' | 'general';

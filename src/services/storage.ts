@@ -13,7 +13,7 @@ export function parseSettings(raw: string | null): Settings {
   try {
     const v = raw ? JSON.parse(raw) : null;
     return {
-      lang: v && ['ar', 'en', 'ur'].includes(v.lang) ? v.lang : DEFAULT_SETTINGS.lang,
+      lang: v && ['ar', 'en', 'ur', 'hi', 'bn'].includes(v.lang) ? v.lang : DEFAULT_SETTINGS.lang,
       theme: v && ['system', 'light', 'dark'].includes(v.theme) ? v.theme : DEFAULT_SETTINGS.theme,
     };
   } catch {

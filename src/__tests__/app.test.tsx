@@ -126,7 +126,7 @@ describe('nearby schools', () => {
 describe('English exam', () => {
   it('shows the question and answers in English with A-D letters', async () => {
     await open('/settings');
-    await fireEvent.press(screen.getByRole('tab', { name: 'English' }));
+    await fireEvent.press(screen.getByRole('radio', { name: 'English' }));
     await settle();
     await open('/test');
     await fireEvent.press(screen.getByText('Start exam'));

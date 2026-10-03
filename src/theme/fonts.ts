@@ -9,6 +9,14 @@ export const FONT_FILES = {
   Inter_500Medium: require('@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf'),
   Inter_600SemiBold: require('@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
   Inter_700Bold: require('@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
+  NotoSansDevanagari_400Regular: require('@expo-google-fonts/noto-sans-devanagari/400Regular/NotoSansDevanagari_400Regular.ttf'),
+  NotoSansDevanagari_500Medium: require('@expo-google-fonts/noto-sans-devanagari/500Medium/NotoSansDevanagari_500Medium.ttf'),
+  NotoSansDevanagari_600SemiBold: require('@expo-google-fonts/noto-sans-devanagari/600SemiBold/NotoSansDevanagari_600SemiBold.ttf'),
+  NotoSansDevanagari_700Bold: require('@expo-google-fonts/noto-sans-devanagari/700Bold/NotoSansDevanagari_700Bold.ttf'),
+  NotoSansBengali_400Regular: require('@expo-google-fonts/noto-sans-bengali/400Regular/NotoSansBengali_400Regular.ttf'),
+  NotoSansBengali_500Medium: require('@expo-google-fonts/noto-sans-bengali/500Medium/NotoSansBengali_500Medium.ttf'),
+  NotoSansBengali_600SemiBold: require('@expo-google-fonts/noto-sans-bengali/600SemiBold/NotoSansBengali_600SemiBold.ttf'),
+  NotoSansBengali_700Bold: require('@expo-google-fonts/noto-sans-bengali/700Bold/NotoSansBengali_700Bold.ttf'),
   NotoNastaliqUrdu_400Regular: require('@expo-google-fonts/noto-nastaliq-urdu/400Regular/NotoNastaliqUrdu_400Regular.ttf'),
   NotoNastaliqUrdu_600SemiBold: require('@expo-google-fonts/noto-nastaliq-urdu/600SemiBold/NotoNastaliqUrdu_600SemiBold.ttf'),
 };
@@ -17,6 +25,8 @@ export type Weight = 'regular' | 'medium' | 'semibold' | 'bold';
 
 const ARABIC = { regular: 'IBMPlexSansArabic_400Regular', medium: 'IBMPlexSansArabic_500Medium', semibold: 'IBMPlexSansArabic_600SemiBold', bold: 'IBMPlexSansArabic_700Bold' };
 export const LATIN_FONT: Record<Weight, string> = { regular: 'Inter_400Regular', medium: 'Inter_500Medium', semibold: 'Inter_600SemiBold', bold: 'Inter_700Bold' };
+const DEVANAGARI = { regular: 'NotoSansDevanagari_400Regular', medium: 'NotoSansDevanagari_500Medium', semibold: 'NotoSansDevanagari_600SemiBold', bold: 'NotoSansDevanagari_700Bold' };
+const BENGALI = { regular: 'NotoSansBengali_400Regular', medium: 'NotoSansBengali_500Medium', semibold: 'NotoSansBengali_600SemiBold', bold: 'NotoSansBengali_700Bold' };
 const URDU = { regular: 'NotoNastaliqUrdu_400Regular', medium: 'NotoNastaliqUrdu_400Regular', semibold: 'NotoNastaliqUrdu_600SemiBold', bold: 'NotoNastaliqUrdu_600SemiBold' };
 
 /**
@@ -25,11 +35,15 @@ const URDU = { regular: 'NotoNastaliqUrdu_400Regular', medium: 'NotoNastaliqUrdu
  */
 export function fontFor(lang: Lang, weight: Weight, content = false): string {
   if (content || lang === 'ar') return ARABIC[weight];
-  return lang === 'ur' ? URDU[weight] : LATIN_FONT[weight];
+  if (lang === 'ur') return URDU[weight];
+  if (lang === 'hi') return DEVANAGARI[weight];
+  if (lang === 'bn') return BENGALI[weight];
+  return LATIN_FONT[weight];
 }
 
 /** Nastaliq needs extra line height so tall letters are not clipped. */
 export function lineHeightFor(lang: Lang, size: number, content = false): number {
   if (!content && lang === 'ur') return Math.round(size * 2.1);
+  if (!content && (lang === 'hi' || lang === 'bn')) return Math.round(size * 1.7);
   return Math.round(size * 1.55);
 }
