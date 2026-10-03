@@ -47,7 +47,7 @@ jobs:
           if ! xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build CODE_SIGNING_ALLOWED=NO build > xcodebuild.log 2>&1; then
-            grep -E "error:|fatal|BUILD FAILED" xcodebuild.log | head -20 | while read -r l; do echo "::error::$l"; done
+            grep -E -A6 "error:|fatal|BUILD FAILED" xcodebuild.log | head -40 | while read -r l; do echo "::error::$l"; done
             tail -n 60 xcodebuild.log
             exit 1
           fi
