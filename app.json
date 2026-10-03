@@ -18,13 +18,15 @@
       "bundleIdentifier": "sa.drivingguide.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Your location is used once, on your device, to sort driving schools by distance. It is not stored or shared. / يُستخدم موقعك مرة واحدة على جهازك لترتيب مدارس القيادة حسب المسافة، ولا يُحفظ أو يُشارك.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDisplayName": "دليل القيادة"
       },
       "privacyManifests": {
         "NSPrivacyTracking": false,
         "NSPrivacyTrackingDomains": [],
         "NSPrivacyCollectedDataTypes": []
-      }
+      },
+      "buildNumber": "1"
     },
     "android": {
       "package": "sa.drivingguide.app",
