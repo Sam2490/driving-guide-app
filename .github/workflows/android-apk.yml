@@ -67,10 +67,10 @@ jobs:
           if [ -n "$KEYSTORE_B64" ]; then
             echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload-key.p12"
             echo "ANDROID_UPLOAD_STORE_FILE=$RUNNER_TEMP/upload-key.p12" >> "$GITHUB_ENV"
-            echo "signed=upload" >> "$GITHUB_OUTPUT"
+            echo "signed=private-key" >> "$GITHUB_OUTPUT"
           else
             echo "::warning::Upload key secrets are not set. This build is signed with the public debug key: testing only, not for Google Play."
-            echo "signed=debug" >> "$GITHUB_OUTPUT"
+            echo "signed=debug-key" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
@@ -88,9 +88,10 @@ jobs:
           APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
           CERT=$("$APKSIGNER" verify --print-certs android/app/build/outputs/apk/release/app-release.apk | grep -m1 "SHA-256 digest" | awk '{print $NF}')
           echo "::notice::APK signing certificate SHA-256: $CERT"
+          # (The output values avoid the word "upload": GitHub hides job outputs that match a secret, such as the key alias.)
           # SHA-256 of the public React Native debug keystore.
           DEBUG_CERT="fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c"
-          if [ "${{ steps.sign.outputs.signed }}" = "upload" ] && [ "$CERT" = "$DEBUG_CERT" ]; then
+          if [ "${{ steps.sign.outputs.signed }}" = "private-key" ] && [ "$CERT" = "$DEBUG_CERT" ]; then
             echo "::error::Upload key secrets are set but the APK is still signed with the debug key."
             exit 1
           fi
@@ -100,7 +101,7 @@ jobs:
         id: out
         run: |
           VERSION=$(node -p "require('./app.json').expo.version")
-          SUFFIX=$([ "${{ steps.sign.outputs.signed }}" = "debug" ] && echo "-debug-signed" || echo "")
+          SUFFIX=$([ "${{ steps.sign.outputs.signed }}" = "debug-key" ] && echo "-debug-signed" || echo "")
           APK="driving-guide-${VERSION}-build${{ github.run_number }}${SUFFIX}.apk"
           AAB="driving-guide-${VERSION}-build${{ github.run_number }}${SUFFIX}.aab"
           cp android/app/build/outputs/apk/release/app-release.apk "$APK"
@@ -134,7 +135,7 @@ jobs:
           name: Test build ${{ github.run_number }} (v${{ needs.build.outputs.version }})
           prerelease: true
           body: |
-            ${{ needs.build.outputs.signed == 'upload' && 'Signed with the private upload key.' || 'Signed with the public DEBUG key: for testing only, not for Google Play.' }}
+            ${{ needs.build.outputs.signed == 'private-key' && 'Signed with the private upload key.' || 'Signed with the public DEBUG key: for testing only, not for Google Play.' }}
             - `.apk`: download on your phone and open it to install.
             - `.aab`: upload this one to Google Play Console.
           files: |
