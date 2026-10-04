@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useApp } from '@/state/AppProvider';
+import { useExam } from '@/state/ExamProvider';
 import { Button, Card, Notice, Row, Screen, Segmented, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { Journey } from '@/components/Journey';
@@ -9,7 +10,8 @@ import { QUESTIONS } from '@/data/questions';
 import { answeredCount, DEFAULT_EXAM, startExam } from '@/features/quiz/engine';
 
 export default function TestHome() {
-  const { t, c, exam, setExam, setExamDone } = useApp();
+  const { t, c } = useApp();
+  const { exam, setExam, setExamDone } = useExam();
   const [mode, setMode] = useState(0);
   const begin = () => {
     setExamDone(null);

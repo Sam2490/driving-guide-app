@@ -1,19 +1,20 @@
 # Production checklist
 
-- [x] Android test APK (GitHub Actions, debug-signed)
-- [ ] Android release build for Google Play (`.aab`, upload key)
+- [x] Android test APK and Play `.aab` on every push (GitHub Actions)
+- [x] Release signing with a private upload key (`plugins/withReleaseHardening.js`, GitHub secrets) — add the 4 secrets, then enrol in Play App Signing
 - [ ] iOS release build (Apple Developer account, EAS or Xcode)
 - [x] App icon and splash screen (first version)
-- [x] App permissions reviewed (location when in use only)
-- [ ] Privacy policy page (public URL, required by Google Play)
+- [x] App permissions reviewed: approximate location while in use only; native config checked in CI (`.github/scripts/check-native-config.js`)
+- [x] Privacy policy page: `docs/privacy/index.html` → https://sam2490.github.io/driving-guide-app/privacy/ (turn on GitHub Pages: Settings → Pages → main /docs)
 - [ ] Store listing: name, descriptions in Arabic and English, screenshots, category Education
-- [ ] Android signing: create upload key, enrol in Play App Signing
+- [ ] Enrol in Play App Signing when creating the app in Play Console
 - [ ] iOS signing
 - [x] Production API configuration: not needed (no API)
 - [x] Dependency audit (`npm audit`) — repeat before release
 - [x] Security review (`docs/SECURITY.md`)
 - [ ] Performance check on a low-end Android phone
-- [ ] Accessibility pass with TalkBack and large fonts
+- [x] Accessibility in code: every control has a role and name (tested), translated dialog labels, reduced motion respected, button colours meet 4.5:1
+- [ ] Accessibility pass on a device with TalkBack / VoiceOver and the largest font size
 - [x] Offline check of content (bundled)
 - [ ] Location check on a real device (allow, deny, GPS off)
 - [ ] Confirm content licences: sign artwork attribution (CC BY-SA 4.0) shown in About; permission for third-party question material

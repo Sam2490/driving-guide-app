@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "دليل القيادة",
+    "NSLocationWhenInUseUsageDescription": "يُستخدم موقعك التقريبي مرة واحدة على جهازك لترتيب مدارس القيادة حسب المسافة، ولا يُحفظ ولا يُشارك."
+  }
+}

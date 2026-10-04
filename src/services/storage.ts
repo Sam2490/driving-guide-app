@@ -1,12 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Lang } from '@/data/types';
+import type { Lang, Question } from '@/data/types';
 import { EMPTY_PROGRESS, type Progress } from '@/features/levels/levels';
+import type { ExamSession } from '@/features/quiz/engine';
 
 export type ThemePref = 'system' | 'light' | 'dark';
 export type Settings = { lang: Lang; theme: ThemePref };
 
 export const DEFAULT_SETTINGS: Settings = { lang: 'ar', theme: 'dark' };
-const KEYS = { settings: 'settings.v1', progress: 'levels.v1' } as const;
+const KEYS = { settings: 'settings.v1', progress: 'levels.v1', exam: 'exam.v1' } as const;
 
 /** Stored data is treated as untrusted: anything malformed falls back to defaults. */
 export function parseSettings(raw: string | null): Settings {
@@ -43,6 +44,47 @@ export function parseProgress(raw: string | null): Progress {
   }
 }
 
+/** Only ids, option order and answers are saved; question text always comes from the bundled bank. */
+type SavedExam = { v: 1; q: { id: string; o: string[] }[]; a: Record<string, string>; s: number; e: number; c: { count: number; minutes: number; passMark: number } };
+
+export function serializeExam(x: ExamSession): SavedExam {
+  const a: Record<string, string> = {};
+  for (const [k, v] of Object.entries(x.answers)) if (v !== undefined) a[k] = v;
+  return { v: 1, q: x.questions.map((q) => ({ id: q.id, o: q.options.map((o) => o.id) })), a, s: x.startedAt, e: x.endsAt, c: x.config };
+}
+
+/** Rebuilds a saved exam from the bundled bank. Anything unknown, tampered with or already timed out is dropped. */
+export function parseExam(raw: string | null, bank: readonly Question[], now = Date.now()): ExamSession | null {
+  try {
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || v.v !== 1 || !Array.isArray(v.q) || v.q.length === 0 || v.q.length > 100) return null;
+    if (!Number.isFinite(v.s) || !Number.isFinite(v.e) || v.e <= now || v.e - v.s > 4 * 3600_000) return null;
+    const c = v.c ?? {};
+    if (![c.count, c.minutes, c.passMark].every((n) => Number.isInteger(n) && n > 0 && n <= 1000)) return null;
+    const byId = new Map(bank.map((q) => [q.id, q]));
+    const seen = new Set<string>();
+    const questions: Question[] = [];
+    for (const item of v.q) {
+      const q = item && typeof item.id === 'string' ? byId.get(item.id) : undefined;
+      if (!q || seen.has(q.id) || !Array.isArray(item.o) || item.o.length !== q.options.length) return null;
+      const opts = item.o.map((id: unknown) => q.options.find((o) => o.id === id));
+      if (opts.some((o: unknown) => !o) || new Set(item.o).size !== q.options.length) return null;
+      seen.add(q.id);
+      questions.push({ ...q, options: opts });
+    }
+    const answers: Record<string, string | undefined> = {};
+    if (v.a && typeof v.a === 'object') {
+      for (const [k, a] of Object.entries(v.a)) {
+        const q = byId.get(k);
+        if (q && seen.has(k) && typeof a === 'string' && q.options.some((o) => o.id === a)) answers[k] = a;
+      }
+    }
+    return { questions, answers, startedAt: v.s, endsAt: v.e, config: { count: c.count, minutes: c.minutes, passMark: c.passMark } };
+  } catch {
+    return null;
+  }
+}
+
 async function read(key: string): Promise<string | null> {
   try {
     return await AsyncStorage.getItem(key);
@@ -65,4 +107,13 @@ export const storage = {
   loadProgress: async () => parseProgress(await read(KEYS.progress)),
   saveProgress: (p: Progress) => write(KEYS.progress, p),
   clearProgress: () => write(KEYS.progress, EMPTY_PROGRESS),
+  loadExam: async (bank: readonly Question[]) => parseExam(await read(KEYS.exam), bank),
+  saveExam: async (x: ExamSession | null) => {
+    if (x) return write(KEYS.exam, serializeExam(x));
+    try {
+      await AsyncStorage.removeItem(KEYS.exam);
+    } catch {
+      // Not fatal.
+    }
+  },
 };

@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
 import { useApp, useDir } from '@/state/AppProvider';
 import { LATIN_FONT, type Weight } from '@/theme/fonts';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Icon, type IconName } from './Icon';
 
 export const TAB_BAR_SPACE = 104;
@@ -93,12 +94,12 @@ export function IconButton({ icon, label, onPress, flip, size = 22 }: { icon: Ic
   );
 }
 
-export function Card({ children, style, onPress, label, accent }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; label?: string; accent?: string }) {
+export function Card({ children, style, onPress, label, accent, checked }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; label?: string; accent?: string; checked?: boolean }) {
   const { c } = useApp();
   const base = [styles.card, { backgroundColor: c.card, borderColor: accent ?? c.ln }, style];
   if (!onPress) return <View style={base}>{children}</View>;
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [...base, pressed && { opacity: 0.85 }]}>
+    <Pressable accessibilityRole={checked === undefined ? 'button' : 'checkbox'} accessibilityLabel={label} accessibilityState={checked === undefined ? undefined : { checked }} onPress={onPress} style={({ pressed }) => [...base, pressed && { opacity: 0.85 }]}>
       {children}
     </Pressable>
   );
@@ -108,11 +109,12 @@ type BtnProps = { title: string; onPress: () => void; kind?: 'primary' | 'ghost'
 
 export function Button({ title, onPress, kind = 'primary', icon, disabled, style, small }: BtnProps) {
   const { c } = useApp();
-  const bg = kind === 'primary' ? c.ac : kind === 'danger' ? c.bad : kind === 'ok' ? c.ok : c.fill;
+  const bg = kind === 'primary' ? c.acSolid : kind === 'danger' ? c.badSolid : kind === 'ok' ? c.okSolid : c.fill;
   const fg = kind === 'ghost' ? c.ac : c.onAc;
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={title}
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
@@ -129,7 +131,7 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, style
 export function Chip({ label, on, onPress }: { label: string; on?: boolean; onPress?: () => void }) {
   const { c } = useApp();
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ selected: !!on }} onPress={onPress} disabled={!onPress} style={[styles.chip, { backgroundColor: on ? c.ac : c.fill }]}>
+    <Pressable accessibilityRole={onPress ? 'button' : 'text'} accessibilityLabel={label} accessibilityState={{ selected: !!on }} onPress={onPress} disabled={!onPress} style={[styles.chip, { backgroundColor: on ? c.acSolid : c.fill }]}>
       <T size={14} weight={on ? 'semibold' : 'regular'} color={on ? c.onAc : c.tx}>{label}</T>
     </Pressable>
   );
@@ -141,7 +143,7 @@ export function Segmented({ options, value, onChange }: { options: string[]; val
   return (
     <View accessibilityRole="tablist" style={[styles.seg, { backgroundColor: c.fill, borderColor: c.ln, flexDirection: d.row }]}>
       {options.map((o, i) => (
-        <Pressable key={o} accessibilityRole="tab" accessibilityState={{ selected: value === i }} onPress={() => onChange(i)} style={[styles.segBtn, value === i && { backgroundColor: isDark ? c.card : '#fff', borderColor: c.ln, borderWidth: 1 }]}>
+        <Pressable key={o} accessibilityRole="tab" accessibilityLabel={o} accessibilityState={{ selected: value === i }} onPress={() => onChange(i)} style={[styles.segBtn, value === i && { backgroundColor: isDark ? c.card : '#fff', borderColor: c.ln, borderWidth: 1 }]}>
           <T size={15} weight="semibold" center color={value === i ? c.tx : c.tx2}>{o}</T>
         </Pressable>
       ))}
@@ -250,11 +252,12 @@ export function EmptyState({ text, action }: { text: string; action?: React.Reac
 }
 
 export function Dialog({ visible, text, title, actions, onClose }: { visible: boolean; title?: string; text: string; actions: React.ReactNode; onClose: () => void }) {
-  const { c } = useApp();
+  const { c, t } = useApp();
+  const reduce = useReducedMotion();
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={[styles.scrim, { backgroundColor: c.scrim }]} onPress={onClose} accessibilityLabel="close">
-        <Pressable style={[styles.dialog, { backgroundColor: c.card, borderColor: c.ln }]} onPress={() => {}}>
+    <Modal visible={visible} transparent animationType={reduce ? 'none' : 'fade'} onRequestClose={onClose} statusBarTranslucent>
+      <Pressable style={[styles.scrim, { backgroundColor: c.scrim }]} onPress={onClose} accessibilityRole="button" accessibilityLabel={t.common.close}>
+        <Pressable style={[styles.dialog, { backgroundColor: c.card, borderColor: c.ln }]} onPress={() => {}} accessible={false} accessibilityViewIsModal>
           {title ? <T size={19} weight="bold" center>{title}</T> : null}
           <T center style={{ marginVertical: 10 }}>{text}</T>
           <View style={{ gap: 10 }}>{actions}</View>
@@ -266,17 +269,18 @@ export function Dialog({ visible, text, title, actions, onClose }: { visible: bo
 
 /** Bottom-sheet style list picker (replaces the web <select>). */
 export function PickerSheet({ visible, title, items, value, onPick, onClose }: { visible: boolean; title: string; items: { value: string; label: string }[]; value: string; onPick: (v: string) => void; onClose: () => void }) {
-  const { c } = useApp();
+  const { c, t } = useApp();
   const insets = useSafeAreaInsets();
   const d = useDir();
+  const reduce = useReducedMotion();
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={{ flex: 1, backgroundColor: c.scrim }} onPress={onClose} accessibilityLabel="close" />
-      <View style={[styles.sheet, { backgroundColor: c.card, paddingBottom: 16 + insets.bottom }]}>
+    <Modal visible={visible} transparent animationType={reduce ? 'none' : 'slide'} onRequestClose={onClose} statusBarTranslucent>
+      <Pressable style={{ flex: 1, backgroundColor: c.scrim }} onPress={onClose} accessibilityRole="button" accessibilityLabel={t.common.close} />
+      <View accessibilityViewIsModal style={[styles.sheet, { backgroundColor: c.card, paddingBottom: 16 + insets.bottom }]}>
         <T size={18} weight="bold" style={{ marginBottom: 8 }}>{title}</T>
         <ScrollView style={{ maxHeight: 420 }}>
           {items.map((it) => (
-            <Pressable key={it.value || '_all'} accessibilityRole="button" accessibilityState={{ selected: it.value === value }} onPress={() => { onPick(it.value); onClose(); }} style={[styles.sheetRow, { flexDirection: d.row, backgroundColor: it.value === value ? c.fill : 'transparent' }]}>
+            <Pressable key={it.value || '_all'} accessibilityRole="button" accessibilityLabel={it.label} accessibilityState={{ selected: it.value === value }} onPress={() => { onPick(it.value); onClose(); }} style={[styles.sheetRow, { flexDirection: d.row, backgroundColor: it.value === value ? c.fill : 'transparent' }]}>
               <View style={{ flex: 1 }}><T weight={it.value === value ? 'semibold' : 'regular'} color={it.value === value ? c.ac : c.tx}>{it.label}</T></View>
               {it.value === value ? <Icon name="check" size={18} color={c.ac} /> : null}
             </Pressable>

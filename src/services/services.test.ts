@@ -1,10 +1,13 @@
 import * as Location from 'expo-location';
 import { getPositionOnce } from './location';
 import { nativeMapsUrl, webMapsUrl } from './maps';
-import { parseProgress, parseSettings } from './storage';
+import { parseExam, parseProgress, parseSettings, serializeExam } from './storage';
+import { isSafeDeepLink } from './links';
+import { QUESTIONS } from '@/data/questions';
+import { selectAnswer, startExam } from '@/features/quiz/engine';
 
 jest.mock('expo-location', () => ({
-  Accuracy: { Balanced: 3 },
+  Accuracy: { Low: 2, Balanced: 3 },
   requestForegroundPermissionsAsync: jest.fn(),
   hasServicesEnabledAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
@@ -55,5 +58,48 @@ describe('stored data validation', () => {
   it('keeps only valid progress values', () => {
     expect(parseProgress('{"xp":-5,"streak":"x","done":{"1":3,"2":9,"abc":2},"last":"2026-10-02"}')).toEqual({ xp: 0, streak: 0, last: '2026-10-02', done: { 1: 3 } });
     expect(parseProgress(null)).toEqual({ xp: 0, streak: 0, done: {} });
+  });
+});
+
+describe('saved exam', () => {
+  const now = 1_800_000_000_000;
+  const exam = () => {
+    let x = startExam(QUESTIONS, { count: 30, minutes: 40, passMark: 21 }, now, () => 0.3);
+    x = selectAnswer(x, x.questions[0].id, x.questions[0].options[1].id);
+    return x;
+  };
+
+  it('round-trips ids, option order and answers, and rebuilds text from the bank', () => {
+    const x = exam();
+    const saved = JSON.stringify(serializeExam(x));
+    expect(saved).not.toContain(x.questions[0].question);
+    expect(parseExam(saved, QUESTIONS, now + 1000)).toEqual(x);
+  });
+  it('drops expired, unknown or tampered sessions', () => {
+    const s = serializeExam(exam());
+    expect(parseExam(JSON.stringify(s), QUESTIONS, s.e + 1)).toBeNull();
+    expect(parseExam(JSON.stringify({ ...s, q: [{ id: 'nope', o: ['a'] }] }), QUESTIONS, now)).toBeNull();
+    expect(parseExam(JSON.stringify({ ...s, q: [{ ...s.q[0], o: [s.q[0].o[0], s.q[0].o[0], ...s.q[0].o.slice(2)] }, ...s.q.slice(1)] }), QUESTIONS, now)).toBeNull();
+    expect(parseExam(JSON.stringify({ ...s, c: { count: -1, minutes: 40, passMark: 21 } }), QUESTIONS, now)).toBeNull();
+    expect(parseExam('{bad', QUESTIONS, now)).toBeNull();
+    expect(parseExam(null, QUESTIONS, now)).toBeNull();
+  });
+  it('ignores answers that are not options of that question', () => {
+    const s = serializeExam(exam());
+    const first = s.q[0].id;
+    const x = parseExam(JSON.stringify({ ...s, a: { [first]: 'zzz', other: 'a' } }), QUESTIONS, now)!;
+    expect(x.answers).toEqual({});
+  });
+});
+
+describe('deep link guard', () => {
+  it('accepts the app links', () => {
+    for (const p of ['/', '/schools/b01', 'drivingguide://signs/s000', '/level/3', '/guide/t00?x=%D8%A7']) expect(isSafeDeepLink(p)).toBe(true);
+  });
+  it('rejects oversized or malformed percent-encoding', () => {
+    expect(isSafeDeepLink('/x?' + 'a'.repeat(600))).toBe(false);
+    expect(isSafeDeepLink('/x?q=' + '%25'.repeat(60))).toBe(false);
+    expect(isSafeDeepLink('/x?q=%E0%A4%A')).toBe(false);
+    expect(isSafeDeepLink('/x?q=%zz')).toBe(false);
   });
 });

@@ -3,10 +3,9 @@ import { useColorScheme } from 'react-native';
 import type { Lang } from '@/data/types';
 import { isRtlLang, STRINGS, type Strings } from '@/i18n';
 import { dark, light, type Palette } from '@/theme/colors';
-import { fontFor, lineHeightFor, type Weight } from '@/theme/fonts';
+import { fontFor, lineHeightFor, loadFontsFor, type Weight } from '@/theme/fonts';
 import { DEFAULT_SETTINGS, storage, type Settings, type ThemePref } from '@/services/storage';
 import { EMPTY_PROGRESS, type Progress } from '@/features/levels/levels';
-import type { ExamSession } from '@/features/quiz/engine';
 
 type AppState = {
   ready: boolean;
@@ -22,10 +21,6 @@ type AppState = {
   lh: (size: number, content?: boolean) => number;
   progress: Progress;
   setProgress: (p: Progress) => void;
-  exam: ExamSession | null;
-  setExam: (s: ExamSession | null) => void;
-  examDone: { session: ExamSession; finishedAt: number; timedOut: boolean } | null;
-  setExamDone: (d: AppState['examDone']) => void;
 };
 
 const Ctx = createContext<AppState | null>(null);
@@ -35,13 +30,12 @@ export function AppProvider({ children, initial }: { children: React.ReactNode; 
   const [settings, setSettings] = useState<Settings>(initial?.settings ?? DEFAULT_SETTINGS);
   const [progress, setProgressState] = useState<Progress>(initial?.progress ?? EMPTY_PROGRESS);
   const [ready, setReady] = useState(Boolean(initial));
-  const [exam, setExam] = useState<ExamSession | null>(null);
-  const [examDone, setExamDone] = useState<AppState['examDone']>(null);
 
   useEffect(() => {
     if (initial) return;
     let alive = true;
-    Promise.all([storage.loadSettings(), storage.loadProgress()]).then(([s, p]) => {
+    Promise.all([storage.loadSettings(), storage.loadProgress()]).then(async ([s, p]) => {
+      await loadFontsFor(s.lang);
       if (!alive) return;
       setSettings(s);
       setProgressState(p);
@@ -52,12 +46,18 @@ export function AppProvider({ children, initial }: { children: React.ReactNode; 
     };
   }, [initial]);
 
-  const update = useCallback((s: Settings) => {
-    setSettings(s);
-    storage.saveSettings(s);
+  const update = useCallback((patch: Partial<Settings>) => {
+    setSettings((prev) => {
+      const next = { ...prev, ...patch };
+      storage.saveSettings(next);
+      return next;
+    });
   }, []);
-  const setLang = useCallback((lang: Lang) => update({ ...settings, lang }), [settings, update]);
-  const setTheme = useCallback((theme: ThemePref) => update({ ...settings, theme }), [settings, update]);
+  // Switch only once the language's fonts are ready, so text never flashes in a fallback font.
+  const setLang = useCallback((lang: Lang) => {
+    loadFontsFor(lang).then(() => update({ lang }));
+  }, [update]);
+  const setTheme = useCallback((theme: ThemePref) => update({ theme }), [update]);
   const setProgress = useCallback((p: Progress) => {
     setProgressState(p);
     storage.saveProgress(p);
@@ -71,9 +71,9 @@ export function AppProvider({ children, initial }: { children: React.ReactNode; 
       setLang, setTheme,
       font: (w, content) => fontFor(lang, w, content),
       lh: (size, content) => lineHeightFor(lang, size, content),
-      progress, setProgress, exam, setExam, examDone, setExamDone,
+      progress, setProgress,
     };
-  }, [ready, settings, scheme, setLang, setTheme, progress, setProgress, exam, examDone]);
+  }, [ready, settings, scheme, setLang, setTheme, progress, setProgress]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

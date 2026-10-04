@@ -33,7 +33,7 @@ export function OptionButton({ q, option, index, state, onPress, disabled }: { q
   const letter = t.common.letters[index] ?? String(index + 1);
   const border = state === 'selected' ? c.ac : state === 'ok' ? c.ok : state === 'bad' ? c.bad : 'transparent';
   const bg = state === 'selected' ? c.ac + '24' : state === 'ok' ? c.okbg : state === 'bad' ? c.badbg : c.fill;
-  const letterBg = state === 'selected' ? c.ac : state === 'ok' ? c.ok : state === 'bad' ? c.bad : c.card;
+  const letterBg = state === 'selected' ? c.acSolid : state === 'ok' ? c.okSolid : state === 'bad' ? c.badSolid : c.card;
   return (
     <Pressable
       accessibilityRole="radio"

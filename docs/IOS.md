@@ -17,4 +17,6 @@ Apple only allows signed apps on iPhones, so this needs an **Apple Developer Pro
 2. Create a free account at expo.dev, then run `npx eas-cli build -p ios --profile production` and let EAS create the certificates.
 3. `npx eas-cli submit -p ios` uploads the build to TestFlight. Invite testers by email; they install with the TestFlight app.
 
-Already configured for iOS: bundle ID, display name دليل القيادة, location "when in use" purpose text (English/Arabic), privacy manifest (no tracking), no background modes, iPhone only.
+Already configured for iOS: bundle ID, display name دليل القيادة, approximate "when in use" location with the purpose text translated into all five languages (`locales/*.json`), no "Always" location or Motion texts, no `NSAllowsLocalNetworking`, privacy manifest (no tracking), no background modes, iPhone only. CI checks these after prebuild (`.github/scripts/check-native-config.js ios`).
+
+For a local debug build that loads JavaScript from your computer, keep local networking: `EXPO_DEV_LOCAL_NETWORK=1 npx expo run:ios`.

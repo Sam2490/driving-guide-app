@@ -3,13 +3,15 @@ import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useApp, useDir } from '@/state/AppProvider';
+import { useExam } from '@/state/ExamProvider';
 import { Button, Card, Notice, Ring, Row, Screen, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { QUESTIONS } from '@/data/questions';
 import { DEFAULT_EXAM, formatClock, scoreExam, startExam } from '@/features/quiz/engine';
 
 export default function Result() {
-  const { t, c, examDone, setExam, setExamDone } = useApp();
+  const { t, c } = useApp();
+  const { examDone, setExam, setExamDone } = useExam();
   const d = useDir();
   React.useEffect(() => {
     if (examDone) {

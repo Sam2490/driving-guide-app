@@ -1,5 +1,7 @@
+import * as Font from 'expo-font';
 import type { Lang } from '@/data/types';
 
+/** Arabic (content and UI) and Inter (English UI, numbers) are needed by everyone and load before the first screen. */
 export const FONT_FILES = {
   IBMPlexSansArabic_400Regular: require('@expo-google-fonts/ibm-plex-sans-arabic/400Regular/IBMPlexSansArabic_400Regular.ttf'),
   IBMPlexSansArabic_500Medium: require('@expo-google-fonts/ibm-plex-sans-arabic/500Medium/IBMPlexSansArabic_500Medium.ttf'),
@@ -9,17 +11,41 @@ export const FONT_FILES = {
   Inter_500Medium: require('@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf'),
   Inter_600SemiBold: require('@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
   Inter_700Bold: require('@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
-  NotoSansDevanagari_400Regular: require('@expo-google-fonts/noto-sans-devanagari/400Regular/NotoSansDevanagari_400Regular.ttf'),
+};
+
+/**
+ * Script fonts for Hindi, Bengali and Urdu (about 2.8 MB together) load only when that language is in use,
+ * so most readers start the app without parsing them.
+ */
+const LANGUAGE_FONTS: Partial<Record<Lang, Record<string, number>>> = {
+  hi: {
+    NotoSansDevanagari_400Regular: require('@expo-google-fonts/noto-sans-devanagari/400Regular/NotoSansDevanagari_400Regular.ttf'),
   NotoSansDevanagari_500Medium: require('@expo-google-fonts/noto-sans-devanagari/500Medium/NotoSansDevanagari_500Medium.ttf'),
   NotoSansDevanagari_600SemiBold: require('@expo-google-fonts/noto-sans-devanagari/600SemiBold/NotoSansDevanagari_600SemiBold.ttf'),
   NotoSansDevanagari_700Bold: require('@expo-google-fonts/noto-sans-devanagari/700Bold/NotoSansDevanagari_700Bold.ttf'),
-  NotoSansBengali_400Regular: require('@expo-google-fonts/noto-sans-bengali/400Regular/NotoSansBengali_400Regular.ttf'),
+  },
+  bn: {
+    NotoSansBengali_400Regular: require('@expo-google-fonts/noto-sans-bengali/400Regular/NotoSansBengali_400Regular.ttf'),
   NotoSansBengali_500Medium: require('@expo-google-fonts/noto-sans-bengali/500Medium/NotoSansBengali_500Medium.ttf'),
   NotoSansBengali_600SemiBold: require('@expo-google-fonts/noto-sans-bengali/600SemiBold/NotoSansBengali_600SemiBold.ttf'),
   NotoSansBengali_700Bold: require('@expo-google-fonts/noto-sans-bengali/700Bold/NotoSansBengali_700Bold.ttf'),
-  NotoNastaliqUrdu_400Regular: require('@expo-google-fonts/noto-nastaliq-urdu/400Regular/NotoNastaliqUrdu_400Regular.ttf'),
+  },
+  ur: {
+    NotoNastaliqUrdu_400Regular: require('@expo-google-fonts/noto-nastaliq-urdu/400Regular/NotoNastaliqUrdu_400Regular.ttf'),
   NotoNastaliqUrdu_600SemiBold: require('@expo-google-fonts/noto-nastaliq-urdu/600SemiBold/NotoNastaliqUrdu_600SemiBold.ttf'),
+  },
 };
+
+/** Loads the script fonts a language needs (no-op for Arabic and English, and for fonts already loaded). */
+export async function loadFontsFor(lang: Lang): Promise<void> {
+  const fonts = LANGUAGE_FONTS[lang];
+  if (!fonts) return;
+  try {
+    await Font.loadAsync(fonts);
+  } catch {
+    // Text falls back to the system font for that script; the app stays usable.
+  }
+}
 
 export type Weight = 'regular' | 'medium' | 'semibold' | 'bold';
 

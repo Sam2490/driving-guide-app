@@ -8,7 +8,8 @@ import { Button, Card, Chip, Notice, Row, T } from './ui';
 import { Icon } from './Icon';
 
 /** Reusable driving-school card: branch name, town, men/women, optional distance, details and directions. */
-export function SchoolCard({ school, distance }: { school: School; distance?: { km: number; city: string } }) {
+/** Memoised: typing in the school search re-renders the list, but unchanged cards are skipped. */
+export const SchoolCard = React.memo(function SchoolCard({ school, distance }: { school: School; distance?: { km: number; city: string } }) {
   const { t, c, lang } = useApp();
   const [failed, setFailed] = useState(false);
   const ar = lang === 'ar';
@@ -36,4 +37,4 @@ export function SchoolCard({ school, distance }: { school: School; distance?: { 
       {failed ? <Notice tone="bad" text={t.schools.mapsFailed} /> : null}
     </Card>
   );
-}
+});

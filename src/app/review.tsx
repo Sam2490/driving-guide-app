@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useApp } from '@/state/AppProvider';
+import { useExam } from '@/state/ExamProvider';
 import { Button, Card, Row, Screen, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { Media } from '@/components/Media';
@@ -9,7 +10,8 @@ import { OptionContent, QuestionText } from '@/components/Quiz';
 import { mistakes } from '@/features/quiz/engine';
 
 export default function Review() {
-  const { t, c, examDone } = useApp();
+  const { t, c } = useApp();
+  const { examDone } = useExam();
   if (!examDone) return <Screen back tabSpace={false}><Button title={t.common.back} onPress={() => router.replace('/test')} /></Screen>;
   const { session } = examDone;
   const list = mistakes(session.questions, session.answers);

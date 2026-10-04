@@ -2,7 +2,7 @@ export const en = {
   appName: 'دليل القيادة',
   tabs: { home: 'Home', guide: 'Guide', signs: 'Signs', test: 'Test', schools: 'Schools' },
   common: {
-    close: 'Close', cancel: 'Cancel', back: 'Back', tryAgain: 'Try again', all: 'All', noResults: 'No results.',
+    close: 'Close', home: 'Home', cancel: 'Cancel', back: 'Back', tryAgain: 'Try again', all: 'All', noResults: 'No results.',
     more: 'Show more', search: 'Search', arabicOnly: 'This content is in Arabic.',
     official: 'From the official trainee guide', general: 'General information · verify on Absher',
     letters: ['A', 'B', 'C', 'D'],
@@ -75,14 +75,14 @@ export const en = {
     note: (d: string) => `Men's branches as listed in Absher's driving-licence booking (checked ${d}). Women's schools come from public sources. Distances are to the town centre. Book through Absher.`,
     checked: (d: string) => `List checked on ${d}`,
   },
-  settings: { title: 'Settings', language: 'Language', theme: 'Appearance', system: 'System', light: 'Light', dark: 'Dark', contentNote: 'Questions, answers, the trainee guide, signs and schools follow the language you choose. Arabic is the original; English and Urdu are translations to help you study.' },
+  settings: { title: 'Settings', language: 'Language', theme: 'Appearance', system: 'System', light: 'Light', dark: 'Dark', contentNote: 'Questions, answers, the trainee guide, signs and schools follow the language you choose. Arabic is the original; English, Urdu, Hindi and Bengali are translations to help you study.' },
   about: {
     title: 'About',
     intro: 'An educational app to prepare for the Saudi driving theory test. It is not an official government app and is not affiliated with the General Directorate of Traffic or Absher.',
-    privacyT: 'Privacy', privacy: 'No account, no tracking, no analytics. Your location is used once on your phone when you tap Find nearby, and is never stored or sent. Your language, theme and level progress are saved only on this phone.',
+    privacyT: 'Privacy', privacyLink: 'Privacy policy', privacy: 'No account, no tracking, no analytics. Your location is used once on your phone when you tap Find nearby, and is never stored or sent. Your language, theme and level progress are saved only on this phone.',
     sourcesT: 'Sources',
     sources: [
-      'English and Urdu: translations of the Arabic questions and guide, made to help you study. The official exam wording may differ.',
+      'English, Urdu, Hindi and Bengali: translations of the Arabic questions and guide, made to help you study. The official exam wording may differ.',
       'Trainee guide content: the official traffic theory guide (دليل المتدرب).',
       'License steps, fees and school list: compiled from public sources; verify on Absher.',
       'Question bank: practice questions collected from public practice material.',
@@ -94,7 +94,7 @@ export const en = {
     ],
     version: (v: string) => `Version ${v}`,
   },
-  errors: { generic: 'Something went wrong. Please try again.' },
+  errors: { generic: 'Something went wrong. Please try again.', crashed: 'Something went wrong on this screen. Your progress is safe.', notFound: 'This page does not exist.' },
 };
 
 type Widen<T> = T extends string ? string : T extends (...a: infer A) => infer R ? (...a: A) => R : T extends readonly (infer U)[] ? Widen<U>[] : T extends object ? { [K in keyof T]: Widen<T[K]> } : T;

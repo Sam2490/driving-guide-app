@@ -1,0 +1,6 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "دليل القيادة",
+    "NSLocationWhenInUseUsageDescription": "Your approximate location is used once, on your phone, to sort driving schools by distance. It is not stored or shared."
+  }
+}

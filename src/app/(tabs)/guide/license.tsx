@@ -18,9 +18,9 @@ export default function License() {
       <T muted>{t.license.prog(n, steps.length)}</T>
       <ProgressBar value={n / steps.length} />
       {steps.map((s, i) => (
-        <Card key={s.title} label={`${t.license.step(i + 1)}: ${s.title}`} onPress={() => setDone({ ...done, [i]: !done[i] })} accent={done[i] ? c.ok : undefined}>
+        <Card key={s.title} label={`${t.license.step(i + 1)}: ${s.title}`} onPress={() => setDone({ ...done, [i]: !done[i] })} accent={done[i] ? c.ok : undefined} checked={!!done[i]}>
           <Row style={{ alignItems: 'flex-start' }}>
-            <View style={[styles.num, { backgroundColor: done[i] ? c.ok : c.fill }]} accessibilityLabel={done[i] ? '✓' : String(i + 1)}>
+            <View style={[styles.num, { backgroundColor: done[i] ? c.okSolid : c.fill }]} accessibilityLabel={done[i] ? '✓' : String(i + 1)}>
               {done[i] ? <Icon name="check" size={18} color="#fff" /> : <T weight="semibold" center>{String(i + 1)}</T>}
             </View>
             <View style={{ flex: 1, gap: 2 }}>

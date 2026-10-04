@@ -8,6 +8,7 @@ export type LocationResult =
   | { status: 'unavailable' };
 
 /**
+ * Approximate location is enough: schools are sorted by distance to town centres.
  * Asks for "when in use" permission (only when the user taps Find nearby) and reads the position once.
  * The position is returned to the caller and never stored or sent anywhere.
  */
@@ -16,7 +17,7 @@ export async function getPositionOnce(): Promise<LocationResult> {
     const perm = await Location.requestForegroundPermissionsAsync();
     if (perm.status !== 'granted') return { status: 'denied', canAskAgain: perm.canAskAgain };
     if (!(await Location.hasServicesEnabledAsync())) return { status: 'services-off' };
-    const pos = await withTimeout(Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }), 15_000);
+    const pos = await withTimeout(Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }), 15_000);
     const { latitude, longitude } = pos.coords;
     if (!isValidCoords(latitude, longitude)) return { status: 'unavailable' };
     return { status: 'ok', lat: latitude, lng: longitude };

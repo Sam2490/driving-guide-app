@@ -34,17 +34,18 @@ export default function Schools() {
   const [picker, setPicker] = useState<null | 'region' | 'city'>(null);
   const [loc, setLoc] = useState<Loc>({ phase: 'idle' });
 
+  // Search text for each school, built once per language instead of on every keystroke.
+  const haystack = useMemo(
+    () => new Map(SCHOOLS.map((x) => [x.id, `${x.name} ${schoolText(x, lang).name} ${x.cities.map((ct) => `${ct} ${cityName(ct, lang)}`).join(' ')}`.toLowerCase()])),
+    [lang],
+  );
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
     const base = filterSchools(SCHOOLS, CITIES, { region, city });
-    if (!s) return base;
-    return base.filter((x) => {
-      const tx = schoolText(x, lang);
-      return `${x.name} ${tx.name} ${x.cities.map((ct) => `${ct} ${cityName(ct, lang)}`).join(' ')}`.toLowerCase().includes(s);
-    });
-  }, [region, city, q, lang]);
-  const regions = regionsOf(CITIES);
-  const cities = citiesIn(CITIES, region || undefined).filter((x) => SCHOOLS.some((s) => s.cities.includes(x.name)));
+    return s ? base.filter((x) => haystack.get(x.id)!.includes(s)) : base;
+  }, [region, city, q, haystack]);
+  const regions = useMemo(() => regionsOf(CITIES), []);
+  const cities = useMemo(() => citiesIn(CITIES, region || undefined).filter((x) => SCHOOLS.some((s) => s.cities.includes(x.name))), [region]);
 
   const locate = async () => {
     setLoc({ phase: 'locating' });

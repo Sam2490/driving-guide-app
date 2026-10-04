@@ -3,13 +3,17 @@ import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp, useDir } from '@/state/AppProvider';
+import { useExam } from '@/state/ExamProvider';
+import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Button, Dialog, IconButton, ProgressBar, Row, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { OptionButton, QuestionBody } from '@/components/Quiz';
 import { answeredCount, formatClock, remainingSeconds, selectAnswer } from '@/features/quiz/engine';
 
 export default function ExamScreen() {
-  const { t, c, exam, setExam, setExamDone } = useApp();
+  const { t, c } = useApp();
+  const { exam, setExam, setExamDone } = useExam();
+  const reduce = useReducedMotion();
   const d = useDir();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -118,16 +122,16 @@ export default function ExamScreen() {
         </Row>
       </View>
 
-      <Modal visible={grid} transparent animationType="slide" onRequestClose={() => setGrid(false)} statusBarTranslucent>
-        <Pressable style={{ flex: 1, backgroundColor: c.scrim }} onPress={() => setGrid(false)} accessibilityLabel={t.common.close} />
-        <View style={[styles.sheet, { backgroundColor: c.card, paddingBottom: 16 + insets.bottom }]}>
+      <Modal visible={grid} transparent animationType={reduce ? 'none' : 'slide'} onRequestClose={() => setGrid(false)} statusBarTranslucent>
+        <Pressable style={{ flex: 1, backgroundColor: c.scrim }} onPress={() => setGrid(false)} accessibilityRole="button" accessibilityLabel={t.common.close} />
+        <View accessibilityViewIsModal style={[styles.sheet, { backgroundColor: c.card, paddingBottom: 16 + insets.bottom }]}>
           <T size={18} weight="bold">{t.test.grid}</T>
           <T size={14} muted>{t.test.answered(answered, n)}</T>
           <View style={[styles.gridWrap, { flexDirection: d.row }]}>
             {exam.questions.map((x, k) => {
               const done = exam.answers[x.id] !== undefined;
               return (
-                <Pressable key={x.id} accessibilityRole="button" accessibilityLabel={`${t.test.qOf(k + 1, n)}${done ? ' ✓' : ''}`} onPress={() => { setI(k); setGrid(false); }} style={[styles.cell, { backgroundColor: done ? c.ac : c.fill, borderColor: k === i ? c.tx : 'transparent' }]}>
+                <Pressable key={x.id} accessibilityRole="button" accessibilityLabel={`${t.test.qOf(k + 1, n)}${done ? ' ✓' : ''}`} onPress={() => { setI(k); setGrid(false); }} style={[styles.cell, { backgroundColor: done ? c.acSolid : c.fill, borderColor: k === i ? c.tx : 'transparent' }]}>
                   <T size={15} weight="semibold" center color={done ? '#fff' : c.tx}>{String(k + 1)}</T>
                 </Pressable>
               );

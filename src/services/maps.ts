@@ -33,12 +33,17 @@ export async function openInMaps(query: string): Promise<boolean> {
 }
 
 export const ABSHER_URL = 'https://www.absher.sa';
+export const PRIVACY_URL = 'https://sam2490.github.io/driving-guide-app/privacy/';
 
-export async function openAbsher(): Promise<boolean> {
+/** Opens one of the app's fixed HTTPS links. Never called with user-provided URLs. */
+async function openFixed(url: string): Promise<boolean> {
   try {
-    await Linking.openURL(ABSHER_URL);
+    await Linking.openURL(url);
     return true;
   } catch {
     return false;
   }
 }
+
+export const openAbsher = () => openFixed(ABSHER_URL);
+export const openPrivacyPolicy = () => openFixed(PRIVACY_URL);
