@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import type { Lang } from '@/data/types';
 import { isRtlLang, STRINGS, type Strings } from '@/i18n';
@@ -46,16 +46,25 @@ export function AppProvider({ children, initial }: { children: React.ReactNode; 
     };
   }, [initial]);
 
+  // The latest settings, so a change is computed and saved outside React's state updater (which may run twice).
+  const current = useRef(settings);
+  useEffect(() => {
+    current.current = settings;
+  }, [settings]);
   const update = useCallback((patch: Partial<Settings>) => {
-    setSettings((prev) => {
-      const next = { ...prev, ...patch };
-      storage.saveSettings(next);
-      return next;
-    });
+    const next = { ...current.current, ...patch };
+    current.current = next;
+    setSettings(next);
+    storage.saveSettings(next);
   }, []);
   // Switch only once the language's fonts are ready, so text never flashes in a fallback font.
+  // If the user picks again while fonts load, only the latest choice is applied.
+  const wanted = useRef<Lang | null>(null);
   const setLang = useCallback((lang: Lang) => {
-    loadFontsFor(lang).then(() => update({ lang }));
+    wanted.current = lang;
+    loadFontsFor(lang).then(() => {
+      if (wanted.current === lang) update({ lang });
+    });
   }, [update]);
   const setTheme = useCallback((theme: ThemePref) => update({ theme }), [update]);
   const setProgress = useCallback((p: Progress) => {

@@ -1,25 +1,46 @@
-# Weekly update PRs for GitHub Actions (pinned SHAs) and npm packages.
-# Expo / React Native packages move together with the Expo SDK, so their major updates are ignored here
-# and done as a planned SDK upgrade (`npx expo install --fix`).
+# Update requests for GitHub Actions (pinned SHAs) and npm packages.
+# Packages that move with the Expo SDK (Expo, React, React Native and their tooling) are upgraded together
+# with `npx expo install --fix` during a planned SDK upgrade, so Dependabot leaves their versions alone.
+# Major versions of build and test tools are also left alone: they must match what the Expo SDK supports.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
     ignore:
-      - dependency-name: "expo*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "react-native*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "@react-native*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # Versions pinned by the Expo SDK (see node_modules/expo/bundledNativeModules.json).
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+      - dependency-name: "@expo-google-fonts/*"
       - dependency-name: "react"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "react-dom"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-*"
+      - dependency-name: "@react-native/*"
+      - dependency-name: "@react-native-async-storage/*"
+      - dependency-name: "jest-expo"
+      - dependency-name: "eslint-config-expo"
+      # Build and test tools: majors only with the SDK upgrade.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@testing-library/*"
+        update-types: ["version-update:semver-major"]

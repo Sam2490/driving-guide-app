@@ -1,6 +1,7 @@
 # Production checklist
 
 - [x] Android test APK and Play `.aab` on every push (GitHub Actions)
+- [x] Build number from the CI run number on Android and iOS (`app.config.js`)
 - [x] Release signing with a private upload key (`plugins/withReleaseHardening.js`, GitHub secrets) — add the 4 secrets, then enrol in Play App Signing
 - [ ] iOS release build (Apple Developer account, EAS or Xcode)
 - [x] App icon and splash screen (first version)

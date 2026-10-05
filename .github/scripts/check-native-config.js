@@ -26,6 +26,10 @@ if (platform === 'android') {
   must(!/android:debuggable="true"/.test(manifest), 'Release manifest is debuggable');
   const gradle = fs.readFileSync('android/app/build.gradle', 'utf8');
   must(gradle.includes("System.getenv('ANDROID_UPLOAD_STORE_FILE') ? signingConfigs.release"), 'Release signing hook missing from app/build.gradle');
+  if (process.env.BUILD_NUMBER) {
+    const vc = (gradle.match(/versionCode\s+(\d+)/) || [])[1];
+    must(vc === process.env.BUILD_NUMBER, `versionCode is ${vc}, expected BUILD_NUMBER ${process.env.BUILD_NUMBER}`);
+  }
   const props = fs.readFileSync('android/gradle.properties', 'utf8');
   must(/android\.enableMinifyInReleaseBuilds=true/.test(props), 'R8 minify is off');
   must(/android\.enableShrinkResourcesInReleaseBuilds=true/.test(props), 'Resource shrinking is off');
@@ -36,6 +40,10 @@ if (platform === 'android') {
     must(!plist.includes(`<key>${k}</key>`), `Info.plist must not contain ${k}`);
   }
   must(/<key>NSLocationDefaultAccuracyReduced<\/key>\s*<true\/>/.test(plist), 'NSLocationDefaultAccuracyReduced should be true');
+  if (process.env.BUILD_NUMBER) {
+    const bn = (plist.match(/<key>CFBundleVersion<\/key>\s*<string>([^<]+)<\/string>/) || [])[1];
+    must(bn === process.env.BUILD_NUMBER, `CFBundleVersion is ${bn}, expected BUILD_NUMBER ${process.env.BUILD_NUMBER}`);
+  }
   for (const lang of ['ar', 'en', 'ur', 'hi', 'bn']) {
     const f = path.join('ios', dir, 'Supporting', `${lang}.lproj`, 'InfoPlist.strings');
     must(fs.existsSync(f) && fs.readFileSync(f, 'utf8').includes('NSLocationWhenInUseUsageDescription'), `Missing translated location prompt for ${lang}`);

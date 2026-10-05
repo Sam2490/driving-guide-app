@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { I18nManager, Platform, Pressable, Text, View } from 'react-native';
+import { Appearance, I18nManager, Platform, Pressable, Text, View } from 'react-native';
 import { router, Stack, type ErrorBoundaryProps } from 'expo-router';
 import { getLocales } from 'expo-localization';
 import { StatusBar } from 'expo-status-bar';
@@ -12,7 +12,7 @@ import { ExamProvider } from '@/state/ExamProvider';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { STRINGS } from '@/i18n';
 import type { Lang } from '@/data/types';
-import { dark } from '@/theme/colors';
+import { dark, light } from '@/theme/colors';
 import { FONT_FILES } from '@/theme/fonts';
 import { Loading } from '@/components/ui';
 
@@ -71,10 +71,12 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
   const code = getLocales()[0]?.languageCode ?? 'ar';
   const lang: Lang = (['ar', 'en', 'ur', 'hi', 'bn'] as const).find((l) => l === code) ?? 'ar';
   const t = STRINGS[lang];
-  const btn = { backgroundColor: dark.acSolid, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 24, minWidth: 200 } as const;
+  // Follows the phone's light/dark setting directly; the app's own theme state may be what failed.
+  const p = Appearance.getColorScheme() === 'light' ? light : dark;
+  const btn = { backgroundColor: p.acSolid, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 24, minWidth: 200 } as const;
   return (
-    <View style={{ flex: 1, backgroundColor: dark.bg, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 14 }}>
-      <Text accessibilityRole="header" style={{ color: dark.tx, fontSize: 18, textAlign: 'center' }}>{t.errors.crashed}</Text>
+    <View style={{ flex: 1, backgroundColor: p.bg, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 14 }}>
+      <Text accessibilityRole="header" style={{ color: p.tx, fontSize: 18, textAlign: 'center' }}>{t.errors.crashed}</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={t.common.tryAgain} onPress={() => retry()} style={btn}>
         <Text style={{ color: '#ffffff', fontSize: 17, textAlign: 'center' }}>{t.common.tryAgain}</Text>
       </Pressable>
@@ -89,9 +91,9 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
           }
           retry();
         }}
-        style={[btn, { backgroundColor: dark.fill }]}
+        style={[btn, { backgroundColor: p.fill }]}
       >
-        <Text style={{ color: dark.tx, fontSize: 17, textAlign: 'center' }}>{t.common.home}</Text>
+        <Text style={{ color: p.tx, fontSize: 17, textAlign: 'center' }}>{t.common.home}</Text>
       </Pressable>
     </View>
   );

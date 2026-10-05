@@ -189,6 +189,46 @@ describe('exam survives the app closing', () => {
   });
 });
 
+describe('exam timer and leaving', () => {
+  it('submits automatically when the time runs out', async () => {
+    const x = startExam(QUESTIONS);
+    await AsyncStorage.setItem('exam.v1', JSON.stringify(serializeExam({ ...x, endsAt: Date.now() + 1500 })));
+    await open('/test');
+    await waitFor(() => expect(screen.getByText(/^متابعة الاختبار/)).toBeTruthy());
+    await fireEvent.press(screen.getByText(/^متابعة الاختبار/));
+    await settle();
+    await waitFor(() => expect(screen.getByText('انتهى الوقت وتم تسليم إجاباتك.')).toBeTruthy(), { timeout: 4000 });
+    expect(await AsyncStorage.getItem('exam.v1')).toBeNull();
+  });
+  it('jumps between questions from the grid and confirms before leaving the exam', async () => {
+    await open('/test');
+    await fireEvent.press(screen.getByText('ابدأ الاختبار'));
+    await settle();
+    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getByLabelText('السؤال 5 من 30'));
+    expect(screen.getByText('السؤال 5 من 30')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('خروج'));
+    expect(screen.getByText('الخروج من الاختبار؟ ستفقد إجاباتك.')).toBeTruthy();
+    await fireEvent.press(screen.getAllByText('متابعة').at(-1)!);
+    expect(screen.queryByText('الخروج من الاختبار؟ ستفقد إجاباتك.')).toBeNull();
+    await fireEvent.press(screen.getByLabelText('خروج'));
+    await fireEvent.press(screen.getAllByText('خروج').at(-1)!);
+    await settle();
+    expect(screen.getByText('ابدأ الاختبار')).toBeTruthy();
+    expect(await AsyncStorage.getItem('exam.v1')).toBeNull();
+  });
+  it('asks before leaving a level with answers, and stays when asked to', async () => {
+    await open('/level/1');
+    await fireEvent.press(screen.getAllByRole('radio')[0]);
+    await fireEvent.press(screen.getByText('تأكيد الإجابة'));
+    await fireEvent.press(screen.getByLabelText('خروج'));
+    expect(screen.getByText('الخروج الآن يلغي تقدمك في هذا المستوى.')).toBeTruthy();
+    await fireEvent.press(screen.getByText('متابعة المستوى'));
+    await settle();
+    expect(screen.getByText('متابعة')).toBeTruthy();
+  });
+});
+
 describe('level outcomes', () => {
   // Level 1 always has the same 8 questions (only the option order is shuffled), so the right answer is found by its text.
   async function play(right: boolean, rounds: number) {
@@ -211,9 +251,13 @@ describe('level outcomes', () => {
     expect(screen.getByText('اكتمل المستوى')).toBeTruthy();
     expect(JSON.parse((await AsyncStorage.getItem('levels.v1'))!).done['1']).toBe(3);
   });
-  it('ends the level after 5 wrong answers', async () => {
+  it('ends the level after 5 wrong answers, and a retry starts it fresh', async () => {
     await play(false, 5);
     expect(screen.getByText('نفدت المحاولات')).toBeTruthy();
+    await fireEvent.press(screen.getByText('إعادة المستوى'));
+    await settle();
+    expect(screen.getByText('تأكيد الإجابة')).toBeTruthy();
+    expect(screen.getByLabelText('المحاولات المتبقية: 5')).toBeTruthy();
   });
 });
 

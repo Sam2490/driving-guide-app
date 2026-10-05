@@ -18,7 +18,6 @@ export default function ExamScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [i, setI] = useState(0);
-  const [left, setLeft] = useState(() => (exam ? remainingSeconds(exam.endsAt) : 0));
   const [grid, setGrid] = useState(false);
   const [ask, setAsk] = useState<null | 'submit' | 'leave'>(null);
   const allowLeave = useRef(false);
@@ -36,18 +35,7 @@ export default function ExamScreen() {
     [exam, setExam, setExamDone],
   );
 
-  // Timer based on the stored end time, so it stays correct if the app is in the background.
-  useEffect(() => {
-    if (!exam) return;
-    const tick = () => {
-      const r = remainingSeconds(exam.endsAt);
-      setLeft(r);
-      if (r <= 0) finish(true);
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [exam, finish]);
+  const onTimeUp = useCallback(() => finish(true), [finish]);
 
   // Confirm before the Android back button or a swipe throws the exam away.
   useEffect(() => {
@@ -93,10 +81,7 @@ export default function ExamScreen() {
           <T size={14} muted>{t.test.qOf(i + 1, n)}</T>
           <ProgressBar value={answered / n} />
         </View>
-        <View accessibilityLabel={formatClock(left)} style={[styles.timer, { backgroundColor: left < 300 ? c.badbg : c.fill, flexDirection: 'row' }]}>
-          <Icon name="clock" size={16} color={left < 300 ? c.bad : c.tx} />
-          <T size={15} weight="semibold" color={left < 300 ? c.bad : c.tx} style={{ fontVariant: ['tabular-nums'], writingDirection: 'ltr' }}>{formatClock(left)}</T>
-        </View>
+        <ExamClock endsAt={exam.endsAt} onTimeUp={onTimeUp} />
       </View>
 
       <ScrollView ref={scroll} contentContainerStyle={{ padding: 20, gap: 10, paddingBottom: 24 }}>
@@ -175,4 +160,30 @@ const styles = StyleSheet.create({
   sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 12 },
   gridWrap: { flexWrap: 'wrap', gap: 8 },
   cell: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
+});
+
+/**
+ * The countdown re-renders itself every second; the question, options and image above it do not.
+ * It reads the stored end time, so it stays correct after the app was in the background.
+ */
+const ExamClock = React.memo(function ExamClock({ endsAt, onTimeUp }: { endsAt: number; onTimeUp: () => void }) {
+  const { c } = useApp();
+  const [left, setLeft] = useState(() => remainingSeconds(endsAt));
+  useEffect(() => {
+    const tick = () => {
+      const r = remainingSeconds(endsAt);
+      setLeft(r);
+      if (r <= 0) onTimeUp();
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [endsAt, onTimeUp]);
+  const low = left < 300;
+  return (
+    <View accessibilityLabel={formatClock(left)} style={[styles.timer, { backgroundColor: low ? c.badbg : c.fill, flexDirection: 'row' }]}>
+      <Icon name="clock" size={16} color={low ? c.bad : c.tx} />
+      <T size={15} weight="semibold" color={low ? c.bad : c.tx} style={{ fontVariant: ['tabular-nums'], writingDirection: 'ltr' }}>{formatClock(left)}</T>
+    </View>
+  );
 });

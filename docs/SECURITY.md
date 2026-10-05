@@ -1,6 +1,6 @@
 # Security and privacy review
 
-Last reviewed: 4 October 2026 (audit findings F-01 to F-18 addressed; see the audit report).
+Last reviewed: 5 October 2026 (audit F-01 to F-18 and re-audit N-01 to N-08 addressed; see the audit report).
 
 | Area | Status |
 | --- | --- |
@@ -15,6 +15,8 @@ Last reviewed: 4 October 2026 (audit findings F-01 to F-18 addressed; see the au
 | Errors | Root `ErrorBoundary` shows a translated message with no technical details. Nothing is logged. |
 | Dependencies | Official Expo / React Native packages only. `npm audit --omit=dev` runs in CI (report only). Remaining advisories are in build tools or transitive (see audit F-08, F-09); fix with the Expo SDK upgrade, never `npm audit fix --force`. Dependabot watches actions and npm. |
 | Android release | Not debuggable. R8 and resource shrinking on. Signed with the private upload key when the secrets are set; CI labels any debug-signed build "testing only" and fails if the secrets are set but the APK still has the debug certificate. |
-| CI | Third-party actions pinned to commit SHAs. Only the release job has `contents: write`. |
+| CI | Third-party actions pinned to commit SHAs (Node 24 versions); `ubuntu-24.04` pinned; Gradle cache uses the open-source `basic` provider. Only the release job has `contents: write`. Build numbers come from the workflow run number (`app.config.js`, checked after prebuild). |
+| Updates | Dependabot groups action updates and minor/patch npm updates. Packages pinned by the Expo SDK and major versions of build/test tools are ignored and move with the SDK upgrade. |
+| Signing key | The upload key and password were shared once through the setup chat: keep them in a password manager and delete downloaded copies. If they may have leaked, ask Google Play to reset the upload key (Play App Signing keeps the app signing key). |
 
 **Limits that cannot be removed:** the question bank ships inside the app, so anyone can read it by unpacking the APK. That is acceptable for a practice simulator; this app must not be presented as a secure or official exam. The app cannot be described as "100% secure".

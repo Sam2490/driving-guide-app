@@ -103,3 +103,36 @@ describe('deep link guard', () => {
     expect(isSafeDeepLink('/x?q=%zz')).toBe(false);
   });
 });
+
+describe('opening maps and fixed links', () => {
+  const { Linking, Platform } = jest.requireActual('react-native') as typeof import('react-native');
+  const maps = jest.requireActual('./maps') as typeof import('./maps');
+  let spy: jest.SpyInstance;
+  beforeEach(() => {
+    spy = jest.spyOn(Linking, 'openURL');
+  });
+  afterEach(() => spy.mockRestore());
+
+  it('tries the phone map app first', async () => {
+    spy.mockResolvedValue(true);
+    await expect(maps.openInMaps('مدرسة')).resolves.toBe(true);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toBe(maps.nativeMapsUrl('مدرسة', Platform.OS) ?? maps.webMapsUrl('مدرسة'));
+  });
+  it('falls back to the web map, then reports failure', async () => {
+    spy.mockRejectedValueOnce(new Error('no map app')).mockResolvedValueOnce(true);
+    await expect(maps.openInMaps('x')).resolves.toBe(true);
+    expect(spy.mock.calls.at(-1)![0]).toBe(maps.webMapsUrl('x'));
+    spy.mockRejectedValue(new Error('nothing'));
+    await expect(maps.openInMaps('x')).resolves.toBe(false);
+  });
+  it('opens only the fixed HTTPS links', async () => {
+    spy.mockResolvedValue(true);
+    await maps.openAbsher();
+    await maps.openPrivacyPolicy();
+    expect(spy.mock.calls.map((c) => c[0])).toEqual([maps.ABSHER_URL, maps.PRIVACY_URL]);
+    for (const u of [maps.ABSHER_URL, maps.PRIVACY_URL]) expect(u.startsWith('https://')).toBe(true);
+    spy.mockRejectedValue(new Error('no browser'));
+    await expect(maps.openAbsher()).resolves.toBe(false);
+  });
+});
