@@ -28,6 +28,7 @@ jobs:
       aab: ${{ steps.out.outputs.aab }}
       version: ${{ steps.out.outputs.version }}
       signed: ${{ steps.sign.outputs.signed }}
+      apk_sha256: ${{ steps.out.outputs.apk_sha256 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -104,18 +105,37 @@ jobs:
           fi
           rm -f "$RUNNER_TEMP/upload-key.p12"
 
+      - name: Check the APK installs cleanly
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          # Every signature scheme must verify (v2/v3 are what Android 7+ checks at install time).
+          "$BT/apksigner" verify -v "$APK" | tee "$RUNNER_TEMP/sig.txt"
+          grep -q "Verified using v2 scheme (APK Signature Scheme v2): true" "$RUNNER_TEMP/sig.txt" \
+            || { echo "::error::APK is not signed with scheme v2."; exit 1; }
+          # Uncompressed native libraries must be 16 KB page aligned, otherwise Android rejects the package as invalid.
+          "$BT/zipalign" -c -P 16 4 "$APK" || { echo "::error::APK is not zip-aligned."; exit 1; }
+          # The manifest must parse and carry the expected package, version and ABIs.
+          "$BT/aapt2" dump badging "$APK" | grep -E "^(package|sdkVersion|targetSdkVersion|native-code)" | tee "$RUNNER_TEMP/badging.txt"
+          grep -q "versionCode='${{ github.run_number }}'" "$RUNNER_TEMP/badging.txt" \
+            || { echo "::error::Unexpected versionCode in the APK."; exit 1; }
+          grep -q "arm64-v8a" "$RUNNER_TEMP/badging.txt" || { echo "::error::APK has no arm64 native code."; exit 1; }
+          echo "::notice::$(head -1 "$RUNNER_TEMP/badging.txt")"
+
       - name: Name the outputs
         id: out
         run: |
           VERSION=$(node -p "require('./app.json').expo.version")
           SUFFIX=$([ "${{ steps.sign.outputs.signed }}" = "debug-key" ] && echo "-debug-signed" || echo "")
           APK="driving-guide-${VERSION}-build${{ github.run_number }}${SUFFIX}.apk"
-          AAB="driving-guide-${VERSION}-build${{ github.run_number }}${SUFFIX}.aab"
+          # The AAB name says it is for Google Play: phones cannot install .aab files.
+          AAB="driving-guide-${VERSION}-build${{ github.run_number }}${SUFFIX}-google-play-only.aab"
           cp android/app/build/outputs/apk/release/app-release.apk "$APK"
           cp android/app/build/outputs/bundle/release/app-release.aab "$AAB"
           echo "::notice::APK $(du -h "$APK" | cut -f1), AAB $(du -h "$AAB" | cut -f1)"
           echo "apk=$APK" >> "$GITHUB_OUTPUT"
           echo "aab=$AAB" >> "$GITHUB_OUTPUT"
+          echo "apk_sha256=$(sha256sum "$APK" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -135,6 +155,20 @@ jobs:
         with:
           name: android-build-${{ github.run_number }}
 
+      # The APK published to the release must be byte-identical to the one checked above.
+      - name: Re-check the downloaded APK
+        env:
+          APK: ${{ needs.build.outputs.apk }}
+          EXPECTED: ${{ needs.build.outputs.apk_sha256 }}
+        run: |
+          ls -l
+          ACTUAL=$(sha256sum "$APK" | cut -d' ' -f1)
+          [ "$ACTUAL" = "$EXPECTED" ] || { echo "::error::APK changed in transit ($ACTUAL != $EXPECTED)."; exit 1; }
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify "$APK"
+          "$BT/zipalign" -c -P 16 4 "$APK"
+          echo "::notice::APK SHA-256 $ACTUAL"
+
       - name: Publish test release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
@@ -142,9 +176,13 @@ jobs:
           name: Test build ${{ github.run_number }} (v${{ needs.build.outputs.version }})
           prerelease: true
           body: |
+            **On your phone, download the `.apk` file** (not the `.aab`) and open it to install. Needs Android 7.0 or newer.
+            If an older test build is installed, uninstall it first.
+
+            - `${{ needs.build.outputs.apk }}`: install on a phone. SHA-256 `${{ needs.build.outputs.apk_sha256 }}`
+            - `${{ needs.build.outputs.aab }}`: upload to Google Play Console only. Phones cannot open it.
+
             ${{ needs.build.outputs.signed == 'private-key' && 'Signed with the private upload key.' || 'Signed with the public DEBUG key: for testing only, not for Google Play.' }}
-            - `.apk`: download on your phone and open it to install.
-            - `.aab`: upload this one to Google Play Console.
           files: |
             ${{ needs.build.outputs.apk }}
             ${{ needs.build.outputs.aab }}
