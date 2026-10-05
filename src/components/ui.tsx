@@ -5,14 +5,17 @@ import { router } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
 import { useApp, useDir } from '@/state/AppProvider';
 import { LATIN_FONT, type Weight } from '@/theme/fonts';
+import { MAX_CONTENT_WIDTH, RADIUS, SPACE, TOUCH, type TypeSize } from '@/theme/tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Icon, type IconName } from './Icon';
+import { LANGUAGES } from '@/i18n';
 
 export const TAB_BAR_SPACE = 104;
 
 type TProps = {
   children: React.ReactNode;
-  size?: number;
+  /** A step of the type scale (theme/tokens TYPE). */
+  size?: TypeSize;
   weight?: Weight;
   color?: string;
   muted?: boolean;
@@ -56,10 +59,12 @@ type ScreenProps = {
   scroll?: boolean;
   tabSpace?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
+  /** Use the heading size (24) instead of display (28) for long root titles. */
+  compactTitle?: boolean;
 };
 
 /** Safe-area screen with an optional header and a back button that points the right way. */
-export function Screen({ title, contentTitle, back, onBack, right, children, scroll = true, tabSpace = true, contentStyle }: ScreenProps) {
+export function Screen({ title, contentTitle, back, onBack, right, children, scroll = true, tabSpace = true, contentStyle, compactTitle }: ScreenProps) {
   const { c, t } = useApp();
   const insets = useSafeAreaInsets();
   const d = useDir();
@@ -68,7 +73,7 @@ export function Screen({ title, contentTitle, back, onBack, right, children, scr
       {back ? (
         <IconButton icon="go" flip={!d.rtl ? false : true} label={t.common.back} onPress={onBack ?? (() => (router.canGoBack() ? router.back() : router.replace('/')))} />
       ) : null}
-      <View style={{ flex: 1 }}>{title ? <T size={back ? 19 : 28} weight="bold" role="header" numberOfLines={2} content={contentTitle}>{title}</T> : null}</View>
+      <View style={{ flex: 1 }}>{title ? <T size={back ? 20 : compactTitle ? 24 : 28} weight="bold" role="header" numberOfLines={2} content={contentTitle}>{title}</T> : null}</View>
       {right}
     </View>
   );
@@ -109,8 +114,8 @@ type BtnProps = { title: string; onPress: () => void; kind?: 'primary' | 'ghost'
 
 export function Button({ title, onPress, kind = 'primary', icon, disabled, style, small }: BtnProps) {
   const { c } = useApp();
-  const bg = kind === 'primary' ? c.acSolid : kind === 'danger' ? c.badSolid : kind === 'ok' ? c.okSolid : c.fill;
-  const fg = kind === 'ghost' ? c.ac : c.onAc;
+  const bg = disabled ? 'transparent' : kind === 'primary' ? c.acSolid : kind === 'danger' ? c.badSolid : kind === 'ok' ? c.okSolid : c.fill;
+  const fg = disabled ? c.tx2 : kind === 'ghost' ? c.ac : c.onAc;
   return (
     <Pressable
       accessibilityRole="button"
@@ -118,33 +123,42 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, style
       accessibilityState={{ disabled: !!disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.btn, small && styles.btnSmall, { backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.85 : 1 }, style]}
+      // Disabled = outlined and muted (not just faded), so it reads as "not yet" rather than a rendering glitch.
+      style={({ pressed }) => [styles.btn, small && styles.btnSmall, { backgroundColor: bg, borderWidth: 1, borderColor: disabled ? c.ln : 'transparent', borderStyle: disabled ? 'dashed' : 'solid', opacity: pressed ? 0.85 : 1 }, style]}
     >
       <Row gap={8} style={{ justifyContent: 'center' }}>
         {icon ? <Icon name={icon} size={20} color={fg} /> : null}
-        <T size={small ? 15 : 17} weight="semibold" color={fg} center>{title}</T>
+        <T size={small ? 16 : 18} weight="semibold" color={fg} center>{title}</T>
       </Row>
     </Pressable>
   );
 }
 
+/** A filter chip when it has `onPress` (44 px touch target), otherwise a compact label chip. */
 export function Chip({ label, on, onPress }: { label: string; on?: boolean; onPress?: () => void }) {
   const { c } = useApp();
+  if (!onPress) {
+    return (
+      <View style={[styles.chip, styles.chipStatic, { backgroundColor: c.fill }]}>
+        <T size={14}>{label}</T>
+      </View>
+    );
+  }
   return (
-    <Pressable accessibilityRole={onPress ? 'button' : 'text'} accessibilityLabel={label} accessibilityState={{ selected: !!on }} onPress={onPress} disabled={!onPress} style={[styles.chip, { backgroundColor: on ? c.acSolid : c.fill }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: !!on }} onPress={onPress} style={({ pressed }) => [styles.chip, { backgroundColor: on ? c.acSolid : c.fill, opacity: pressed ? 0.85 : 1 }]}>
       <T size={14} weight={on ? 'semibold' : 'regular'} color={on ? c.onAc : c.tx}>{label}</T>
     </Pressable>
   );
 }
 
 export function Segmented({ options, value, onChange }: { options: string[]; value: number; onChange: (i: number) => void }) {
-  const { c, isDark } = useApp();
+  const { c } = useApp();
   const d = useDir();
   return (
     <View accessibilityRole="tablist" style={[styles.seg, { backgroundColor: c.fill, borderColor: c.ln, flexDirection: d.row }]}>
       {options.map((o, i) => (
-        <Pressable key={o} accessibilityRole="tab" accessibilityLabel={o} accessibilityState={{ selected: value === i }} onPress={() => onChange(i)} style={[styles.segBtn, value === i && { backgroundColor: isDark ? c.card : '#fff', borderColor: c.ln, borderWidth: 1 }]}>
-          <T size={15} weight="semibold" center color={value === i ? c.tx : c.tx2}>{o}</T>
+        <Pressable key={o} accessibilityRole="tab" accessibilityLabel={o} accessibilityState={{ selected: value === i }} onPress={() => onChange(i)} style={[styles.segBtn, value === i && { backgroundColor: c.card, borderColor: c.ln, borderWidth: 1 }]}>
+          <T size={16} weight="semibold" center color={value === i ? c.tx : c.tx2}>{o}</T>
         </Pressable>
       ))}
     </View>
@@ -203,7 +217,7 @@ export function SearchBox({ value, onChange, placeholder }: { value: string; onC
         accessibilityLabel={placeholder}
         maxLength={60}
         autoCorrect={false}
-        style={{ flex: 1, fontFamily: font('regular', true), fontSize: 16, color: c.tx, textAlign: d.align, paddingVertical: 10 }}
+        style={{ flex: 1, fontFamily: font('regular', true), fontSize: 16, color: c.tx, textAlign: d.align, paddingVertical: 12 }}
       />
     </View>
   );
@@ -213,7 +227,7 @@ export function Notice({ text, tone = 'info' }: { text: string; tone?: 'info' | 
   const { c } = useApp();
   const color = tone === 'ok' ? c.ok : tone === 'bad' ? c.bad : c.tx2;
   return (
-    <Row gap={10} style={[styles.notice, { backgroundColor: tone === 'bad' ? c.badbg : tone === 'ok' ? c.okbg : c.fill }]}>
+    <Row gap={12} style={[styles.notice, { backgroundColor: tone === 'bad' ? c.badbg : tone === 'ok' ? c.okbg : c.fill }]}>
       <Icon name={tone === 'bad' ? 'alert' : 'info'} size={18} color={color} />
       <View style={{ flex: 1 }}><T size={14} color={tone === 'info' ? c.tx2 : color}>{text}</T></View>
     </Row>
@@ -222,11 +236,13 @@ export function Notice({ text, tone = 'info' }: { text: string; tone?: 'info' | 
 
 export function SourceBadge({ kind }: { kind: 'official' | 'general' }) {
   const { c, t } = useApp();
+  const d = useDir();
   const color = kind === 'official' ? c.ok : c.tx2;
+  // Sits at the reading start: right in Arabic and Urdu, left otherwise.
   return (
-    <Row gap={6} style={{ alignSelf: 'flex-start' }}>
+    <Row gap={8} style={{ alignSelf: d.start }}>
       <Icon name={kind === 'official' ? 'check' : 'info'} size={16} color={color} />
-      <T size={13} color={color}>{kind === 'official' ? t.common.official : t.common.general}</T>
+      <T size={14} color={color}>{kind === 'official' ? t.common.official : t.common.general}</T>
     </Row>
   );
 }
@@ -243,7 +259,7 @@ export function Loading() {
 export function EmptyState({ text, action }: { text: string; action?: React.ReactNode }) {
   const { c } = useApp();
   return (
-    <View style={{ alignItems: 'center', paddingVertical: 40, gap: 14 }}>
+    <View style={{ alignItems: 'center', paddingVertical: 40, gap: 16 }}>
       <Icon name="search" size={36} color={c.tx2} />
       <T muted center>{text}</T>
       {action}
@@ -251,16 +267,17 @@ export function EmptyState({ text, action }: { text: string; action?: React.Reac
   );
 }
 
-export function Dialog({ visible, text, title, actions, onClose }: { visible: boolean; title?: string; text: string; actions: React.ReactNode; onClose: () => void }) {
+export function Dialog({ visible, text, title, actions, onClose, icon }: { visible: boolean; title?: string; text: string; actions: React.ReactNode; onClose: () => void; icon?: IconName }) {
   const { c, t } = useApp();
   const reduce = useReducedMotion();
   return (
     <Modal visible={visible} transparent animationType={reduce ? 'none' : 'fade'} onRequestClose={onClose} statusBarTranslucent>
       <Pressable style={[styles.scrim, { backgroundColor: c.scrim }]} onPress={onClose} accessibilityRole="button" accessibilityLabel={t.common.close}>
         <Pressable style={[styles.dialog, { backgroundColor: c.card, borderColor: c.ln }]} onPress={() => {}} accessible={false} accessibilityViewIsModal>
-          {title ? <T size={19} weight="bold" center>{title}</T> : null}
-          <T center style={{ marginVertical: 10 }}>{text}</T>
-          <View style={{ gap: 10 }}>{actions}</View>
+          {icon ? <View style={{ alignSelf: 'center', marginBottom: SPACE.sm }}><IconTile icon={icon} color={c.ac} /></View> : null}
+          {title ? <T size={20} weight="bold" center>{title}</T> : null}
+          <T center style={{ marginVertical: 12 }}>{text}</T>
+          <View style={{ gap: 12 }}>{actions}</View>
         </Pressable>
       </Pressable>
     </Modal>
@@ -270,17 +287,26 @@ export function Dialog({ visible, text, title, actions, onClose }: { visible: bo
 /** Bottom-sheet style list picker (replaces the web <select>). */
 export function PickerSheet({ visible, title, items, value, onPick, onClose }: { visible: boolean; title: string; items: { value: string; label: string }[]; value: string; onPick: (v: string) => void; onClose: () => void }) {
   const { c, t } = useApp();
+  const [q, setQ] = React.useState('');
+  // Long lists (cities) get a search field.
+  const searchable = items.length > 15;
+  const shown = searchable && q.trim() ? items.filter((it) => !it.value || it.label.toLowerCase().includes(q.trim().toLowerCase())) : items;
+  const close = () => {
+    setQ('');
+    onClose();
+  };
   const insets = useSafeAreaInsets();
   const d = useDir();
   const reduce = useReducedMotion();
   return (
-    <Modal visible={visible} transparent animationType={reduce ? 'none' : 'slide'} onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={{ flex: 1, backgroundColor: c.scrim }} onPress={onClose} accessibilityRole="button" accessibilityLabel={t.common.close} />
-      <View accessibilityViewIsModal style={[styles.sheet, { backgroundColor: c.card, paddingBottom: 16 + insets.bottom }]}>
-        <T size={18} weight="bold" style={{ marginBottom: 8 }}>{title}</T>
-        <ScrollView style={{ maxHeight: 420 }}>
-          {items.map((it) => (
-            <Pressable key={it.value || '_all'} accessibilityRole="button" accessibilityLabel={it.label} accessibilityState={{ selected: it.value === value }} onPress={() => { onPick(it.value); onClose(); }} style={[styles.sheetRow, { flexDirection: d.row, backgroundColor: it.value === value ? c.fill : 'transparent' }]}>
+    <Modal visible={visible} transparent animationType={reduce ? 'none' : 'slide'} onRequestClose={close} statusBarTranslucent>
+      <Pressable style={{ flex: 1, backgroundColor: c.scrim }} onPress={close} accessibilityRole="button" accessibilityLabel={t.common.close} />
+      <View accessibilityViewIsModal style={[styles.sheet, { backgroundColor: c.card, paddingBottom: SPACE.md + insets.bottom, gap: SPACE.xs }]}>
+        <T size={18} weight="bold">{title}</T>
+        {searchable ? <SearchBox value={q} onChange={setQ} placeholder={t.common.search} /> : null}
+        <ScrollView style={{ maxHeight: 420 }} keyboardShouldPersistTaps="handled">
+          {shown.map((it) => (
+            <Pressable key={it.value || '_all'} accessibilityRole="button" accessibilityLabel={it.label} accessibilityState={{ selected: it.value === value }} onPress={() => { onPick(it.value); close(); }} style={[styles.sheetRow, { flexDirection: d.row, backgroundColor: it.value === value ? c.fill : 'transparent' }]}>
               <View style={{ flex: 1 }}><T weight={it.value === value ? 'semibold' : 'regular'} color={it.value === value ? c.ac : c.tx}>{it.label}</T></View>
               {it.value === value ? <Icon name="check" size={18} color={c.ac} /> : null}
             </Pressable>
@@ -293,7 +319,7 @@ export function PickerSheet({ visible, title, items, value, onPick, onClose }: {
 
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <View style={{ gap: 10, marginTop: 18 }}>
+    <View style={{ gap: 12, marginTop: 16 }}>
       <T size={20} weight="bold" role="header">{title}</T>
       {children}
     </View>
@@ -301,19 +327,50 @@ export function Section({ title, children }: { title: string; children: React.Re
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8, minHeight: 56 },
-  content: { paddingHorizontal: 20, paddingTop: 6, gap: 12 },
-  iconBtn: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  card: { borderRadius: 20, padding: 16, borderWidth: 1 },
-  btn: { minHeight: 52, borderRadius: 16, paddingHorizontal: 18, paddingVertical: 12, justifyContent: 'center' },
-  btnSmall: { minHeight: 44, borderRadius: 14, paddingVertical: 8 },
-  chip: { minHeight: 36, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 999, justifyContent: 'center' },
-  seg: { padding: 4, borderRadius: 16, borderWidth: 1, gap: 4 },
-  segBtn: { flex: 1, minHeight: 44, borderRadius: 12, justifyContent: 'center', paddingHorizontal: 6 },
-  search: { alignItems: 'center', gap: 8, borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, minHeight: 48 },
-  notice: { padding: 12, borderRadius: 14, alignItems: 'flex-start' },
-  scrim: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  dialog: { width: '100%', maxWidth: 360, borderRadius: 24, padding: 22, borderWidth: 1 },
-  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
-  sheetRow: { alignItems: 'center', minHeight: 48, paddingHorizontal: 12, borderRadius: 12 },
+  // Header and content share one centred column, capped on tablets and large phones.
+  header: { alignItems: 'center', gap: SPACE.sm, paddingHorizontal: SPACE.lg, paddingTop: SPACE.sm, paddingBottom: SPACE.xs, minHeight: 56, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
+  content: { paddingHorizontal: SPACE.lg, paddingTop: SPACE.xs, gap: SPACE.sm, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
+  iconBtn: { width: TOUCH, height: TOUCH, borderRadius: TOUCH / 2, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  card: { borderRadius: RADIUS.lg, padding: SPACE.md, borderWidth: 1 },
+  btn: { minHeight: 52, borderRadius: RADIUS.lg, paddingHorizontal: SPACE.md, paddingVertical: SPACE.sm, justifyContent: 'center' },
+  btnSmall: { minHeight: TOUCH, borderRadius: RADIUS.md, paddingVertical: SPACE.xs },
+  chip: { minHeight: TOUCH, paddingHorizontal: SPACE.md, paddingVertical: SPACE.xs, borderRadius: RADIUS.pill, justifyContent: 'center' },
+  chipStatic: { minHeight: 32, paddingHorizontal: SPACE.sm, paddingVertical: SPACE.xxs },
+  seg: { padding: SPACE.xxs, borderRadius: RADIUS.lg, borderWidth: 1, gap: SPACE.xxs },
+  segBtn: { flex: 1, minHeight: TOUCH, borderRadius: RADIUS.md, justifyContent: 'center', paddingHorizontal: SPACE.xs },
+  search: { alignItems: 'center', gap: SPACE.xs, borderRadius: RADIUS.md, borderWidth: 1, paddingHorizontal: SPACE.sm, minHeight: 48 },
+  notice: { padding: SPACE.sm, borderRadius: RADIUS.md, alignItems: 'flex-start' },
+  scrim: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACE.xl },
+  dialog: { width: '100%', maxWidth: 360, borderRadius: RADIUS.xl, padding: SPACE.xl, borderWidth: 1 },
+  sheet: { borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl, padding: SPACE.xl },
+  sheetRow: { alignItems: 'center', minHeight: 48, paddingHorizontal: SPACE.sm, borderRadius: RADIUS.md },
 });
+
+/** Tinted square behind a feature icon. One size everywhere (44), 36 for compact rows. */
+export function IconTile({ icon, color, compact }: { icon: IconName; color: string; compact?: boolean }) {
+  const size = compact ? 36 : TOUCH;
+  return (
+    <View style={{ width: size, height: size, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center', backgroundColor: color + '29' }}>
+      <Icon name={icon} size={compact ? 20 : 24} color={color} />
+    </View>
+  );
+}
+
+/** Shows the current language and opens Settings; language must never hide behind an icon in a five-language app. */
+export function LanguagePill() {
+  const { c, t, lang } = useApp();
+  const d = useDir();
+  const name = LANGUAGES.find((l) => l.id === lang)?.name ?? lang;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${t.settings.language}: ${name}`}
+      onPress={() => router.push('/settings')}
+      hitSlop={4}
+      style={({ pressed }) => [{ flexDirection: d.row, alignItems: 'center', gap: SPACE.xxs, minHeight: TOUCH, paddingHorizontal: SPACE.sm, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: c.ln, backgroundColor: c.fill, opacity: pressed ? 0.7 : 1 }]}
+    >
+      <Icon name="globe" size={18} color={c.tx} />
+      <T size={14} weight="semibold">{name}</T>
+    </Pressable>
+  );
+}

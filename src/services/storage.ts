@@ -7,7 +7,24 @@ export type ThemePref = 'system' | 'light' | 'dark';
 export type Settings = { lang: Lang; theme: ThemePref };
 
 export const DEFAULT_SETTINGS: Settings = { lang: 'ar', theme: 'dark' };
-const KEYS = { settings: 'settings.v1', progress: 'levels.v1', exam: 'exam.v1' } as const;
+const KEYS = { settings: 'settings.v1', progress: 'levels.v1', exam: 'exam.v1', history: 'history.v1' } as const;
+
+/** One finished mock exam, for "last result" and "best" on the Test tab. */
+export type ExamRecord = { at: number; correct: number; total: number; passed: boolean };
+const HISTORY_MAX = 20;
+
+export function parseHistory(raw: string | null): ExamRecord[] {
+  try {
+    const v = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(v)) return [];
+    return v
+      .filter((r) => r && Number.isFinite(r.at) && Number.isInteger(r.total) && r.total > 0 && r.total <= 100 && Number.isInteger(r.correct) && r.correct >= 0 && r.correct <= r.total && typeof r.passed === 'boolean')
+      .slice(0, HISTORY_MAX)
+      .map((r) => ({ at: r.at, correct: r.correct, total: r.total, passed: r.passed }));
+  } catch {
+    return [];
+  }
+}
 
 /** Stored data is treated as untrusted: anything malformed falls back to defaults. */
 export function parseSettings(raw: string | null): Settings {
@@ -103,10 +120,21 @@ async function write(key: string, value: unknown): Promise<void> {
 
 export const storage = {
   loadSettings: async () => parseSettings(await read(KEYS.settings)),
+  /** Settings plus whether the user has ever chosen them (false on the very first launch). */
+  loadSettingsState: async () => {
+    const raw = await read(KEYS.settings);
+    return { settings: parseSettings(raw), saved: raw !== null };
+  },
   saveSettings: (s: Settings) => write(KEYS.settings, s),
   loadProgress: async () => parseProgress(await read(KEYS.progress)),
   saveProgress: (p: Progress) => write(KEYS.progress, p),
   clearProgress: () => write(KEYS.progress, EMPTY_PROGRESS),
+  loadHistory: async () => parseHistory(await read(KEYS.history)),
+  /** Newest first; the same exam (same finish time) is never stored twice. */
+  addHistory: async (r: ExamRecord) => {
+    const list = parseHistory(await read(KEYS.history)).filter((x) => x.at !== r.at);
+    await write(KEYS.history, [r, ...list].slice(0, HISTORY_MAX));
+  },
   loadExam: async (bank: readonly Question[]) => parseExam(await read(KEYS.exam), bank),
   saveExam: async (x: ExamSession | null) => {
     if (x) return write(KEYS.exam, serializeExam(x));

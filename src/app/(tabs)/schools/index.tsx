@@ -17,7 +17,7 @@ function Select({ label, value, onPress }: { label: string; value: string; onPre
     <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}`} onPress={onPress} style={[styles.select, { backgroundColor: c.fill, borderColor: c.ln, flexDirection: d.row }]}>
       <View style={{ flex: 1 }}>
         <T size={12} muted>{label}</T>
-        <T size={15} weight="medium" content={lang === 'ar'} numberOfLines={1}>{value}</T>
+        <T size={16} weight="medium" content={lang === 'ar'} numberOfLines={1}>{value}</T>
       </View>
       <View style={{ transform: [{ rotate: '-90deg' }] }}><Icon name="go" size={16} color={c.tx2} /></View>
     </Pressable>
@@ -65,9 +65,9 @@ export default function Schools() {
         <Row style={{ justifyContent: 'center', paddingVertical: 8 }}><ActivityIndicator color={c.ac} /><T muted>{t.schools.locating}</T></Row>
       ) : null}
       {loc.phase === 'error' ? (
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: 12 }}>
           <Notice tone="bad" text={errorText(loc.result)} />
-          <Row gap={10}>
+          <Row gap={12}>
             {loc.result.status === 'denied' && !loc.result.canAskAgain ? (
               <Button small title={t.schools.openSettings} onPress={() => Linking.openSettings().catch(() => {})} style={{ flex: 1 }} />
             ) : (
@@ -88,7 +88,7 @@ export default function Schools() {
         </View>
       ) : (
         <View style={{ gap: 12 }}>
-          <Row gap={10}>
+          <Row gap={12}>
             <View style={{ flex: 1 }}><Select label={t.schools.region} value={region ? regionName(region, lang) : t.schools.allReg} onPress={() => setPicker('region')} /></View>
             <View style={{ flex: 1 }}><Select label={t.schools.city} value={city ? cityName(city, lang) : t.schools.allCity} onPress={() => setPicker('city')} /></View>
           </Row>
@@ -98,10 +98,11 @@ export default function Schools() {
           {list.map((s) => <SchoolCard key={s.id} school={s} />)}
         </View>
       )}
-      <T size={13} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>
+      <T size={14} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>
 
       <Dialog
         visible={loc.phase === 'explain'}
+        icon="locate"
         title={t.schools.permTitle}
         text={t.schools.permBody}
         onClose={reset}
@@ -132,4 +133,4 @@ export default function Schools() {
   );
 }
 
-const styles = StyleSheet.create({ select: { alignItems: 'center', gap: 8, borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56 } });
+const styles = StyleSheet.create({ select: { alignItems: 'center', gap: 8, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56 } });

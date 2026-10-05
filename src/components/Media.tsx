@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import type { ImageRef } from '@/data/types';
+import { useApp } from '@/state/AppProvider';
 import { QUESTION_IMAGES } from '@/data/questionImages';
 import { SIGN_IMAGES } from '@/data/signImages';
 
@@ -11,10 +12,11 @@ export function sourceOf(ref: ImageRef) {
 
 /** Question or answer picture on a white panel (sign artwork and photos are designed for white). */
 export function Media({ image, height = 200, label }: { image: ImageRef; height?: number; label?: string }) {
+  const { c } = useApp();
   const src = sourceOf(image);
   if (!src) return null;
   return (
-    <View style={[styles.panel, { height: height + 16 }]} accessible accessibilityRole="image" accessibilityLabel={label}>
+    <View style={[styles.panel, { height: height + 16, backgroundColor: c.paper }]} accessible accessibilityRole="image" accessibilityLabel={label}>
       <Image source={src} style={{ width: '100%', height }} contentFit="contain" transition={120} />
     </View>
   );
@@ -27,5 +29,5 @@ export function SignImage({ id, size, label }: { id: string; size: number; label
 }
 
 const styles = StyleSheet.create({
-  panel: { backgroundColor: '#ffffff', borderRadius: 16, padding: 8, alignItems: 'center', justifyContent: 'center' },
+  panel: { borderRadius: 16, padding: 8, alignItems: 'center', justifyContent: 'center' },
 });

@@ -21,6 +21,11 @@ type AppState = {
   lh: (size: number, content?: boolean) => number;
   progress: Progress;
   setProgress: (p: Progress) => void;
+  /** True on the very first launch, until a language is chosen. */
+  firstRun: boolean;
+  finishWelcome: (l: Lang) => void;
+  /** A language whose fonts are still loading after the user picked it. */
+  pendingLang: Lang | null;
 };
 
 const Ctx = createContext<AppState | null>(null);
@@ -30,13 +35,16 @@ export function AppProvider({ children, initial }: { children: React.ReactNode; 
   const [settings, setSettings] = useState<Settings>(initial?.settings ?? DEFAULT_SETTINGS);
   const [progress, setProgressState] = useState<Progress>(initial?.progress ?? EMPTY_PROGRESS);
   const [ready, setReady] = useState(Boolean(initial));
+  const [firstRun, setFirstRun] = useState(false);
+  const [pendingLang, setPendingLang] = useState<Lang | null>(null);
 
   useEffect(() => {
     if (initial) return;
     let alive = true;
-    Promise.all([storage.loadSettings(), storage.loadProgress()]).then(async ([s, p]) => {
+    Promise.all([storage.loadSettingsState(), storage.loadProgress()]).then(async ([{ settings: s, saved }, p]) => {
       await loadFontsFor(s.lang);
       if (!alive) return;
+      setFirstRun(!saved);
       setSettings(s);
       setProgressState(p);
       setReady(true);
@@ -62,8 +70,18 @@ export function AppProvider({ children, initial }: { children: React.ReactNode; 
   const wanted = useRef<Lang | null>(null);
   const setLang = useCallback((lang: Lang) => {
     wanted.current = lang;
+    setPendingLang(lang);
     loadFontsFor(lang).then(() => {
-      if (wanted.current === lang) update({ lang });
+      if (wanted.current !== lang) return;
+      setPendingLang(null);
+      update({ lang });
+    });
+  }, [update]);
+  const finishWelcome = useCallback((lang: Lang) => {
+    wanted.current = lang;
+    loadFontsFor(lang).then(() => {
+      update({ lang });
+      setFirstRun(false);
     });
   }, [update]);
   const setTheme = useCallback((theme: ThemePref) => update({ theme }), [update]);
@@ -80,9 +98,9 @@ export function AppProvider({ children, initial }: { children: React.ReactNode; 
       setLang, setTheme,
       font: (w, content) => fontFor(lang, w, content),
       lh: (size, content) => lineHeightFor(lang, size, content),
-      progress, setProgress,
+      progress, setProgress, firstRun, finishWelcome, pendingLang,
     };
-  }, [ready, settings, scheme, setLang, setTheme, progress, setProgress]);
+  }, [ready, settings, scheme, setLang, setTheme, progress, setProgress, firstRun, finishWelcome, pendingLang]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

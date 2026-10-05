@@ -30,39 +30,40 @@ export default function Result() {
     setExam(startExam(QUESTIONS, DEFAULT_EXAM));
     router.replace('/exam');
   };
+  const tone = r.passed ? c.ok : c.bad;
+  // Verdict first, then one score (inside the ring), then the breakdown.
   return (
-    <Screen back onBack={() => router.replace('/test')} tabSpace={false}>
+    <Screen back title={t.ux.resultTitle} onBack={() => router.replace('/test')} tabSpace={false}>
       {timedOut ? <Notice tone="bad" text={t.test.timeUp} /> : null}
-      <Ring value={r.percent / 100} size={170} color={r.passed ? c.ok : c.bad} label={`${r.percent}%`} />
-      <View style={[styles.verdict, { backgroundColor: r.passed ? c.okbg : c.badbg, borderColor: r.passed ? c.ok : c.bad }]} accessibilityRole="summary">
+      <View style={[styles.verdict, { backgroundColor: r.passed ? c.okbg : c.badbg, borderColor: tone }]} accessibilityRole="summary">
         <Row gap={8} style={{ justifyContent: 'center' }}>
-          <Icon name={r.passed ? 'check' : 'close'} size={24} color={r.passed ? c.ok : c.bad} />
-          <T size={26} weight="bold" color={r.passed ? c.ok : c.bad}>{r.passed ? t.test.pass : t.test.fail}</T>
+          <Icon name={r.passed ? 'check' : 'close'} size={24} color={tone} />
+          <T size={28} weight="bold" color={tone}>{r.passed ? t.test.pass : t.test.fail}</T>
         </Row>
-        <T size={13} center color={r.passed ? c.ok : c.bad}>{t.test.passMark(r.passMark)}</T>
+        <T size={14} center color={tone}>{t.test.passMark(r.passMark)}</T>
       </View>
-      <T size={34} weight="bold" center>{t.test.score(r.correct, r.total)}</T>
-      <Row gap={10} style={{ justifyContent: 'center' }}>
+      <Ring value={r.percent / 100} size={170} color={tone} label={t.test.score(r.correct, r.total)} />
+      <Row gap={12}>
         {[
           [t.test.correctN, r.correct, c.ok],
           [t.test.wrongN, r.wrong, c.bad],
           [t.test.blankN, r.unanswered, c.tx2],
         ].map(([label, v, col]) => (
           <Card key={String(label)} style={styles.stat}>
-            <T size={22} weight="bold" center color={String(col)}>{String(v)}</T>
-            <T size={12.5} muted center>{String(label)}</T>
+            <T size={24} weight="bold" center color={String(col)}>{String(v)}</T>
+            <T size={12} muted center>{String(label)}</T>
           </Card>
         ))}
       </Row>
       <T muted center>{t.test.timeUsed(formatClock(used))}</T>
       {r.correct === r.total ? <T center color={c.ok}>{t.test.perfect}</T> : <Button title={t.test.review} icon="eye" onPress={() => router.push('/review')} />}
       <Button kind={r.correct === r.total ? 'primary' : 'ghost'} title={t.test.again} icon="loop" onPress={again} />
-      <View style={{ alignItems: d.start }}><T size={13} muted>{t.test.disclaimer}</T></View>
+      <View style={{ alignItems: d.start }}><T size={14} muted>{t.test.disclaimer}</T></View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  verdict: { alignSelf: 'center', minWidth: 210, borderRadius: 18, borderWidth: 1, paddingVertical: 12, paddingHorizontal: 24, gap: 2 },
-  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 6, gap: 2 },
+  verdict: { borderRadius: 16, borderWidth: 1, paddingVertical: 16, paddingHorizontal: 16, gap: 4 },
+  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, gap: 4 },
 });

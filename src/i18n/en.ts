@@ -8,7 +8,7 @@ export const en = {
     letters: ['A', 'B', 'C', 'D'],
   },
   home: {
-    title: 'Saudi Driving Guide', start: 'Start a practice test', quick: 'Quick tips',
+    title: 'Driving Guide', start: 'Start a practice test', quick: 'Quick tips',
     tireT: 'Tyre speed ratings', tireP: 'The letter on the tyre shows its maximum speed (km/h).',
     settings: 'Settings', about: 'About',
     cards: {
@@ -93,6 +93,14 @@ export const en = {
       'Fonts: IBM Plex Sans Arabic, Inter, Noto Nastaliq Urdu (SIL Open Font License).',
     ],
     version: (v: string) => `Version ${v}`,
+  },
+  ux: {
+    welcomeTitle: 'Choose your language', welcomeSub: 'You can change it any time in Settings.', welcomeGo: 'Continue',
+    relatedSigns: 'More signs of this type', revealAll: 'Reveal all', hideAll: 'Hide all',
+    category: 'Category', bookAbsher: 'Book on Absher',
+    resultTitle: 'Exam result', lastResult: (s: number, n: number, pass: boolean) => `Last result: ${s}/${n} · ${pass ? 'Pass' : 'Fail'}`, best: (s: number, n: number) => `Best: ${s}/${n}`,
+    reviewFilter: ['All', 'Wrong', 'Skipped'], attemptsLeft: (n: number) => `${n} left`,
+    nextTopic: 'Next topic', prevTopic: 'Previous topic', markStep: 'Mark as done',
   },
   errors: { generic: 'Something went wrong. Please try again.', crashed: 'Something went wrong on this screen. Your progress is safe.', notFound: 'This page does not exist.' },
 };

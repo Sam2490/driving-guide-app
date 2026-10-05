@@ -10,7 +10,7 @@ export const bn: Strings = {
     letters: ['ক', 'খ', 'গ', 'ঘ'],
   },
   home: {
-    title: 'সৌদি ড্রাইভিং গাইড', start: 'অনুশীলন পরীক্ষা শুরু করুন', quick: 'দরকারি টিপস',
+    title: 'ড্রাইভিং গাইড', start: 'অনুশীলন পরীক্ষা শুরু করুন', quick: 'দরকারি টিপস',
     tireT: 'টায়ারের গতি রেটিং', tireP: 'টায়ারে লেখা অক্ষরটি বোঝায় টায়ারটি সর্বোচ্চ কত গতি (কিমি/ঘণ্টা) সহ্য করতে পারে।',
     settings: 'সেটিংস', about: 'অ্যাপ সম্পর্কে',
     cards: {
@@ -95,6 +95,14 @@ export const bn: Strings = {
       'ফন্ট: IBM Plex Sans Arabic, Inter, Noto Nastaliq Urdu (SIL Open Font License)।',
     ],
     version: (v) => `সংস্করণ ${v}`,
+  },
+  ux: {
+    welcomeTitle: 'আপনার ভাষা বেছে নিন', welcomeSub: 'সেটিংসে যেকোনো সময় এটি বদলাতে পারবেন।', welcomeGo: 'চালিয়ে যান',
+    relatedSigns: 'একই ধরনের আরও সাইন', revealAll: 'সব দেখান', hideAll: 'সব লুকান',
+    category: 'বিভাগ', bookAbsher: 'আবশেরে বুক করুন',
+    resultTitle: 'পরীক্ষার ফলাফল', lastResult: (s, n, pass) => `শেষ ফলাফল: ${s}/${n} · ${pass ? 'পাস' : 'ফেল'}`, best: (s, n) => `সেরা: ${s}/${n}`,
+    reviewFilter: ['সব', 'ভুল', 'উত্তর নেই'], attemptsLeft: (n) => `${n} বাকি`,
+    nextTopic: 'পরের বিষয়', prevTopic: 'আগের বিষয়', markStep: 'সম্পন্ন হিসেবে চিহ্নিত করুন',
   },
   errors: { generic: 'কিছু একটা সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', crashed: 'এই স্ক্রিনে একটি সমস্যা হয়েছে। আপনার অগ্রগতি সুরক্ষিত আছে।', notFound: 'এই পেজটি নেই।' },
 };

@@ -43,3 +43,10 @@ State           src/state/AppProvider (language, theme, progress) · src/state/E
 - Hindi, Bengali and Urdu fonts (about 2.8 MB) load only when that language is chosen (`loadFontsFor` in `src/theme/fonts.ts`).
 - Exam state is in its own provider, so answering re-renders only exam screens. The exam countdown is its own component (`ExamClock`), so the question and options are not redrawn every second. School cards are memoised and the school search index is built once per language.
 - Release builds use R8 and resource shrinking (`expo-build-properties`); Google Play receives an `.aab`, split per device.
+
+## Design system
+
+- `src/theme/tokens.ts`: type scale (12, 14, 16, 18, 20, 24, 28, 36), 4-pt spacing, radii (8, 12, 16, 24, pill), icon sizes, 44 px touch target, 640 px content width. `T` only accepts sizes from the scale (type-checked).
+- `src/theme/colors.ts`: every colour, both themes, including feature and stage colours and the white `paper` behind artwork. `src/theme/colors.test.ts` checks contrast (text 4.5:1, icons 3:1) for both themes.
+- Direction: rows and `alignSelf` go through `useDir()`; never `flexDirection: 'row'` or `flex-start` for content that follows the reading direction. Latin names inside Arabic or Urdu strings are wrapped in Unicode isolates (U+2066…U+2069).
+- First launch shows a language picker (`src/components/Welcome.tsx`); Home shows the current language as a pill that opens Settings.

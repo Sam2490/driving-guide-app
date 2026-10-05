@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp, useDir } from '@/state/AppProvider';
+import { MAX_CONTENT_WIDTH } from '@/theme/tokens';
 import { useExam } from '@/state/ExamProvider';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Button, Dialog, IconButton, ProgressBar, Row, T } from '@/components/ui';
@@ -16,6 +17,7 @@ export default function ExamScreen() {
   const reduce = useReducedMotion();
   const d = useDir();
   const insets = useSafeAreaInsets();
+  const winW = useWindowDimensions().width;
   const navigation = useNavigation();
   const [i, setI] = useState(0);
   const [grid, setGrid] = useState(false);
@@ -77,27 +79,27 @@ export default function ExamScreen() {
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
       <View style={[styles.top, { flexDirection: d.row }]}>
         <IconButton icon="close" label={t.test.leave} onPress={() => setAsk('leave')} />
-        <View style={{ flex: 1, gap: 6 }}>
+        <View style={{ flex: 1, gap: 8 }}>
           <T size={14} muted>{t.test.qOf(i + 1, n)}</T>
           <ProgressBar value={answered / n} />
         </View>
         <ExamClock endsAt={exam.endsAt} onTimeUp={onTimeUp} />
       </View>
 
-      <ScrollView ref={scroll} contentContainerStyle={{ padding: 20, gap: 10, paddingBottom: 24 }}>
+      <ScrollView ref={scroll} contentContainerStyle={{ padding: 20, gap: 12, paddingBottom: 24, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' }}>
         <QuestionBody q={q} />
-        <View style={{ gap: 10, marginTop: 6 }}>
+        <View style={{ gap: 12, marginTop: 8 }}>
           {q.options.map((o, k) => (
             <OptionButton key={o.id} q={q} option={o} index={k} state={exam.answers[q.id] === o.id ? 'selected' : 'idle'} onPress={() => setExam(selectAnswer(exam, q.id, o.id))} />
           ))}
         </View>
       </ScrollView>
 
-      <View style={[styles.dock, { backgroundColor: c.glass, borderColor: c.glassBorder, marginBottom: Math.max(insets.bottom, 12) }]}>
-        <Row gap={10}>
+      <View style={[styles.dock, { width: Math.min(winW - 24, MAX_CONTENT_WIDTH - 16), backgroundColor: c.glass, borderColor: c.glassBorder, marginBottom: Math.max(insets.bottom, 12) }]}>
+        <Row gap={12}>
           <Button small kind="ghost" title={t.test.prev} disabled={i === 0} onPress={() => setI(i - 1)} style={{ flex: 1 }} />
           <Pressable accessibilityRole="button" accessibilityLabel={t.test.grid} onPress={() => setGrid(true)} style={[styles.gridBtn, { backgroundColor: c.fill }]}>
-            <Icon name="grid" size={22} color={c.tx} />
+            <Icon name="grid" size={24} color={c.tx} />
           </Pressable>
           {i < n - 1 ? (
             <Button small title={t.test.next} onPress={() => setI(i + 1)} style={{ flex: 1 }} />
@@ -116,8 +118,8 @@ export default function ExamScreen() {
             {exam.questions.map((x, k) => {
               const done = exam.answers[x.id] !== undefined;
               return (
-                <Pressable key={x.id} accessibilityRole="button" accessibilityLabel={`${t.test.qOf(k + 1, n)}${done ? ' ✓' : ''}`} onPress={() => { setI(k); setGrid(false); }} style={[styles.cell, { backgroundColor: done ? c.acSolid : c.fill, borderColor: k === i ? c.tx : 'transparent' }]}>
-                  <T size={15} weight="semibold" center color={done ? '#fff' : c.tx}>{String(k + 1)}</T>
+                <Pressable key={x.id} accessibilityRole="button" accessibilityLabel={`${t.test.qOf(k + 1, n)}${done ? ' ✓' : ''}`} onPress={() => { setI(k); setGrid(false); }} style={[styles.cell, { backgroundColor: done ? c.acSolid : c.fill, borderColor: k === i ? c.ac : 'transparent', borderWidth: k === i ? 3 : 2 }]}>
+                  <T size={16} weight="semibold" center color={done ? c.onAc : c.tx}>{String(k + 1)}</T>
                 </Pressable>
               );
             })}
@@ -153,10 +155,10 @@ export default function ExamScreen() {
 }
 
 const styles = StyleSheet.create({
-  top: { alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 10 },
-  timer: { alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
-  dock: { marginHorizontal: 12, padding: 10, borderRadius: 24, borderWidth: 1 },
-  gridBtn: { width: 48, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  top: { alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 12, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
+  timer: { alignItems: 'center', gap: 8, paddingHorizontal: 12, minHeight: 44, borderRadius: 999 },
+  dock: { alignSelf: 'center', padding: 12, borderRadius: 24, borderWidth: 1 },
+  gridBtn: { width: 48, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 12 },
   gridWrap: { flexWrap: 'wrap', gap: 8 },
   cell: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
@@ -183,7 +185,7 @@ const ExamClock = React.memo(function ExamClock({ endsAt, onTimeUp }: { endsAt: 
   return (
     <View accessibilityLabel={formatClock(left)} style={[styles.timer, { backgroundColor: low ? c.badbg : c.fill, flexDirection: 'row' }]}>
       <Icon name="clock" size={16} color={low ? c.bad : c.tx} />
-      <T size={15} weight="semibold" color={low ? c.bad : c.tx} style={{ fontVariant: ['tabular-nums'], writingDirection: 'ltr' }}>{formatClock(left)}</T>
+      <T size={16} weight="semibold" color={low ? c.bad : c.tx} style={{ fontVariant: ['tabular-nums'], writingDirection: 'ltr' }}>{formatClock(left)}</T>
     </View>
   );
 });

@@ -7,23 +7,24 @@ import type { Question, QuestionOption } from '@/data/types';
 import { optionText, questionText } from '@/data/localize';
 import { Media, SignImage, sourceOf } from './Media';
 import { T } from './ui';
+import type { TypeSize } from '@/theme/tokens';
 import { Icon } from './Icon';
 
 export type OptionState = 'idle' | 'selected' | 'ok' | 'bad' | 'dim';
 
 /** An answer's text in the chosen language, or its picture. */
 export function OptionContent({ q, option, size = 84 }: { q: Question; option: QuestionOption; size?: number }) {
-  const { lang } = useApp();
+  const { lang, c } = useApp();
   const d = useDir();
   if (option.image) {
     const src = sourceOf(option.image);
     return (
-      <View style={[styles.optImg, { alignSelf: d.start }]}>
+      <View style={[styles.optImg, { alignSelf: d.start, backgroundColor: c.paper }]}>
         {option.image.kind === 'sign' ? <SignImage id={option.image.id} size={size} /> : src ? <Image source={src} style={{ width: size * 1.4, height: size }} contentFit="contain" /> : null}
       </View>
     );
   }
-  return <T content={lang === 'ar'} size={16.5}>{optionText(q, option, lang)}</T>;
+  return <T content={lang === 'ar'} size={16}>{optionText(q, option, lang)}</T>;
 }
 
 /** Large, touch-friendly answer row. State is shown by colour, border and an icon, never colour alone. */
@@ -47,21 +48,21 @@ export function OptionButton({ q, option, index, state, onPress, disabled }: { q
       style={({ pressed }) => [styles.opt, { flexDirection: d.row, backgroundColor: bg, borderColor: border, opacity: state === 'dim' ? 0.45 : pressed ? 0.85 : 1 }]}
     >
       <View style={[styles.letter, { backgroundColor: letterBg }]}>
-        {state === 'ok' ? <Icon name="check" size={16} color="#fff" /> : state === 'bad' ? <Icon name="close" size={16} color="#fff" /> : <T size={14} weight="semibold" center color={state === 'selected' ? '#fff' : c.tx2} style={{ lineHeight: 20 }}>{letter}</T>}
+        {state === 'ok' ? <Icon name="check" size={16} color={c.onAc} /> : state === 'bad' ? <Icon name="close" size={16} color={c.onAc} /> : <T size={14} weight="semibold" center color={state === 'selected' ? c.onAc : c.tx2} style={{ lineHeight: 20 }}>{letter}</T>}
       </View>
       <View style={{ flex: 1 }}><OptionContent q={q} option={option} /></View>
     </Pressable>
   );
 }
 
-export function QuestionText({ q, size = 20 }: { q: Question; size?: number }) {
+export function QuestionText({ q, size = 20 }: { q: Question; size?: TypeSize }) {
   const { lang } = useApp();
   return <T content={lang === 'ar'} size={size} weight="semibold">{questionText(q, lang)}</T>;
 }
 
 export function QuestionBody({ q }: { q: Question }) {
   return (
-    <View style={{ gap: 14 }}>
+    <View style={{ gap: 16 }}>
       {q.image ? <Media image={q.image} height={q.image.kind === 'sign' ? 170 : 210} /> : null}
       <QuestionText q={q} />
     </View>
@@ -69,7 +70,7 @@ export function QuestionBody({ q }: { q: Question }) {
 }
 
 const styles = StyleSheet.create({
-  opt: { alignItems: 'center', gap: 12, borderRadius: 16, borderWidth: 2, paddingHorizontal: 14, paddingVertical: 12, minHeight: 56 },
+  opt: { alignItems: 'center', gap: 12, borderRadius: 16, borderWidth: 2, paddingHorizontal: 16, paddingVertical: 12, minHeight: 56 },
   letter: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-  optImg: { backgroundColor: '#fff', borderRadius: 10, padding: 4 },
+  optImg: { borderRadius: 8, padding: 4 },
 });

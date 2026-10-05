@@ -19,7 +19,11 @@ jest.mock('expo-haptics', () => ({ selectionAsync: jest.fn(() => Promise.resolve
 const L = Location as jest.Mocked<typeof Location>;
 
 const APP = './src/app';
-beforeEach(() => AsyncStorage.clear());
+// A returning user (language already chosen); the first-run language screen has its own test.
+beforeEach(async () => {
+  await AsyncStorage.clear();
+  await AsyncStorage.setItem('settings.v1', JSON.stringify({ lang: 'ar', theme: 'dark' }));
+});
 async function settle() {
   for (let i = 0; i < 6; i++) await act(async () => {});
 }
@@ -290,5 +294,91 @@ describe('accessibility', () => {
     await settle();
     expect(screen.getAllByLabelText(/^المستوى \d+/).length).toBeGreaterThan(0);
     expect(unlabelledControls(screen.toJSON())).toEqual([]);
+  });
+});
+
+describe('UI/UX audit fixes', () => {
+  it('first launch asks for the language, switches the screen live, then opens Home', async () => {
+    await AsyncStorage.clear();
+    await open('/');
+    expect(screen.getByRole('radio', { name: 'English' })).toBeTruthy();
+    await fireEvent.press(screen.getByRole('radio', { name: 'English' }));
+    await settle();
+    expect(screen.getByText('Choose your language')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Continue'));
+    await settle();
+    expect(screen.getByText('Start a practice test')).toBeTruthy();
+    expect(JSON.parse((await AsyncStorage.getItem('settings.v1'))!).lang).toBe('en');
+  });
+
+  it('Home shows the current language and its button starts the exam', async () => {
+    await open('/');
+    expect(screen.getByLabelText('اللغة: العربية')).toBeTruthy();
+    await fireEvent.press(screen.getByText('ابدأ اختباراً تجريبياً'));
+    await settle();
+    expect(screen.getByText('السؤال 1 من 30')).toBeTruthy();
+  });
+
+  it('source badge sits at the reading start in Arabic (right) and English (left)', async () => {
+    await open('/guide');
+    const badge = (text: string) => {
+      let n: any = screen.getByText(text);
+      while (n && n.props?.style && !JSON.stringify(n.props.style).includes('alignSelf')) n = n.parent;
+      return JSON.stringify(n?.props?.style);
+    };
+    expect(badge('من دليل المتدرب الرسمي')).toContain('"alignSelf":"flex-end"');
+  });
+
+  it('result screen leads with the verdict, and the Test tab remembers the last result', async () => {
+    await open('/test');
+    await fireEvent.press(screen.getByText('ابدأ الاختبار'));
+    await settle();
+    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
+    await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
+    await settle();
+    expect(screen.getByText('نتيجة الاختبار')).toBeTruthy();
+    expect(screen.getByText('راسب')).toBeTruthy();
+    await fireEvent.press(screen.getByText('مراجعة الأخطاء'));
+    await settle();
+    await fireEvent.press(screen.getByRole('tab', { name: 'الخاطئة' }));
+    expect(screen.getByText('لا توجد نتائج.')).toBeTruthy(); // nothing was answered, so no wrong answers
+    await fireEvent.press(screen.getByRole('tab', { name: 'دون إجابة' }));
+    expect(screen.getAllByText('لم تُجب').length).toBeGreaterThan(0);
+    const h = JSON.parse((await AsyncStorage.getItem('history.v1'))!);
+    expect(h[0]).toMatchObject({ correct: 0, total: 30, passed: false });
+    await open('/test');
+    await waitFor(() => expect(screen.getByText('آخر نتيجة: 0 من 30 · راسب')).toBeTruthy());
+  });
+
+  it('school cards open details on tap and keep directions as a secondary icon button', async () => {
+    await open('/schools');
+    expect(screen.queryAllByText('الاتجاهات').length).toBe(0);
+    expect(screen.getAllByLabelText('الاتجاهات').length).toBeGreaterThan(0);
+    await fireEvent.press(screen.getAllByRole('button', { name: /^مدرسة/ })[0]);
+    await settle();
+    expect(screen.getByText('الفئة')).toBeTruthy();
+    expect(screen.getByText('احجز عبر أبشر')).toBeTruthy();
+  });
+
+  it('signs practice mode can reveal and hide every sign at once', async () => {
+    await open('/signs');
+    await fireEvent.press(screen.getByRole('button', { name: 'وضع التدريب' }));
+    expect(screen.getAllByText('اضغط للكشف').length).toBeGreaterThan(0);
+    await fireEvent.press(screen.getByText('إظهار الكل'));
+    expect(screen.queryAllByText('اضغط للكشف').length).toBe(0);
+    await fireEvent.press(screen.getByText('إخفاء الكل'));
+    expect(screen.getAllByText('اضغط للكشف').length).toBeGreaterThan(0);
+  });
+
+  it('a wrong answer in a level is followed by the normal primary Continue, not a red one', async () => {
+    const qs = levelQuestions(QUESTIONS, 1);
+    await open('/level/1');
+    const correct = qs[0].options.find((o) => o.id === qs[0].correctAnswerId)!.text!;
+    await fireEvent.press(screen.getAllByRole('radio').find((r) => String(r.props.accessibilityLabel).slice(3) !== correct)!);
+    await fireEvent.press(screen.getByText('تأكيد الإجابة'));
+    expect(screen.getByText('4 متبقية')).toBeTruthy();
+    const style = JSON.stringify(screen.getByRole('button', { name: 'متابعة' }).props.style);
+    expect(style).not.toContain('#d0302a');
   });
 });

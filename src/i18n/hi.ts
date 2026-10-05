@@ -10,7 +10,7 @@ export const hi: Strings = {
     letters: ['क', 'ख', 'ग', 'घ'],
   },
   home: {
-    title: 'सऊदी ड्राइविंग गाइड', start: 'प्रैक्टिस टेस्ट शुरू करें', quick: 'ज़रूरी टिप्स',
+    title: 'ड्राइविंग गाइड', start: 'प्रैक्टिस टेस्ट शुरू करें', quick: 'ज़रूरी टिप्स',
     tireT: 'टायर स्पीड रेटिंग', tireP: 'टायर पर लिखा अक्षर बताता है कि टायर अधिकतम कितनी स्पीड (किमी/घंटा) सह सकता है।',
     settings: 'सेटिंग्स', about: 'ऐप के बारे में',
     cards: {
@@ -95,6 +95,14 @@ export const hi: Strings = {
       'फ़ॉन्ट: IBM Plex Sans Arabic, Inter, Noto Nastaliq Urdu (SIL Open Font License)।',
     ],
     version: (v) => `वर्ज़न ${v}`,
+  },
+  ux: {
+    welcomeTitle: 'अपनी भाषा चुनें', welcomeSub: 'आप इसे कभी भी सेटिंग्स में बदल सकते हैं।', welcomeGo: 'आगे बढ़ें',
+    relatedSigns: 'इसी प्रकार के और संकेत', revealAll: 'सभी दिखाएँ', hideAll: 'सभी छिपाएँ',
+    category: 'श्रेणी', bookAbsher: 'अबशर पर बुक करें',
+    resultTitle: 'परीक्षा का परिणाम', lastResult: (s, n, pass) => `पिछला परिणाम: ${s}/${n} · ${pass ? 'पास' : 'फेल'}`, best: (s, n) => `सर्वश्रेष्ठ: ${s}/${n}`,
+    reviewFilter: ['सभी', 'गलत', 'बिना जवाब'], attemptsLeft: (n) => `${n} बाकी`,
+    nextTopic: 'अगला विषय', prevTopic: 'पिछला विषय', markStep: 'पूरा चिह्नित करें',
   },
   errors: { generic: 'कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।', crashed: 'इस स्क्रीन पर कुछ गड़बड़ हो गई। आपकी प्रगति सुरक्षित है।', notFound: 'यह पेज मौजूद नहीं है।' },
 };

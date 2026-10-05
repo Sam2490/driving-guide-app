@@ -6,7 +6,6 @@ import { Card, EmptyState, Row, Screen, SearchBox, SourceBadge, T } from '@/comp
 import { Icon, type IconName } from '@/components/Icon';
 import { GUIDE_TOPICS } from '@/data/licenseGuide';
 import { topicText } from '@/data/localize';
-import { FEATURE } from '@/theme/colors';
 
 export default function GuideIndex() {
   const { t, c, lang } = useApp();
@@ -19,12 +18,12 @@ export default function GuideIndex() {
   return (
     <Screen title={t.guide.title}>
       <T muted>{t.guide.sub}</T>
-      <Card label={t.guide.licenseCard} onPress={() => router.push('/guide/license')} accent={FEATURE.license + '66'}>
+      <Card label={t.guide.licenseCard} onPress={() => router.push('/guide/license')} accent={c.feature.license + '66'}>
         <Row>
-          <View style={[styles.chip, { backgroundColor: FEATURE.license + '29' }]}><Icon name="license" color={FEATURE.license} /></View>
+          <View style={[styles.chip, { backgroundColor: c.feature.license + '29' }]}><Icon name="license" color={c.feature.license} /></View>
           <View style={{ flex: 1 }}>
-            <T size={17} weight="semibold">{t.guide.licenseCard}</T>
-            <T size={13} muted>{t.guide.licenseCardSub}</T>
+            <T size={18} weight="semibold">{t.guide.licenseCard}</T>
+            <T size={14} muted>{t.guide.licenseCardSub}</T>
           </View>
           <Icon name="go" size={18} color={c.tx2} flip={!d.rtl} />
         </Row>
@@ -35,13 +34,13 @@ export default function GuideIndex() {
       {list.map((topic) => (
         <Card key={topic.id} label={topicText(topic, lang).title} onPress={() => router.push({ pathname: '/guide/[topic]', params: { topic: topic.id, q } })}>
           <Row>
-            <View style={[styles.chip, { backgroundColor: c.fill }]}><Icon name={topic.icon as IconName} size={20} color={FEATURE.guide} /></View>
+            <View style={[styles.chip, { backgroundColor: c.fill }]}><Icon name={topic.icon as IconName} size={20} color={c.feature.guide} /></View>
             <View style={{ flex: 1 }}><T size={16} weight="medium" content={lang === 'ar'}>{topicText(topic, lang).title}</T></View>
             <Icon name="go" size={18} color={c.tx2} flip={!d.rtl} />
           </Row>
         </Card>
       ))}
-      <T size={13} muted>{t.guide.note}</T>
+      <T size={14} muted>{t.guide.note}</T>
     </Screen>
   );
 }

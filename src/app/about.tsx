@@ -13,7 +13,7 @@ export default function About() {
     items.map((x) => (
       <Row key={x} gap={8} style={{ alignItems: 'flex-start' }}>
         <Icon name="check" size={16} color={c.tx2} />
-        <T size={14} muted style={{ flex: 1 }}>{x}</T>
+        <T size={16} muted style={{ flex: 1 }}>{x}</T>
       </Row>
     ));
   return (
@@ -21,13 +21,13 @@ export default function About() {
       <Card><T>{A.intro}</T></Card>
       <Section title={A.privacyT}>
         <Card style={{ gap: 12 }}>
-          <T size={14} muted>{A.privacy}</T>
+          <T size={16} muted>{A.privacy}</T>
           <Button small kind="ghost" icon="globe" title={A.privacyLink} onPress={() => openPrivacyPolicy()} />
         </Card>
       </Section>
       <Section title={A.sourcesT}><Card style={{ gap: 8 }}>{list(A.sources)}</Card></Section>
       <Section title={A.creditsT}><Card style={{ gap: 8 }}>{list(A.credits)}</Card></Section>
-      <T size={13} muted center>{A.version(Constants.expoConfig?.version ?? '1.0.0')}</T>
+      <T size={14} muted center>{A.version(Constants.expoConfig?.version ?? '1.0.0')}</T>
     </Screen>
   );
 }

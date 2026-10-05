@@ -31,8 +31,8 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
           };
           return (
             <Pressable key={route.key} accessibilityRole="tab" accessibilityState={{ selected: on }} accessibilityLabel={labels[route.name]} onPress={press} style={[styles.tab, on && { backgroundColor: c.fill, borderColor: c.glassBorder }]}>
-              <Icon name={ICONS[route.name] ?? 'home'} size={22} color={on ? c.ac : c.tx2} />
-              <T size={11} weight={on ? 'semibold' : 'regular'} color={on ? c.ac : c.tx2} center numberOfLines={1} style={{ lineHeight: lang === 'ur' ? 22 : 15 }}>
+              <Icon name={ICONS[route.name] ?? 'home'} size={24} color={on ? c.ac : c.tx2} />
+              <T size={12} weight={on ? 'semibold' : 'regular'} color={on ? c.ac : c.tx2} center numberOfLines={1} style={{ lineHeight: lang === 'ur' ? 22 : 16 }}>
                 {labels[route.name]}
               </T>
             </Pressable>
@@ -58,6 +58,6 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center', paddingHorizontal: 12 },
-  bar: { width: '100%', maxWidth: 520, borderRadius: 30, borderWidth: 1, padding: 6, gap: 2, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 12 },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, minHeight: 56, borderRadius: 24, borderWidth: 1, borderColor: 'transparent', paddingVertical: 6 },
+  bar: { width: '100%', maxWidth: 520, borderRadius: 999, borderWidth: 1, padding: 8, gap: 4, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 12 },
+  tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 56, borderRadius: 24, borderWidth: 1, borderColor: 'transparent', paddingVertical: 8 },
 });

@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { ExamSession } from '@/features/quiz/engine';
+import { scoreExam, type ExamSession } from '@/features/quiz/engine';
 import { QUESTIONS } from '@/data/questions';
-import { storage } from '@/services/storage';
+import { storage, type ExamRecord } from '@/services/storage';
 
 export type ExamDone = { session: ExamSession; finishedAt: number; timedOut: boolean };
 
@@ -10,6 +10,8 @@ type ExamState = {
   setExam: (s: ExamSession | null) => void;
   examDone: ExamDone | null;
   setExamDone: (d: ExamDone | null) => void;
+  /** Finished mock exams, newest first. */
+  history: ExamRecord[];
 };
 
 const Ctx = createContext<ExamState | null>(null);
@@ -20,11 +22,13 @@ const Ctx = createContext<ExamState | null>(null);
  */
 export function ExamProvider({ children }: { children: React.ReactNode }) {
   const [exam, setExamState] = useState<ExamSession | null>(null);
-  const [examDone, setExamDone] = useState<ExamDone | null>(null);
+  const [examDone, setExamDoneState] = useState<ExamDone | null>(null);
+  const [history, setHistory] = useState<ExamRecord[]>([]);
   const touched = useRef(false);
 
   useEffect(() => {
     let alive = true;
+    storage.loadHistory().then((h) => alive && setHistory(h));
     storage.loadExam(QUESTIONS).then((saved) => {
       // Don't overwrite an exam the user started while the saved one was loading.
       if (alive && saved && !touched.current) setExamState(saved);
@@ -40,7 +44,16 @@ export function ExamProvider({ children }: { children: React.ReactNode }) {
     storage.saveExam(s);
   }, []);
 
-  const value = useMemo(() => ({ exam, setExam, examDone, setExamDone }), [exam, setExam, examDone]);
+  const setExamDone = useCallback((d: ExamDone | null) => {
+    setExamDoneState(d);
+    if (!d) return;
+    const r = scoreExam(d.session.questions, d.session.answers, d.session.config.passMark);
+    const rec = { at: d.finishedAt, correct: r.correct, total: r.total, passed: r.passed };
+    setHistory((h) => [rec, ...h.filter((x) => x.at !== rec.at)].slice(0, 20));
+    storage.addHistory(rec);
+  }, []);
+
+  const value = useMemo(() => ({ exam, setExam, examDone, setExamDone, history }), [exam, setExam, examDone, setExamDone, history]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

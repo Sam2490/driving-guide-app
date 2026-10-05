@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useApp, useDir } from '@/state/AppProvider';
+import { MAX_CONTENT_WIDTH } from '@/theme/tokens';
 import { Button, Card, Dialog, IconButton, Pips, Ring, Row, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { OptionButton, OptionContent, QuestionBody } from '@/components/Quiz';
@@ -19,6 +20,7 @@ export default function LevelScreen() {
   const L = t.levels;
   const d = useDir();
   const insets = useSafeAreaInsets();
+  const winW = useWindowDimensions().width;
   const navigation = useNavigation();
   const [attempt, setAttempt] = useState(0);
   const questions = useMemo(() => levelQuestions(QUESTIONS, level), [level, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -106,7 +108,7 @@ export default function LevelScreen() {
     const win = stage === 'win';
     return (
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 16 }}>
-        <ScrollView contentContainerStyle={{ padding: 24, gap: 14, alignItems: 'stretch' }}>
+        <ScrollView contentContainerStyle={{ padding: 24, gap: 16, alignItems: 'stretch' }}>
           {win ? (
             <Ring value={run.correct / questions.length} color={c.ok} label={`${run.correct}/${questions.length}`} />
           ) : (
@@ -114,18 +116,18 @@ export default function LevelScreen() {
           )}
           <T size={28} weight="bold" center>{win ? L.fin : L.fail}</T>
           {!win ? <T muted center>{L.failsub}</T> : null}
-          <Row gap={10} style={{ justifyContent: 'center' }}>
+          <Row gap={12} style={{ justifyContent: 'center' }}>
             {win && outcome ? (
-              <Card style={styles.stat}><T size={20} weight="bold" center>{`+${outcome.earned}`}</T><T size={12.5} muted center>{L.gain}</T></Card>
+              <Card style={styles.stat}><T size={20} weight="bold" center>{`+${outcome.earned}`}</T><T size={12} muted center>{L.gain}</T></Card>
             ) : null}
-            <Card style={styles.stat}><T size={20} weight="bold" center>{`${Math.round((run.correct / Math.max(1, run.results.length)) * 100)}%`}</T><T size={12.5} muted center>{L.acc}</T></Card>
+            <Card style={styles.stat}><T size={20} weight="bold" center>{`${Math.round((run.correct / Math.max(1, run.results.length)) * 100)}%`}</T><T size={12} muted center>{L.acc}</T></Card>
             {win && outcome ? (
-              <Card style={[styles.stat, { alignItems: 'center' }]}><Pips n={outcome.stars} max={3} color={c.ac} /><T size={12.5} muted center>{`${L.lvl} ${level}`}</T></Card>
+              <Card style={[styles.stat, { alignItems: 'center' }]}><Pips n={outcome.stars} max={3} color={c.ac} /><T size={12} muted center>{`${L.lvl} ${level}`}</T></Card>
             ) : null}
           </Row>
           {win && outcome?.rankUp != null ? (
             <Card accent={c.ac} style={{ backgroundColor: c.ac + '1f' }}>
-              <Row><Icon name="up" color={c.ac} /><View style={{ flex: 1 }}><T size={13} muted>{L.rankup}</T><T size={18} weight="bold">{L.ranks[outcome.rankUp]}</T></View></Row>
+              <Row><Icon name="up" color={c.ac} /><View style={{ flex: 1 }}><T size={14} muted>{L.rankup}</T><T size={18} weight="bold">{L.ranks[outcome.rankUp]}</T></View></Row>
             </Card>
           ) : null}
           {win ? (level < TOTAL ? <Button title={L.next} onPress={() => restart(level + 1)} /> : null) : <Button title={L.retry} onPress={() => restart()} />}
@@ -144,34 +146,38 @@ export default function LevelScreen() {
             <View key={k} style={[styles.seg, { backgroundColor: k < run.results.length ? (run.results[k] ? c.ok : c.bad) : k === run.index ? c.ac + '8c' : c.fill }]} />
           ))}
         </View>
-        <View accessibilityLabel={`${L.attempts}: ${run.attempts}`}><Pips n={run.attempts} max={ATTEMPTS} color={c.bad} /></View>
+        {/* Attempts: dots plus a visible count, so the meaning does not rely on colour alone. */}
+        <View accessible accessibilityLabel={`${L.attempts}: ${run.attempts}`} style={{ alignItems: 'center', gap: 4 }}>
+          <Pips n={run.attempts} max={ATTEMPTS} color={c.bad} />
+          <T size={12} muted>{t.ux.attemptsLeft(run.attempts)}</T>
+        </View>
       </View>
-      <ScrollView ref={scroll} contentContainerStyle={{ padding: 20, gap: 10, paddingBottom: 24 }}>
+      <ScrollView ref={scroll} contentContainerStyle={{ padding: 20, gap: 12, paddingBottom: 24, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' }}>
         <Row style={{ justifyContent: 'space-between' }}>
           <T size={14} muted>{`${L.lvl} ${level} · ${run.index + 1}/${questions.length}`}</T>
-          {run.combo >= 3 ? <Row gap={4}><Icon name="bolt" size={14} color={c.ac} filled /><T size={14} weight="semibold" color={c.ac}>{`${L.combo} ×${run.combo}`}</T></Row> : null}
+          {run.combo >= 3 ? <Row gap={4}><Icon name="bolt" size={16} color={c.ac} filled /><T size={14} weight="semibold" color={c.ac}>{`${L.combo} ×${run.combo}`}</T></Row> : null}
         </Row>
         <QuestionBody q={q} />
-        <View style={{ gap: 10, marginTop: 6 }}>
+        <View style={{ gap: 12, marginTop: 8 }}>
           {q.options.map((o, k) => {
             const state = checked ? (o.id === q.correctAnswerId ? 'ok' : o.id === sel ? 'bad' : 'dim') : sel === o.id ? 'selected' : 'idle';
             return <OptionButton key={o.id} q={q} option={o} index={k} state={state} disabled={!!checked} onPress={() => setSel(o.id)} />;
           })}
         </View>
       </ScrollView>
-      <View style={[styles.dock, { backgroundColor: checked ? (checked.good ? c.okbg : c.badbg) : c.glass, borderColor: checked ? (checked.good ? c.ok : c.bad) : c.glassBorder, marginBottom: Math.max(insets.bottom, 12) }]}>
+      <View style={[styles.dock, { width: Math.min(winW - 24, MAX_CONTENT_WIDTH - 16), backgroundColor: checked ? (checked.good ? c.okbg : c.badbg) : c.glass, borderColor: checked ? (checked.good ? c.ok : c.bad) : c.glassBorder, marginBottom: Math.max(insets.bottom, 12) }]}>
         {checked ? (
-          <Row style={{ marginBottom: 10, alignItems: 'flex-start' }}>
+          <Row style={{ marginBottom: 12, alignItems: 'flex-start' }}>
             <Icon name={checked.good ? 'check' : 'close'} size={24} color={checked.good ? c.ok : c.bad} />
             <View style={{ flex: 1, gap: 4 }}>
-              <T size={17} weight="bold" color={checked.good ? c.ok : c.bad}>{checked.good ? L.good : L.bad}</T>
+              <T size={18} weight="bold" color={checked.good ? c.ok : c.bad}>{checked.good ? L.good : L.bad}</T>
               {checked.good ? <T size={14} muted>{`+${checked.gain} ${L.xp}`}</T> : (
                 <View style={{ gap: 4 }}><T size={14} muted>{L.right}</T><OptionContent q={q} option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} /></View>
               )}
             </View>
           </Row>
         ) : null}
-        <Button kind={checked ? (checked.good ? 'ok' : 'danger') : 'primary'} title={checked ? L.cont : L.check} disabled={!checked && !sel} onPress={checked ? cont : check} />
+        <Button kind={checked?.good ? 'ok' : 'primary'} title={checked ? L.cont : L.check} disabled={!checked && !sel} onPress={checked ? cont : check} />
       </View>
       <Dialog
         visible={ask}
@@ -189,10 +195,10 @@ export default function LevelScreen() {
 }
 
 const styles = StyleSheet.create({
-  top: { alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 10 },
+  top: { alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 12, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
   segs: { flex: 1, gap: 4 },
   seg: { flex: 1, height: 6, borderRadius: 3 },
-  dock: { marginHorizontal: 12, padding: 12, borderRadius: 24, borderWidth: 1 },
-  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 6, gap: 4 },
-  bigIcon: { width: 76, height: 76, borderRadius: 22, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' },
+  dock: { alignSelf: 'center', padding: 12, borderRadius: 24, borderWidth: 1 },
+  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, gap: 4 },
+  bigIcon: { width: 76, height: 76, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' },
 });
