@@ -36,6 +36,9 @@ export function T({ children, size = 16, weight = 'regular', color, muted, conte
     <Text
       accessibilityRole={role}
       numberOfLines={numberOfLines}
+      // Android's default "highQuality" line breaking measures a little wider than Yoga allots,
+      // which pushed short labels (e.g. "ابدأ الاختبار" next to an icon) onto two lines.
+      textBreakStrategy="simple"
       style={[{ fontFamily: latin ? LATIN_FONT[weight] : font(weight, content), fontSize: size, lineHeight: latin ? Math.round(size * 1.45) : lh(size, content), color: color ?? (muted ? c.tx2 : c.tx), textAlign: center ? 'center' : content ? 'right' : d.align, writingDirection: content ? 'rtl' : d.writing }, style]}
     >
       {children}
@@ -128,7 +131,7 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, style
     >
       <Row gap={8} style={{ justifyContent: 'center' }}>
         {icon ? <Icon name={icon} size={20} color={fg} /> : null}
-        <T size={small ? 16 : 18} weight="semibold" color={fg} center>{title}</T>
+        <T size={small ? 16 : 18} weight="semibold" color={fg} center style={{ flexShrink: 1 }}>{title}</T>
       </Row>
     </Pressable>
   );
