@@ -186,7 +186,16 @@ export function Ring({ value, size = 140, color, label }: { value: number; size?
         <Circle cx={60} cy={60} r={r} fill="none" stroke={c.fill} strokeWidth={9} />
         <Circle cx={60} cy={60} r={r} fill="none" stroke={color ?? c.ac} strokeWidth={9} strokeLinecap="round" strokeDasharray={`${circ}`} strokeDashoffset={circ * (1 - Math.max(0, Math.min(1, value)))} transform="rotate(-90 60 60)" />
       </Svg>
-      <Text style={{ fontFamily: font('bold'), fontSize: size / 5, color: c.tx }}>{label}</Text>
+      {/* Keep the label inside the ring: the hole is about 70% of the ring, so fit the text to ~60% of it. */}
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.5}
+        maxFontSizeMultiplier={1}
+        style={{ width: size * 0.6, textAlign: 'center', fontFamily: font('bold'), fontSize: Math.min(size / 5, (size * 0.6) / (Math.max(3, label.length) * 0.5)), color: c.tx }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }

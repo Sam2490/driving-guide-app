@@ -116,13 +116,13 @@ export default function LevelScreen() {
           )}
           <T size={28} weight="bold" center>{win ? L.fin : L.fail}</T>
           {!win ? <T muted center>{L.failsub}</T> : null}
-          <Row gap={12} style={{ justifyContent: 'center' }}>
+          <Row gap={12} style={{ justifyContent: 'center', alignItems: 'stretch' }}>
             {win && outcome ? (
               <Card style={styles.stat}><T size={20} weight="bold" center>{`+${outcome.earned}`}</T><T size={12} muted center>{L.gain}</T></Card>
             ) : null}
             <Card style={styles.stat}><T size={20} weight="bold" center>{`${Math.round((run.correct / Math.max(1, run.results.length)) * 100)}%`}</T><T size={12} muted center>{L.acc}</T></Card>
             {win && outcome ? (
-              <Card style={[styles.stat, { alignItems: 'center' }]}><Pips n={outcome.stars} max={3} color={c.ac} /><T size={12} muted center>{`${L.lvl} ${level}`}</T></Card>
+              <Card style={[styles.stat, { alignItems: 'center' }]}><View style={styles.pipLine}><Pips n={outcome.stars} max={3} color={c.ac} /></View><T size={12} muted center>{`${L.lvl} ${level}`}</T></Card>
             ) : null}
           </Row>
           {win && outcome?.rankUp != null ? (
@@ -199,6 +199,8 @@ const styles = StyleSheet.create({
   segs: { flex: 1, gap: 4 },
   seg: { flex: 1, height: 6, borderRadius: 3 },
   dock: { alignSelf: 'center', padding: 12, borderRadius: 24, borderWidth: 1 },
-  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, gap: 4 },
+  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, gap: 4, justifyContent: 'center' },
+  // Same height as the 20 pt numbers in the other stat cards, so all three cards match.
+  pipLine: { height: 28, justifyContent: 'center' },
   bigIcon: { width: 76, height: 76, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' },
 });
