@@ -26,16 +26,18 @@ type TProps = {
   style?: StyleProp<TextStyle>;
   numberOfLines?: number;
   role?: 'header';
+  onTextLayout?: React.ComponentProps<typeof Text>['onTextLayout'];
 };
 
 /** Text that picks the right font, line height and alignment for the current language. */
-export function T({ children, size = 16, weight = 'regular', color, muted, content, latin, center, style, numberOfLines, role }: TProps) {
+export function T({ children, size = 16, weight = 'regular', color, muted, content, latin, center, style, numberOfLines, role, onTextLayout }: TProps) {
   const { c, font, lh } = useApp();
   const d = useDir();
   return (
     <Text
       accessibilityRole={role}
       numberOfLines={numberOfLines}
+      onTextLayout={onTextLayout}
       // Android's default "highQuality" line breaking measures a little wider than Yoga allots,
       // which pushed short labels (e.g. "ابدأ الاختبار" next to an icon) onto two lines.
       textBreakStrategy="simple"
@@ -46,9 +48,9 @@ export function T({ children, size = 16, weight = 'regular', color, muted, conte
   );
 }
 
-export function Row({ children, style, gap = 12 }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; gap?: number }) {
+export function Row({ children, style, gap = 12, onLayout }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; gap?: number; onLayout?: React.ComponentProps<typeof View>['onLayout'] }) {
   const d = useDir();
-  return <View style={[{ flexDirection: d.row, alignItems: 'center', gap }, style]}>{children}</View>;
+  return <View onLayout={onLayout} style={[{ flexDirection: d.row, alignItems: 'center', gap }, style]}>{children}</View>;
 }
 
 type ScreenProps = {
@@ -117,6 +119,22 @@ type BtnProps = { title: string; onPress: () => void; kind?: 'primary' | 'ghost'
 
 export function Button({ title, onPress, kind = 'primary', icon, disabled, style, small }: BtnProps) {
   const { c } = useApp();
+  const size = small ? 16 : 18;
+  // Some Android phones draw Arabic labels slightly wider than React Native measured them, so a short
+  // label beside an icon broke onto two lines. If that happens, widen the label to the width it actually
+  // needed (capped to the room inside the button) so the icon and text sit on one line.
+  const [room, setRoom] = React.useState(0);
+  const [fix, setFix] = React.useState<{ title: string; width: number } | null>(null);
+  const need = fix?.title === title ? fix.width : 0;
+  const onTextLayout = React.useCallback(
+    (e: { nativeEvent: { lines: { width: number }[] } }) => {
+      const lines = e.nativeEvent.lines;
+      if (lines.length > 1 && need === 0) setFix({ title, width: Math.ceil(lines.reduce((a, l) => a + l.width, 0) + size * 0.5) });
+    },
+    [need, size, title],
+  );
+  const iconSpace = icon ? 20 + 8 : 0;
+  const minWidth = need && room ? Math.min(need, room - iconSpace) : undefined;
   const bg = disabled ? 'transparent' : kind === 'primary' ? c.acSolid : kind === 'danger' ? c.badSolid : kind === 'ok' ? c.okSolid : c.fill;
   const fg = disabled ? c.tx2 : kind === 'ghost' ? c.ac : c.onAc;
   return (
@@ -129,9 +147,9 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, style
       // Disabled = outlined and muted (not just faded), so it reads as "not yet" rather than a rendering glitch.
       style={({ pressed }) => [styles.btn, small && styles.btnSmall, { backgroundColor: bg, borderWidth: 1, borderColor: disabled ? c.ln : 'transparent', borderStyle: disabled ? 'dashed' : 'solid', opacity: pressed ? 0.85 : 1 }, style]}
     >
-      <Row gap={8} style={{ justifyContent: 'center' }}>
+      <Row gap={8} style={{ justifyContent: 'center' }} onLayout={(e) => setRoom(e.nativeEvent.layout.width)}>
         {icon ? <Icon name={icon} size={20} color={fg} /> : null}
-        <T size={small ? 16 : 18} weight="semibold" color={fg} center style={{ flexShrink: 1 }}>{title}</T>
+        <T size={size} weight="semibold" color={fg} center style={{ flexShrink: 1, minWidth }} onTextLayout={onTextLayout}>{title}</T>
       </Row>
     </Pressable>
   );
