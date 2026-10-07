@@ -3,9 +3,9 @@
 # account (signing) — see docs/IOS.md.
 name: iOS simulator build
 
+# Manual only: macOS runners use GitHub Actions minutes 10 times faster than Linux, so running this on every push
+# used up the account's free minutes. Run it from the Actions tab when the iOS build needs checking.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
