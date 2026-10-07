@@ -22,13 +22,13 @@ export function LanguageList({ value, onPick, pending }: { value: Lang; onPick: 
             accessibilityState={{ selected: on, busy: pending === l.id }}
             accessibilityLabel={l.id === 'en' ? l.name : `${l.name}, ${l.english}`}
             onPress={() => onPick(l.id)}
-            style={({ pressed }) => [styles.row, { flexDirection: d.row, backgroundColor: on ? c.fill : 'transparent', borderColor: on ? c.ac : 'transparent', opacity: pressed ? 0.85 : 1 }]}
+            style={({ pressed }) => [styles.row, { flexDirection: d.row, backgroundColor: on ? c.acSoft : 'transparent', borderColor: on ? c.acSolid : 'transparent', opacity: pressed ? 0.85 : 1 }]}
           >
             <View style={{ flex: 1, flexDirection: d.row, alignItems: 'baseline', gap: SPACE.xs, flexWrap: 'wrap' }}>
-              <Text style={{ fontFamily: fontFor(l.id, on ? 'semibold' : 'regular'), fontSize: TYPE.bodyLg, lineHeight: lineHeightFor(l.id, TYPE.bodyLg), color: on ? c.ac : c.tx }}>{l.name}</Text>
+              <Text style={{ fontFamily: fontFor(l.id, on ? 'semibold' : 'regular'), fontSize: TYPE.bodyLg, lineHeight: lineHeightFor(l.id, TYPE.bodyLg), color: on ? c.onAcSoft : c.tx }}>{l.name}</Text>
               {l.id !== 'en' ? <Text style={{ fontFamily: fontFor('en', 'regular'), fontSize: TYPE.label, color: c.tx2 }}>{l.english}</Text> : null}
             </View>
-            {pending === l.id ? <ActivityIndicator color={c.ac} /> : on ? <Icon name="check" size={20} color={c.ac} /> : null}
+            {pending === l.id ? <ActivityIndicator color={c.ac} /> : on ? <Icon name="check" size={20} color={c.onAcSoft} /> : null}
           </Pressable>
         );
       })}

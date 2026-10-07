@@ -5,9 +5,12 @@ UI layer        src/app (screens, Expo Router) + src/components
 Business logic  src/features/quiz (exam engine, randomisation, scoring, timer)
                 src/features/levels (seeded level order, XP, ranks, streak)
                 src/features/schools (filters, haversine distance, nearby sort)
+                src/features/progress (readiness from recent exams, mistakes kept until right twice in a row)
 Data layer      src/data (bundled, offline) + src/services/storage (AsyncStorage, validated)
 Native services src/services/location (expo-location), src/services/maps (Linking)
 State           src/state/AppProvider (language, theme, progress) · src/state/ExamProvider (exam in progress, saved and resumable)
+                src/state/StudyProvider (saved mistakes, guide topics read, licence steps ticked)
+Design system   src/theme/tokens.ts (type roles, spacing, radius, elevation, width classes, motion) · src/theme/colors.ts (semantic palette)
 ```
 
 - **Offline first.** All content is bundled; nothing is fetched at runtime. Only Find nearby (GPS) and Directions (map app) need device services.
@@ -16,6 +19,10 @@ State           src/state/AppProvider (language, theme, progress) · src/state/E
 - **Level challenge.** Same seed and algorithm as the web app (test checks the order matches), 82 levels × 8 questions, 5 attempts, instant feedback (practice mode).
 - **Right-to-left.** System RTL mirroring is off (`expo-localization` `supportsRTL: false`); the app lays out RTL itself via `useDir()`, so switching language needs no restart. Arabic content (questions, guide, school names) is always right-aligned in IBM Plex Sans Arabic.
 - **Official vs general information.** Guide content is marked as from the official trainee guide; steps, fees and schools are marked as general information to verify on Absher.
+
+## Navigation (Road-ready redesign)
+
+Four docked tabs, a navigation rail at 840 pt and up: **Home** (readiness, continue, tip of the day), **Practice** (`/practice`: mock exam, saved mistakes `/practice/mistakes`, level path), **Learn** (`/learn?section=signs|guide|steps`, details at `/learn/signs/[id]` and `/learn/guide/[topic]`; two panes from 600 pt), **Schools**. Full-screen flows: `/exam`, `/result`, `/review`, `/level/[n]`, `/drill`. Links to the old `/test`, `/guide…` and `/signs…` paths are upgraded in `+native-intent` (`upgradeLegacyPath`). Storage keys added: `mistakes.v1`, `learn.v1`; the saved exam may carry flags (`f`).
 
 ## Migration map
 

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
-import { Button, Dialog, EmptyState, Notice, PickerSheet, Row, Screen, SearchBox, T } from '@/components/ui';
+import { BottomSheet, Button, Chip, EmptyState, IconTile, Notice, PickerSheet, Row, Screen, SearchBox, Skeleton, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { SchoolCard } from '@/components/SchoolCard';
 import { SCHOOLS, SCHOOLS_CHECKED } from '@/data/schools';
@@ -9,25 +9,27 @@ import { CITIES } from '@/data/cities';
 import { citiesIn, filterSchools, nearbySchools, regionsOf, type NearbySchool } from '@/features/schools/search';
 import { getPositionOnce, type LocationResult } from '@/services/location';
 import { cityName, regionName, schoolText } from '@/data/localize';
+import { RADIUS, SPACE } from '@/theme/tokens';
 
 function Select({ label, value, onPress }: { label: string; value: string; onPress: () => void }) {
   const { c, lang } = useApp();
   const d = useDir();
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}`} onPress={onPress} style={[styles.select, { backgroundColor: c.fill, borderColor: c.ln, flexDirection: d.row }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}`} onPress={onPress} style={({ pressed }) => [styles.select, { backgroundColor: pressed ? c.fill : c.card, borderColor: c.lnStrong, flexDirection: d.row }]}>
       <View style={{ flex: 1 }}>
         <T size={12} muted>{label}</T>
         <T size={16} weight="medium" content={lang === 'ar'} numberOfLines={1}>{value}</T>
       </View>
-      <View style={{ transform: [{ rotate: '-90deg' }] }}><Icon name="go" size={16} color={c.tx2} /></View>
+      <Icon name="down" size={16} color={c.tx2} />
     </Pressable>
   );
 }
 
 type Loc = { phase: 'idle' } | { phase: 'explain' } | { phase: 'locating' } | { phase: 'done'; list: NearbySchool[] } | { phase: 'error'; result: Exclude<LocationResult, { status: 'ok' }> };
 
+/** Search first; "Near me" asks for location in a sheet that explains why, and the list works without it. */
 export default function Schools() {
-  const { t, c, lang } = useApp();
+  const { t, lang } = useApp();
   const [region, setRegion] = useState('');
   const [city, setCity] = useState('');
   const [q, setQ] = useState('');
@@ -54,65 +56,65 @@ export default function Schools() {
     else setLoc({ phase: 'error', result: r });
   };
   const reset = () => setLoc({ phase: 'idle' });
+  const near = loc.phase === 'done' || loc.phase === 'locating';
 
   const errorText = (r: Exclude<LocationResult, { status: 'ok' }>) =>
     r.status === 'denied' ? (r.canAskAgain ? t.schools.denied : t.schools.deniedSettings) : r.status === 'services-off' ? t.schools.servicesOff : t.schools.unavailable;
 
   return (
-    <Screen title={t.schools.title}>
-      <Button title={t.schools.findNearby} icon="locate" onPress={() => setLoc({ phase: 'explain' })} />
-      {loc.phase === 'locating' ? (
-        <Row style={{ justifyContent: 'center', paddingVertical: 8 }}><ActivityIndicator color={c.ac} /><T muted>{t.schools.locating}</T></Row>
-      ) : null}
+    <Screen title={t.schools.title} large>
+      <SearchBox value={q} onChange={(v) => { setQ(v); if (near) reset(); }} placeholder={t.schools.search} />
+      <Row gap={SPACE.xs} style={{ flexWrap: 'wrap' }}>
+        <Chip label={t.schools.findNearby} icon="locate" on={near} onPress={() => (near ? reset() : setLoc({ phase: 'explain' }))} />
+        {!near ? <T size={14} muted>{t.schools.count(list.length)}</T> : null}
+      </Row>
+
       {loc.phase === 'error' ? (
-        <View style={{ gap: 12 }}>
-          <Notice tone="bad" text={errorText(loc.result)} />
-          <Row gap={12}>
+        <View style={{ gap: SPACE.sm }}>
+          <Notice tone="bad" text={`${errorText(loc.result)} ${t.rd.searchInstead}`} />
+          <Row gap={SPACE.sm}>
             {loc.result.status === 'denied' && !loc.result.canAskAgain ? (
               <Button small title={t.schools.openSettings} onPress={() => Linking.openSettings().catch(() => {})} style={{ flex: 1 }} />
             ) : (
-              <Button small title={t.common.tryAgain} onPress={locate} style={{ flex: 1 }} />
+              <Button small title={t.common.tryAgain} icon="locate" onPress={locate} style={{ flex: 1 }} />
             )}
-            <Button small kind="ghost" title={t.schools.viewAll} onPress={reset} style={{ flex: 1 }} />
+            <Button small kind="secondary" title={t.schools.viewAll} onPress={reset} style={{ flex: 1 }} />
           </Row>
         </View>
       ) : null}
 
-      {loc.phase === 'done' ? (
-        <View style={{ gap: 12 }}>
+      {loc.phase === 'locating' ? (
+        <View style={{ gap: SPACE.sm }}>
+          <T muted>{t.schools.locating}</T>
+          <Skeleton rows={4} height={88} />
+        </View>
+      ) : loc.phase === 'done' ? (
+        <View style={{ gap: SPACE.sm }}>
           <Row style={{ justifyContent: 'space-between' }}>
-            <T size={20} weight="bold">{t.schools.nearbyTitle}</T>
-            <Button small kind="ghost" title={t.schools.viewAll} onPress={reset} />
+            <T role="h3" header>{t.schools.nearbyTitle}</T>
+            <Button small kind="tertiary" title={t.schools.viewAll} onPress={reset} />
           </Row>
           {loc.list.map((n) => <SchoolCard key={n.school.id} school={n.school} distance={{ km: n.km, city: n.city }} />)}
         </View>
       ) : (
-        <View style={{ gap: 12 }}>
-          <Row gap={12}>
+        <View style={{ gap: SPACE.sm }}>
+          <Row gap={SPACE.sm}>
             <View style={{ flex: 1 }}><Select label={t.schools.region} value={region ? regionName(region, lang) : t.schools.allReg} onPress={() => setPicker('region')} /></View>
             <View style={{ flex: 1 }}><Select label={t.schools.city} value={city ? cityName(city, lang) : t.schools.allCity} onPress={() => setPicker('city')} /></View>
           </Row>
-          <SearchBox value={q} onChange={setQ} placeholder={t.schools.search} />
-          <T size={14} muted>{t.schools.count(list.length)}</T>
-          {list.length === 0 ? <EmptyState text={t.common.noResults} action={<Button small kind="ghost" title={t.schools.viewAll} onPress={() => { setRegion(''); setCity(''); setQ(''); }} />} /> : null}
+          {list.length === 0 ? <EmptyState text={t.common.noResults} action={<Button small kind="secondary" title={t.schools.viewAll} onPress={() => { setRegion(''); setCity(''); setQ(''); }} />} /> : null}
           {list.map((s) => <SchoolCard key={s.id} school={s} />)}
         </View>
       )}
       <T size={14} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>
 
-      <Dialog
-        visible={loc.phase === 'explain'}
-        icon="locate"
-        title={t.schools.permTitle}
-        text={t.schools.permBody}
-        onClose={reset}
-        actions={
-          <>
-            <Button title={t.schools.allow} icon="locate" onPress={locate} />
-            <Button kind="ghost" title={t.schools.notNow} onPress={reset} />
-          </>
-        }
-      />
+      {/* Permission is explained before the system prompt, in a sheet with Allow / Not now. */}
+      <BottomSheet visible={loc.phase === 'explain'} title={t.schools.permTitle} onClose={reset}>
+        <View style={{ alignItems: 'center', paddingVertical: SPACE.xs }}><IconTile icon="locate" /></View>
+        <T>{t.schools.permBody}</T>
+        <Button title={t.schools.allow} icon="locate" onPress={locate} />
+        <Button kind="secondary" title={t.schools.notNow} onPress={reset} />
+      </BottomSheet>
       <PickerSheet
         visible={picker === 'region'}
         title={t.schools.region}
@@ -133,4 +135,4 @@ export default function Schools() {
   );
 }
 
-const styles = StyleSheet.create({ select: { alignItems: 'center', gap: 8, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8, minHeight: 56 } });
+const styles = StyleSheet.create({ select: { alignItems: 'center', gap: SPACE.xs, borderRadius: RADIUS.md, borderWidth: 1, paddingHorizontal: SPACE.sm, paddingVertical: SPACE.xs, minHeight: 56 } });

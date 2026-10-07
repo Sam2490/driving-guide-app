@@ -67,9 +67,13 @@ export function fontFor(lang: Lang, weight: Weight, content = false): string {
   return LATIN_FONT[weight];
 }
 
-/** Nastaliq needs extra line height so tall letters are not clipped. */
-export function lineHeightFor(lang: Lang, size: number, content = false): number {
-  if (!content && lang === 'ur') return Math.round(size * 2.1);
-  if (!content && (lang === 'hi' || lang === 'bn')) return Math.round(size * 1.7);
-  return Math.round(size * 1.55);
+/**
+ * Line height per script (typography roles in theme/tokens). Arabic 1.6× body / 1.5× headings; Urdu Nastaliq
+ * 2.1× / 1.9× so tall letters are not clipped; Devanagari and Bengali 1.7× for conjuncts; Latin 1.4× / 1.25×.
+ * Headings are sizes of 20 and up unless told otherwise.
+ */
+export function lineHeightFor(lang: Lang, size: number, content = false, heading = size >= 20): number {
+  const script = content ? 'ar' : lang;
+  const k = script === 'ur' ? (heading ? 1.9 : 2.1) : script === 'hi' || script === 'bn' ? 1.7 : script === 'en' ? (heading ? 1.25 : 1.4) : heading ? 1.5 : 1.6;
+  return Math.round(size * k);
 }

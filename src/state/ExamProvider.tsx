@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { scoreExam, type ExamSession } from '@/features/quiz/engine';
+import { DEFAULT_EXAM, isCorrect, scoreExam, type ExamSession } from '@/features/quiz/engine';
+import { readiness, type Readiness } from '@/features/progress/progress';
+import { useStudy } from './StudyProvider';
 import { QUESTIONS } from '@/data/questions';
 import { storage, type ExamRecord } from '@/services/storage';
 
@@ -12,6 +14,8 @@ type ExamState = {
   setExamDone: (d: ExamDone | null) => void;
   /** Finished mock exams, newest first. */
   history: ExamRecord[];
+  /** Readiness for the real test from the last few mock exams. */
+  ready: Readiness;
 };
 
 const Ctx = createContext<ExamState | null>(null);
@@ -25,6 +29,7 @@ export function ExamProvider({ children }: { children: React.ReactNode }) {
   const [examDone, setExamDoneState] = useState<ExamDone | null>(null);
   const [history, setHistory] = useState<ExamRecord[]>([]);
   const touched = useRef(false);
+  const { addMisses, addCorrect } = useStudy();
 
   useEffect(() => {
     let alive = true;
@@ -51,9 +56,14 @@ export function ExamProvider({ children }: { children: React.ReactNode }) {
     const rec = { at: d.finishedAt, correct: r.correct, total: r.total, passed: r.passed };
     setHistory((h) => [rec, ...h.filter((x) => x.at !== rec.at)].slice(0, 20));
     storage.addHistory(rec);
-  }, []);
+    // Wrong and skipped questions go to the mistakes list; right answers count toward clearing saved ones.
+    const qs = d.session.questions;
+    addMisses(qs.filter((q) => !isCorrect(q, d.session.answers[q.id])).map((q) => q.id));
+    addCorrect(qs.filter((q) => isCorrect(q, d.session.answers[q.id])).map((q) => q.id));
+  }, [addMisses, addCorrect]);
 
-  const value = useMemo(() => ({ exam, setExam, examDone, setExamDone, history }), [exam, setExam, examDone, setExamDone, history]);
+  const ready = useMemo(() => readiness(history, DEFAULT_EXAM.passMark / DEFAULT_EXAM.count), [history]);
+  const value = useMemo(() => ({ exam, setExam, examDone, setExamDone, history, ready }), [exam, setExam, examDone, setExamDone, history, ready]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

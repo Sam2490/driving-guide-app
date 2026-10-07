@@ -6,8 +6,8 @@ import type { ExamSession } from '@/features/quiz/engine';
 export type ThemePref = 'system' | 'light' | 'dark';
 export type Settings = { lang: Lang; theme: ThemePref };
 
-export const DEFAULT_SETTINGS: Settings = { lang: 'ar', theme: 'dark' };
-const KEYS = { settings: 'settings.v1', progress: 'levels.v1', exam: 'exam.v1', history: 'history.v1' } as const;
+export const DEFAULT_SETTINGS: Settings = { lang: 'ar', theme: 'system' };
+const KEYS = { settings: 'settings.v1', progress: 'levels.v1', exam: 'exam.v1', history: 'history.v1', mistakes: 'mistakes.v1', learn: 'learn.v1' } as const;
 
 /** One finished mock exam, for "last result" and "best" on the Test tab. */
 export type ExamRecord = { at: number; correct: number; total: number; passed: boolean };
@@ -62,12 +62,14 @@ export function parseProgress(raw: string | null): Progress {
 }
 
 /** Only ids, option order and answers are saved; question text always comes from the bundled bank. */
-type SavedExam = { v: 1; q: { id: string; o: string[] }[]; a: Record<string, string>; s: number; e: number; c: { count: number; minutes: number; passMark: number } };
+type SavedExam = { v: 1; q: { id: string; o: string[] }[]; a: Record<string, string>; s: number; e: number; c: { count: number; minutes: number; passMark: number }; f?: string[] };
 
 export function serializeExam(x: ExamSession): SavedExam {
   const a: Record<string, string> = {};
   for (const [k, v] of Object.entries(x.answers)) if (v !== undefined) a[k] = v;
-  return { v: 1, q: x.questions.map((q) => ({ id: q.id, o: q.options.map((o) => o.id) })), a, s: x.startedAt, e: x.endsAt, c: x.config };
+  const out: SavedExam = { v: 1, q: x.questions.map((q) => ({ id: q.id, o: q.options.map((o) => o.id) })), a, s: x.startedAt, e: x.endsAt, c: x.config };
+  if (x.flags?.length) out.f = x.flags;
+  return out;
 }
 
 /** Rebuilds a saved exam from the bundled bank. Anything unknown, tampered with or already timed out is dropped. */
@@ -96,9 +98,48 @@ export function parseExam(raw: string | null, bank: readonly Question[], now = D
         if (q && seen.has(k) && typeof a === 'string' && q.options.some((o) => o.id === a)) answers[k] = a;
       }
     }
-    return { questions, answers, startedAt: v.s, endsAt: v.e, config: { count: c.count, minutes: c.minutes, passMark: c.passMark } };
+    const flags = Array.isArray(v.f) ? [...new Set(v.f.filter((id: unknown) => typeof id === 'string' && seen.has(id)))] as string[] : [];
+    const session: ExamSession = { questions, answers, startedAt: v.s, endsAt: v.e, config: { count: c.count, minutes: c.minutes, passMark: c.passMark } };
+    if (flags.length) session.flags = flags;
+    return session;
   } catch {
     return null;
+  }
+}
+
+/** Saved mistakes: question id → correct answers in a row since it was missed (0 or 1; 2 removes it). */
+export type MistakeBook = Record<string, number>;
+const MISTAKES_MAX = 300;
+
+export function parseMistakes(raw: string | null, bank: readonly Question[]): MistakeBook {
+  try {
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+    const ids = new Set(bank.map((q) => q.id));
+    const out: MistakeBook = {};
+    for (const [k, n] of Object.entries(v)) {
+      if (ids.has(k) && (n === 0 || n === 1)) out[k] = n;
+      if (Object.keys(out).length >= MISTAKES_MAX) break;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+/** What the learner has read and ticked in the Learn tab. */
+export type LearnState = { read: string[]; steps: number[] };
+export const EMPTY_LEARN: LearnState = { read: [], steps: [] };
+
+export function parseLearn(raw: string | null): LearnState {
+  try {
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || typeof v !== 'object') return EMPTY_LEARN;
+    const read = Array.isArray(v.read) ? [...new Set(v.read.filter((x: unknown) => typeof x === 'string' && /^[a-z0-9]{1,8}$/.test(x)))].slice(0, 100) as string[] : [];
+    const steps = Array.isArray(v.steps) ? [...new Set(v.steps.filter((x: unknown) => Number.isInteger(x) && (x as number) >= 0 && (x as number) < 20))].sort() as number[] : [];
+    return { read, steps };
+  } catch {
+    return EMPTY_LEARN;
   }
 }
 
@@ -135,6 +176,10 @@ export const storage = {
     const list = parseHistory(await read(KEYS.history)).filter((x) => x.at !== r.at);
     await write(KEYS.history, [r, ...list].slice(0, HISTORY_MAX));
   },
+  loadMistakes: async (bank: readonly Question[]) => parseMistakes(await read(KEYS.mistakes), bank),
+  saveMistakes: (m: MistakeBook) => write(KEYS.mistakes, m),
+  loadLearn: async () => parseLearn(await read(KEYS.learn)),
+  saveLearn: (l: LearnState) => write(KEYS.learn, l),
   loadExam: async (bank: readonly Question[]) => parseExam(await read(KEYS.exam), bank),
   saveExam: async (x: ExamSession | null) => {
     if (x) return write(KEYS.exam, serializeExam(x));

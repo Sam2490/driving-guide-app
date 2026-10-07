@@ -1,69 +1,66 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useApp, useDir } from '@/state/AppProvider';
+import { useApp } from '@/state/AppProvider';
 import { useExam } from '@/state/ExamProvider';
-import { Button, Card, Notice, Ring, Row, Screen, T } from '@/components/ui';
-import { Icon } from '@/components/Icon';
+import { Badge, Button, EmptyState, Notice, Row, Screen, T } from '@/components/ui';
+import { ResultLayout } from '@/components/ResultLayout';
 import { QUESTIONS } from '@/data/questions';
 import { DEFAULT_EXAM, formatClock, scoreExam, startExam } from '@/features/quiz/engine';
+import { readinessChange } from '@/features/progress/progress';
 
 export default function Result() {
   const { t, c } = useApp();
-  const { examDone, setExam, setExamDone } = useExam();
-  const d = useDir();
+  const { examDone, setExam, setExamDone, history } = useExam();
   React.useEffect(() => {
     if (examDone) {
       const r = scoreExam(examDone.session.questions, examDone.session.answers, examDone.session.config.passMark);
-      Haptics.notificationAsync(r.passed ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error).catch(() => {});
+      Haptics.notificationAsync(r.passed ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning).catch(() => {});
     }
   }, [examDone]);
   if (!examDone) {
-    return <Screen back tabSpace={false}><Button title={t.test.start} onPress={() => router.replace('/test')} /></Screen>;
+    return (
+      <Screen back tabSpace={false} onBack={() => router.replace('/practice')}>
+        <EmptyState icon="exam" text={t.rd.readyEmpty} action={<Button title={t.test.start} onPress={() => router.replace('/practice')} />} />
+      </Screen>
+    );
   }
   const { session, finishedAt, timedOut } = examDone;
   const r = scoreExam(session.questions, session.answers, session.config.passMark);
   const used = Math.round((finishedAt - session.startedAt) / 1000);
+  const delta = history[0]?.at === finishedAt ? readinessChange(history) : null;
   const again = () => {
     setExamDone(null);
     setExam(startExam(QUESTIONS, DEFAULT_EXAM));
     router.replace('/exam');
   };
-  const tone = r.passed ? c.ok : c.bad;
-  // Verdict first, then one score (inside the ring), then the breakdown.
+  const perfect = r.correct === r.total;
   return (
-    <Screen back title={t.ux.resultTitle} onBack={() => router.replace('/test')} tabSpace={false}>
-      {timedOut ? <Notice tone="bad" text={t.test.timeUp} /> : null}
-      <View style={[styles.verdict, { backgroundColor: r.passed ? c.okbg : c.badbg, borderColor: tone }]} accessibilityRole="summary">
-        <Row gap={8} style={{ justifyContent: 'center' }}>
-          <Icon name={r.passed ? 'check' : 'close'} size={24} color={tone} />
-          <T size={28} weight="bold" color={tone}>{r.passed ? t.test.pass : t.test.fail}</T>
-        </Row>
-        <T size={14} center color={tone}>{t.test.passMark(r.passMark)}</T>
-      </View>
-      <Ring value={r.percent / 100} size={170} color={tone} label={t.test.score(r.correct, r.total)} />
-      <Row gap={12}>
-        {[
-          [t.test.correctN, r.correct, c.ok],
-          [t.test.wrongN, r.wrong, c.bad],
-          [t.test.blankN, r.unanswered, c.tx2],
-        ].map(([label, v, col]) => (
-          <Card key={String(label)} style={styles.stat}>
-            <T size={24} weight="bold" center color={String(col)}>{String(v)}</T>
-            <T size={12} muted center>{String(label)}</T>
-          </Card>
-        ))}
+    <ResultLayout
+      title={t.ux.resultTitle}
+      onBack={() => router.replace('/practice')}
+      passed={r.passed}
+      verdict={r.passed ? t.test.pass : t.test.fail}
+      verdictSub={t.test.passMark(r.passMark)}
+      ring={{ value: r.correct / r.total, label: String(r.correct), sub: t.rd.ofTotal(r.total), a11y: t.test.score(r.correct, r.total) }}
+      tiles={[
+        { label: t.test.correctN, value: String(r.correct), color: c.ok },
+        { label: t.test.wrongN, value: String(r.wrong), color: c.bad },
+        { label: t.test.blankN, value: String(r.unanswered), color: c.tx2 },
+      ]}
+      actions={
+        <>
+          {perfect ? <T center color={c.ok}>{t.test.perfect}</T> : <Button title={t.test.review} icon="eye" onPress={() => router.push('/review')} />}
+          <Button kind={perfect ? 'primary' : 'secondary'} title={t.test.again} icon="loop" onPress={again} />
+        </>
+      }
+      footnote={t.test.disclaimer}
+    >
+      {timedOut ? <Notice tone="warn" text={t.test.timeUp} /> : null}
+      <Row style={{ justifyContent: 'center', flexWrap: 'wrap' }} gap={8}>
+        <T muted center>{t.test.timeUsed(formatClock(used))}</T>
+        {delta !== null && delta !== 0 ? <Badge tone={delta > 0 ? 'ok' : 'bad'} text={t.rd.readyDelta(delta)} /> : null}
       </Row>
-      <T muted center>{t.test.timeUsed(formatClock(used))}</T>
-      {r.correct === r.total ? <T center color={c.ok}>{t.test.perfect}</T> : <Button title={t.test.review} icon="eye" onPress={() => router.push('/review')} />}
-      <Button kind={r.correct === r.total ? 'primary' : 'ghost'} title={t.test.again} icon="loop" onPress={again} />
-      <View style={{ alignItems: d.start }}><T size={14} muted>{t.test.disclaimer}</T></View>
-    </Screen>
+    </ResultLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  verdict: { borderRadius: 16, borderWidth: 1, paddingVertical: 16, paddingHorizontal: 16, gap: 4 },
-  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, gap: 4 },
-});

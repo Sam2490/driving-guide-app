@@ -2,7 +2,7 @@ import * as Location from 'expo-location';
 import { getPositionOnce } from './location';
 import { nativeMapsUrl, webMapsUrl } from './maps';
 import { parseExam, parseProgress, parseSettings, serializeExam } from './storage';
-import { isSafeDeepLink } from './links';
+import { isSafeDeepLink, upgradeLegacyPath } from './links';
 import { QUESTIONS } from '@/data/questions';
 import { selectAnswer, startExam } from '@/features/quiz/engine';
 
@@ -52,7 +52,7 @@ describe('maps', () => {
 
 describe('stored data validation', () => {
   it('falls back to defaults for bad settings', () => {
-    expect(parseSettings('{bad json')).toEqual({ lang: 'ar', theme: 'dark' });
+    expect(parseSettings('{bad json')).toEqual({ lang: 'ar', theme: 'system' });
     expect(parseSettings('{"lang":"fr","theme":"light"}')).toEqual({ lang: 'ar', theme: 'light' });
   });
   it('keeps only valid progress values', () => {
@@ -101,6 +101,20 @@ describe('deep link guard', () => {
     expect(isSafeDeepLink('/x?q=' + '%25'.repeat(60))).toBe(false);
     expect(isSafeDeepLink('/x?q=%E0%A4%A')).toBe(false);
     expect(isSafeDeepLink('/x?q=%zz')).toBe(false);
+  });
+});
+
+describe('links from before the redesign', () => {
+  it('open the same content in the new tabs', () => {
+    expect(upgradeLegacyPath('/test')).toBe('/practice');
+    expect(upgradeLegacyPath('/guide')).toBe('/learn?section=guide');
+    expect(upgradeLegacyPath('/guide/license')).toBe('/learn?section=steps');
+    expect(upgradeLegacyPath('drivingguide://signs/s000')).toBe('/learn/signs/s000');
+    expect(upgradeLegacyPath('/guide/t00?q=x')).toBe('/learn/guide/t00?q=x');
+    expect(upgradeLegacyPath('/signs')).toBe('/learn?section=signs');
+  });
+  it('leave current links alone', () => {
+    for (const p of ['/', '/schools/b01', '/learn/signs/s001', '/level/3', '/practice']) expect(upgradeLegacyPath(p)).toBe(p);
   });
 });
 

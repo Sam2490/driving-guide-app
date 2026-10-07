@@ -1,34 +1,80 @@
-/** Theme colours. Every colour on screen should come from here (no raw hex in components). */
-export type FeatureKey = 'guide' | 'signs' | 'license' | 'schools' | 'test';
-
+/**
+ * Theme colours ("Road-ready" identity: palm green from the app icon, warm off-white, sand as the only accent).
+ * Every colour on screen comes from here; components never use raw hex. `SEMANTIC` below names each key's role.
+ */
 export type Palette = {
-  bg: string; card: string; tx: string; tx2: string; ac: string; ok: string; bad: string;
-  okbg: string; badbg: string;
-  /** Fills that carry white text or icons (4.5:1 contrast with white). */
-  acSolid: string; okSolid: string; badSolid: string;
-  /** Per-feature accent (home cards, guide icons) and per-stage colours in the level journey. Light mode uses darker shades for 3:1+ contrast. */
-  feature: Record<FeatureKey, string>; stage: string[];
+  /** color.background.primary / .secondary */
+  bg: string; bg2: string;
+  /** color.surface.default / .elevated */
+  card: string; elevated: string;
+  /** color.text.primary / .secondary */
+  tx: string; tx2: string;
+  /** color.border.subtle (decorative hairlines) / .strong (outlines of controls, 3:1) */
+  ln: string; lnStrong: string;
+  /** Neutral fill for idle chips, tracks and icon buttons. */
+  fill: string;
+  /** color.brand.text: links, selected chips, brand words. */
+  ac: string;
+  /** color.action.primary, its pressed step, and the tinted secondary action (fill + text). */
+  acSolid: string; acPressed: string; acSoft: string; onAcSoft: string;
+  /** color.text.onAction */
+  onAc: string;
+  /** color.status.* with their tinted backgrounds; *Solid carry white text. */
+  ok: string; okbg: string; okSolid: string;
+  bad: string; badbg: string; badSolid: string;
+  warn: string; warnbg: string;
+  info: string; infobg: string;
+  /** color.brand.sand: XP, rank, stars and fees. The only accent besides green. */
+  sand: string;
   /** White panel behind sign and question artwork, in both themes. */
-  paper: string; ln: string; fill: string; onAc: string; glass: string; glassBorder: string; scrim: string;
-};
-
-export const dark: Palette = {
-  bg: '#060a1c', card: '#0f1738', tx: '#f2f4ff', tx2: '#9aa3d8', ac: '#5b9bff', ok: '#30d158', bad: '#ff453a',
-  acSolid: '#1f6bf0', okSolid: '#1e7b34', badSolid: '#d0302a',
-  feature: { guide: '#7d96ff', signs: '#f59ad2', license: '#43d8c9', schools: '#b39bff', test: '#6fb0ff' },
-  paper: '#ffffff',
-  stage: ['#7d96ff', '#43d8c9', '#b39bff', '#f59ad2', '#f5b05a'],
-  okbg: 'rgba(48,209,88,0.18)', badbg: 'rgba(255,69,58,0.18)', ln: 'rgba(255,255,255,0.09)', fill: 'rgba(255,255,255,0.08)',
-  onAc: '#ffffff', glass: 'rgba(17,25,58,0.98)', glassBorder: 'rgba(255,255,255,0.16)', scrim: 'rgba(3,6,18,0.72)',
+  paper: string;
+  scrim: string;
+  /** Overlay shadow colour (level 3 only). */
+  shadow: string;
 };
 
 export const light: Palette = {
-  bg: '#f5f5f7', card: '#ffffff', tx: '#1d1d1f', tx2: '#636366', ac: '#0060c7', ok: '#1f7a36', bad: '#d70015',
-  acSolid: '#0071e3', okSolid: '#1f7a36', badSolid: '#d70015',
-  feature: { guide: '#4a5fd1', signs: '#b8327f', license: '#0f7d74', schools: '#6d4fd1', test: '#1f6fc4' },
-  paper: '#ffffff',
-  stage: ['#4a5fd1', '#0f7d74', '#6d4fd1', '#b8327f', '#a35f0b'],
-  okbg: 'rgba(52,199,89,0.15)', badbg: 'rgba(255,59,48,0.12)', ln: 'rgba(0,0,0,0.09)', fill: 'rgba(0,0,0,0.06)',
-  onAc: '#ffffff', glass: 'rgba(255,255,255,0.98)', glassBorder: 'rgba(0,0,0,0.08)', scrim: 'rgba(3,6,18,0.5)',
+  bg: '#f6f7f5', bg2: '#eef0ec', card: '#ffffff', elevated: '#ffffff',
+  tx: '#16201b', tx2: '#55615a', ln: '#e1e5e0', lnStrong: '#7c8680', fill: '#eef0ec',
+  ac: '#006c35', acSolid: '#006c35', acPressed: '#00552a', acSoft: '#e3f0e7', onAcSoft: '#00552a', onAc: '#ffffff',
+  ok: '#1a7a3a', okbg: 'rgba(26,122,58,0.10)', okSolid: '#1a7a3a',
+  bad: '#c4291c', badbg: 'rgba(196,41,28,0.10)', badSolid: '#c4291c',
+  warn: '#8a5a00', warnbg: 'rgba(201,140,0,0.14)',
+  info: '#0b5cad', infobg: 'rgba(11,92,173,0.10)',
+  sand: '#8a6414', paper: '#ffffff', scrim: 'rgba(10,14,12,0.5)', shadow: '#000000',
 };
 
+export const dark: Palette = {
+  bg: '#0e1311', bg2: '#0a0e0c', card: '#161c19', elevated: '#1d2521',
+  tx: '#eef2ef', tx2: '#a7b2ac', ln: '#2a332e', lnStrong: '#6f7a74', fill: '#222b26',
+  ac: '#5fd08e', acSolid: '#1b7d45', acPressed: '#156637', acSoft: '#1f3328', onAcSoft: '#7ddca4', onAc: '#ffffff',
+  ok: '#4ccf7e', okbg: 'rgba(76,207,126,0.16)', okSolid: '#1b7d45',
+  bad: '#ff6b5e', badbg: 'rgba(255,107,94,0.16)', badSolid: '#c4291c',
+  warn: '#f2b84b', warnbg: 'rgba(242,184,75,0.16)',
+  info: '#6aaeff', infobg: 'rgba(106,174,255,0.16)',
+  sand: '#e2b65a', paper: '#ffffff', scrim: 'rgba(0,0,0,0.6)', shadow: '#000000',
+};
+
+/** The semantic token names used in the design system, mapped to palette keys. */
+export const SEMANTIC = {
+  'color.background.primary': 'bg',
+  'color.background.secondary': 'bg2',
+  'color.surface.default': 'card',
+  'color.surface.elevated': 'elevated',
+  'color.border.subtle': 'ln',
+  'color.border.strong': 'lnStrong',
+  'color.text.primary': 'tx',
+  'color.text.secondary': 'tx2',
+  'color.text.onAction': 'onAc',
+  'color.action.primary': 'acSolid',
+  'color.action.primaryPressed': 'acPressed',
+  'color.action.secondary': 'acSoft',
+  'color.brand.text': 'ac',
+  'color.brand.sand': 'sand',
+  'color.status.success': 'ok',
+  'color.status.warning': 'warn',
+  'color.status.error': 'bad',
+  'color.status.info': 'info',
+  'color.media.paper': 'paper',
+  'color.scrim': 'scrim',
+} as const satisfies Record<string, keyof Palette>;

@@ -9,6 +9,7 @@ import * as SystemUI from 'expo-system-ui';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider, useApp } from '@/state/AppProvider';
 import { ExamProvider } from '@/state/ExamProvider';
+import { StudyProvider } from '@/state/StudyProvider';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { STRINGS } from '@/i18n';
 import type { Lang } from '@/data/types';
@@ -48,6 +49,7 @@ function Root() {
         <Stack.Screen name="result" options={{ gestureEnabled: false }} />
         <Stack.Screen name="review" />
         <Stack.Screen name="level/[n]" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="drill" options={{ gestureEnabled: false }} />
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
         <Stack.Screen name="about" options={{ presentation: 'modal' }} />
       </Stack>
@@ -64,9 +66,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AppProvider>
-        <ExamProvider>
-          <Root />
-        </ExamProvider>
+        <StudyProvider>
+          <ExamProvider>
+            <Root />
+          </ExamProvider>
+        </StudyProvider>
       </AppProvider>
     </SafeAreaProvider>
   );
@@ -87,7 +91,7 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
     <View style={{ flex: 1, backgroundColor: p.bg, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
       <Text accessibilityRole="header" style={{ color: p.tx, fontSize: 18, textAlign: 'center' }}>{t.errors.crashed}</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={t.common.tryAgain} onPress={() => retry()} style={btn}>
-        <Text style={{ color: '#ffffff', fontSize: 18, textAlign: 'center' }}>{t.common.tryAgain}</Text>
+        <Text style={{ color: p.onAc, fontSize: 18, textAlign: 'center' }}>{t.common.tryAgain}</Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"

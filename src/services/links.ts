@@ -18,3 +18,23 @@ export function isSafeDeepLink(path: string): boolean {
   }
   return true;
 }
+
+/**
+ * Links from before the four-tab redesign keep working: Guide and Signs moved into Learn, Test became Practice.
+ * Accepts a bare path or a full app link and returns the new path (or the input unchanged).
+ */
+export function upgradeLegacyPath(path: string): string {
+  const m = path.match(/^(?:[a-z][a-z0-9+.-]*:\/\/)?\/?([^?#]*)(.*)$/i);
+  if (!m) return path;
+  const [, route, rest] = m;
+  const parts = route.split('/').filter(Boolean);
+  const [head, id] = parts;
+  if (parts.length > 2) return path;
+  if (head === 'test' && !id) return `/practice${rest}`;
+  if (head === 'guide' && !id) return '/learn?section=guide';
+  if (head === 'guide' && id === 'license') return '/learn?section=steps';
+  if (head === 'guide' && id) return `/learn/guide/${id}${rest}`;
+  if (head === 'signs' && !id) return '/learn?section=signs';
+  if (head === 'signs' && id) return `/learn/signs/${id}${rest}`;
+  return path;
+}

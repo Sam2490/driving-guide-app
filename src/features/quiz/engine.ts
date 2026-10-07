@@ -15,6 +15,8 @@ export type ExamSession = {
   startedAt: number;
   endsAt: number;
   config: ExamConfig;
+  /** Question ids the learner flagged to come back to (shown in the question grid). */
+  flags?: string[];
 };
 
 export type ExamResult = {
@@ -49,6 +51,13 @@ export function isCorrect(q: Question, answerId: string | undefined): boolean {
 export function selectAnswer(session: ExamSession, questionId: string, optionId: string): ExamSession {
   if (!session.questions.some((q) => q.id === questionId)) return session;
   return { ...session, answers: { ...session.answers, [questionId]: optionId } };
+}
+
+/** Flags or unflags a question so the learner can find it again from the grid. */
+export function toggleFlag(session: ExamSession, questionId: string): ExamSession {
+  if (!session.questions.some((q) => q.id === questionId)) return session;
+  const flags = session.flags ?? [];
+  return { ...session, flags: flags.includes(questionId) ? flags.filter((f) => f !== questionId) : [...flags, questionId] };
 }
 
 export function scoreExam(questions: readonly Question[], answers: Answers, passMark: number): ExamResult {

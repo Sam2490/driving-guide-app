@@ -33,28 +33,30 @@ async function open(url: string) {
 }
 
 describe('navigation', () => {
-  it.each(['/', '/guide', '/guide/t00', '/guide/license', '/signs', '/signs/s000', '/test', '/schools', '/schools/b01', '/settings', '/about', '/level/1'])('renders %s', async (url) => {
+  it.each(['/', '/learn', '/learn?section=guide', '/learn/guide/t00', '/learn?section=steps', '/learn/signs/s000', '/practice', '/practice/mistakes', '/drill', '/schools', '/schools/b01', '/settings', '/about', '/level/1'])('renders %s', async (url) => {
     await open(url);
     expect(screen.toJSON()).toBeTruthy();
   });
 
-  it('home cards open the right tabs', async () => {
+  it('four tabs, and Home rows open the right place in Learn', async () => {
     await open('/');
-    await fireEvent.press(screen.getByLabelText('دليل المتدرب'));
+    expect(screen.getAllByRole('tab').map((x) => x.props.accessibilityLabel)).toEqual(['الرئيسية', 'التدريب', 'تعلّم', 'المدارس']);
+    await fireEvent.press(screen.getByText('خطوات الرخصة · أنجزت 0 من 6'));
     await settle();
-    expect(screen.getByRole('tab', { name: 'الدليل' }).props.accessibilityState.selected).toBe(true);
-    expect(screen.getByPlaceholderText('ابحث في الدليل…', { includeHiddenElements: true })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'تعلّم' }).props.accessibilityState.selected).toBe(true);
+    expect(screen.getByText('أنجزت 0 من 6 خطوات. اضغط على الخطوة لتحديدها.')).toBeTruthy();
+    expect(screen.getByText('فتح أبشر')).toBeTruthy();
   });
 
   it('unknown ids show an empty state instead of crashing', async () => {
-    await open('/guide/nope');
+    await open('/learn/guide/nope');
     expect(screen.getByText('لا توجد نتائج.')).toBeTruthy();
   });
 });
 
 describe('mock exam flow', () => {
   it('hides answers until submit, supports back, and shows score and mistakes', async () => {
-    await open('/test');
+    await open('/practice');
     await fireEvent.press(screen.getByText('ابدأ الاختبار'));
     await settle();
     expect(screen.getByText('السؤال 1 من 30')).toBeTruthy();
@@ -76,7 +78,7 @@ describe('mock exam flow', () => {
     expect(screen.getByText('لم تُجب عن 29 من الأسئلة. هل تريد التسليم؟')).toBeTruthy();
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await settle();
-    expect(screen.getByText('راسب')).toBeTruthy();
+    expect(screen.getByText('لم تنجح بعد')).toBeTruthy();
     expect(screen.getByText('النجاح من 21 فأكثر')).toBeTruthy();
 
     await fireEvent.press(screen.getByText('مراجعة الأخطاء'));
@@ -110,7 +112,7 @@ describe('nearby schools', () => {
     await fireEvent.press(screen.getByText('ابحث عن أقرب مدرسة'));
     expect(L.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
     expect(screen.getByText('استخدام موقعك؟')).toBeTruthy();
-    await fireEvent.press(screen.getByText('متابعة'));
+    await fireEvent.press(screen.getByText('اسمح بالموقع'));
     await settle();
     await waitFor(() => expect(screen.getByText('أقرب المدارس')).toBeTruthy());
     expect(screen.getAllByText(/^\d+ كم$/)[0].props.children).toBe('1 كم');
@@ -119,9 +121,9 @@ describe('nearby schools', () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'denied', canAskAgain: true } as never);
     await open('/schools');
     await fireEvent.press(screen.getByText('ابحث عن أقرب مدرسة'));
-    await fireEvent.press(screen.getByText('متابعة'));
+    await fireEvent.press(screen.getByText('اسمح بالموقع'));
     await settle();
-    await waitFor(() => expect(screen.getByText('يلزم إذن الموقع للعثور على مدارس القيادة القريبة منك.')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/^يلزم إذن الموقع للعثور على مدارس القيادة القريبة منك\./)).toBeTruthy());
     await fireEvent.press(screen.getByText('عرض كل المدارس'));
     expect(screen.getByText(`${SCHOOLS.length} مدرسة`)).toBeTruthy();
   });
@@ -130,9 +132,9 @@ describe('nearby schools', () => {
     L.hasServicesEnabledAsync.mockResolvedValue(false);
     await open('/schools');
     await fireEvent.press(screen.getByText('ابحث عن أقرب مدرسة'));
-    await fireEvent.press(screen.getByText('متابعة'));
+    await fireEvent.press(screen.getByText('اسمح بالموقع'));
     await settle();
-    await waitFor(() => expect(screen.getByText('خدمات الموقع متوقفة. شغّل الموقع وحاول مرة أخرى.')).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/^خدمات الموقع متوقفة\. شغّل الموقع وحاول مرة أخرى\./)).toBeTruthy());
   });
 });
 
@@ -141,7 +143,7 @@ describe('English exam', () => {
     await open('/settings');
     await fireEvent.press(screen.getByRole('radio', { name: 'English' }));
     await settle();
-    await open('/test');
+    await open('/practice');
     await fireEvent.press(screen.getByText('Start exam'));
     await settle();
     expect(screen.getByText('Question 1 of 30')).toBeTruthy();
@@ -170,7 +172,7 @@ describe('safe failures', () => {
 
 describe('exam survives the app closing', () => {
   it('saves the exam in progress as ids and answers only', async () => {
-    await open('/test');
+    await open('/practice');
     await fireEvent.press(screen.getByText('ابدأ الاختبار'));
     await settle();
     await fireEvent.press(screen.getAllByRole('radio')[1]);
@@ -184,7 +186,7 @@ describe('exam survives the app closing', () => {
     const first = QUESTIONS[0];
     const withFirst = selectAnswer({ ...x, questions: [first, ...x.questions.filter((q) => q.id !== first.id).slice(0, 29)] }, first.id, first.options[0].id);
     await AsyncStorage.setItem('exam.v1', JSON.stringify(serializeExam(withFirst)));
-    await open('/test');
+    await open('/practice');
     await waitFor(() => expect(screen.getByText('متابعة الاختبار · أجبت عن 1 من 30')).toBeTruthy());
     await fireEvent.press(screen.getByText('متابعة الاختبار · أجبت عن 1 من 30'));
     await settle();
@@ -197,7 +199,7 @@ describe('exam timer and leaving', () => {
   it('submits automatically when the time runs out', async () => {
     const x = startExam(QUESTIONS);
     await AsyncStorage.setItem('exam.v1', JSON.stringify(serializeExam({ ...x, endsAt: Date.now() + 1500 })));
-    await open('/test');
+    await open('/practice');
     await waitFor(() => expect(screen.getByText(/^متابعة الاختبار/)).toBeTruthy());
     await fireEvent.press(screen.getByText(/^متابعة الاختبار/));
     await settle();
@@ -205,18 +207,18 @@ describe('exam timer and leaving', () => {
     expect(await AsyncStorage.getItem('exam.v1')).toBeNull();
   });
   it('jumps between questions from the grid and confirms before leaving the exam', async () => {
-    await open('/test');
+    await open('/practice');
     await fireEvent.press(screen.getByText('ابدأ الاختبار'));
     await settle();
     await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
     await fireEvent.press(screen.getByLabelText('السؤال 5 من 30'));
     expect(screen.getByText('السؤال 5 من 30')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('خروج'));
-    expect(screen.getByText('الخروج من الاختبار؟ ستفقد إجاباتك.')).toBeTruthy();
+    expect(screen.getByText('هل تريد إنهاء الاختبار؟ ستُحذف إجاباتك.')).toBeTruthy();
     await fireEvent.press(screen.getAllByText('متابعة').at(-1)!);
-    expect(screen.queryByText('الخروج من الاختبار؟ ستفقد إجاباتك.')).toBeNull();
+    expect(screen.queryByText('هل تريد إنهاء الاختبار؟ ستُحذف إجاباتك.')).toBeNull();
     await fireEvent.press(screen.getByLabelText('خروج'));
-    await fireEvent.press(screen.getAllByText('خروج').at(-1)!);
+    await fireEvent.press(screen.getByText('إنهاء وحذف'));
     await settle();
     expect(screen.getByText('ابدأ الاختبار')).toBeTruthy();
     expect(await AsyncStorage.getItem('exam.v1')).toBeNull();
@@ -257,7 +259,7 @@ describe('level outcomes', () => {
   });
   it('ends the level after 5 wrong answers, and a retry starts it fresh', async () => {
     await play(false, 5);
-    expect(screen.getByText('نفدت المحاولات')).toBeTruthy();
+    expect(screen.getByText('لم تكتمل هذه المرة')).toBeTruthy();
     await fireEvent.press(screen.getByText('إعادة المستوى'));
     await settle();
     expect(screen.getByText('تأكيد الإجابة')).toBeTruthy();
@@ -284,14 +286,12 @@ function unlabelledControls(node: unknown): string[] {
 }
 
 describe('accessibility', () => {
-  it.each(['/', '/guide', '/guide/license', '/signs', '/test', '/schools', '/schools/b01', '/settings', '/about', '/level/1'])('all controls on %s have a role and a name', async (url) => {
+  it.each(['/', '/learn', '/learn?section=guide', '/learn?section=steps', '/practice', '/practice/mistakes', '/schools', '/schools/b01', '/settings', '/about', '/level/1'])('all controls on %s have a role and a name', async (url) => {
     await open(url);
     expect(unlabelledControls(screen.toJSON())).toEqual([]);
   });
   it('the level map labels every level node', async () => {
-    await open('/test');
-    await fireEvent.press(screen.getByRole('tab', { name: /المستويات/ }));
-    await settle();
+    await open('/practice');
     expect(screen.getAllByLabelText(/^المستوى \d+/).length).toBeGreaterThan(0);
     expect(unlabelledControls(screen.toJSON())).toEqual([]);
   });
@@ -307,7 +307,7 @@ describe('UI/UX audit fixes', () => {
     expect(screen.getByText('Choose your language')).toBeTruthy();
     await fireEvent.press(screen.getByText('Continue'));
     await settle();
-    expect(screen.getByText('Start a practice test')).toBeTruthy();
+    expect(screen.getByText('Start mock exam')).toBeTruthy();
     expect(JSON.parse((await AsyncStorage.getItem('settings.v1'))!).lang).toBe('en');
   });
 
@@ -320,9 +320,9 @@ describe('UI/UX audit fixes', () => {
   });
 
   it('source badge sits at the reading start in Arabic (right) and English (left)', async () => {
-    await open('/guide');
+    await open('/learn?section=guide');
     const badge = (text: string) => {
-      let n: any = screen.getByText(text);
+      let n: any = screen.getAllByText(text)[0];
       while (n && n.props?.style && !JSON.stringify(n.props.style).includes('alignSelf')) n = n.parent;
       return JSON.stringify(n?.props?.style);
     };
@@ -330,7 +330,7 @@ describe('UI/UX audit fixes', () => {
   });
 
   it('result screen leads with the verdict, and the Test tab remembers the last result', async () => {
-    await open('/test');
+    await open('/practice');
     await fireEvent.press(screen.getByText('ابدأ الاختبار'));
     await settle();
     await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
@@ -338,7 +338,7 @@ describe('UI/UX audit fixes', () => {
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await settle();
     expect(screen.getByText('نتيجة الاختبار')).toBeTruthy();
-    expect(screen.getByText('راسب')).toBeTruthy();
+    expect(screen.getByText('لم تنجح بعد')).toBeTruthy();
     await fireEvent.press(screen.getByText('مراجعة الأخطاء'));
     await settle();
     await fireEvent.press(screen.getByRole('tab', { name: 'الخاطئة' }));
@@ -347,8 +347,8 @@ describe('UI/UX audit fixes', () => {
     expect(screen.getAllByText('لم تُجب').length).toBeGreaterThan(0);
     const h = JSON.parse((await AsyncStorage.getItem('history.v1'))!);
     expect(h[0]).toMatchObject({ correct: 0, total: 30, passed: false });
-    await open('/test');
-    await waitFor(() => expect(screen.getByText('آخر نتيجة: 0 من 30 · راسب')).toBeTruthy());
+    await open('/practice');
+    await waitFor(() => expect(screen.getByText('آخر نتيجة: 0 من 30 · لم تنجح بعد')).toBeTruthy());
   });
 
   it('school cards open details on tap and keep directions as a secondary icon button', async () => {
@@ -362,7 +362,7 @@ describe('UI/UX audit fixes', () => {
   });
 
   it('signs practice mode can reveal and hide every sign at once', async () => {
-    await open('/signs');
+    await open('/learn');
     await fireEvent.press(screen.getByRole('button', { name: 'وضع التدريب' }));
     expect(screen.getAllByText('اضغط للكشف').length).toBeGreaterThan(0);
     await fireEvent.press(screen.getByText('إظهار الكل'));
@@ -380,5 +380,87 @@ describe('UI/UX audit fixes', () => {
     expect(screen.getByText('4 متبقية')).toBeTruthy();
     const style = JSON.stringify(screen.getByRole('button', { name: 'متابعة' }).props.style);
     expect(style).not.toContain('#d0302a');
+  });
+});
+
+describe('Road-ready redesign', () => {
+  const RN = jest.requireActual('react-native') as typeof import('react-native');
+  afterEach(() => jest.restoreAllMocks());
+
+  it('Home shows readiness from the last mock exams, and the exam saves its mistakes', async () => {
+    await open('/');
+    expect(screen.getByText('لم تُقس بعد')).toBeTruthy();
+    expect(screen.getByText('أجرِ أول اختبار تجريبي لتعرف مدى جاهزيتك.')).toBeTruthy();
+    await fireEvent.press(screen.getByText('ابدأ اختباراً تجريبياً'));
+    await settle();
+    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
+    await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
+    await settle();
+    expect(Object.keys(JSON.parse((await AsyncStorage.getItem('mistakes.v1'))!))).toHaveLength(30);
+    await open('/');
+    await waitFor(() => expect(screen.getByText('واصل التدريب')).toBeTruthy());
+    expect(screen.getByText('نجحت في 0 من آخر 1 اختبار')).toBeTruthy();
+    expect(screen.getByText('راجع 30 أخطاء')).toBeTruthy();
+  });
+
+  it('a flagged question is saved and marked in the question grid', async () => {
+    await open('/practice');
+    await fireEvent.press(screen.getByText('ابدأ الاختبار'));
+    await settle();
+    await fireEvent.press(screen.getByRole('button', { name: 'ضع علامة للرجوع' }));
+    await settle();
+    expect(screen.getByRole('button', { name: 'إزالة العلامة' })).toBeTruthy();
+    expect(JSON.parse((await AsyncStorage.getItem('exam.v1'))!).f).toHaveLength(1);
+    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    expect(screen.getByLabelText('السؤال 1 من 30 · عليه علامة')).toBeTruthy();
+  });
+
+  it('mistakes practice: two right answers in a row take a question off the list', async () => {
+    const [a, b] = QUESTIONS;
+    await AsyncStorage.setItem('mistakes.v1', JSON.stringify({ [a.id]: 1, [b.id]: 0 }));
+    await open('/drill');
+    for (let i = 0; i < 2; i++) {
+      // The round starts with the least-practised question (b), then a; options are shuffled, so match by text.
+      const q = i === 0 ? b : a;
+      const right = q.options.find((o) => o.id === q.correctAnswerId)!.text!;
+      await fireEvent.press(screen.getAllByRole('radio').find((r) => String(r.props.accessibilityLabel).slice(3) === right)!);
+      await fireEvent.press(screen.getByText('تأكيد الإجابة'));
+      expect(screen.getByText('إجابة صحيحة')).toBeTruthy();
+      await fireEvent.press(screen.getByText('متابعة'));
+      await settle();
+    }
+    expect(screen.getByText('اكتمل التدريب')).toBeTruthy();
+    expect(JSON.parse((await AsyncStorage.getItem('mistakes.v1'))!)).toEqual({ [b.id]: 1 });
+  });
+
+  it('licence steps and read topics are remembered', async () => {
+    await open('/learn?section=steps');
+    await fireEvent.press(screen.getByRole('checkbox', { name: /^الخطوة 1:/ }));
+    await settle();
+    expect(JSON.parse((await AsyncStorage.getItem('learn.v1'))!).steps).toEqual([0]);
+    await open('/learn/guide/t00');
+    await fireEvent.press(screen.getByText('تمت القراءة'));
+    await settle();
+    expect(JSON.parse((await AsyncStorage.getItem('learn.v1'))!).read).toEqual(['t00']);
+    expect(screen.getByText('مقروء')).toBeTruthy();
+  });
+
+  it('on a phone, a sign opens its own screen; on a tablet it opens beside the list', async () => {
+    const phone = jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 390, height: 844, scale: 3, fontScale: 1 });
+    await open('/learn');
+    await fireEvent.press(screen.getByRole('button', { name: 'منعطف لليسار' }));
+    await settle();
+    expect(screen.getByRole('button', { name: 'رجوع' })).toBeTruthy();
+    phone.mockReturnValue({ width: 900, height: 1200, scale: 2, fontScale: 1 });
+    await open('/learn');
+    expect(screen.queryByRole('button', { name: 'رجوع' })).toBeNull();
+    expect(screen.getByText('تدرّب على هذا النوع')).toBeTruthy();
+  });
+
+  it('old links open the same content in the new tabs', async () => {
+    const { redirectSystemPath } = jest.requireActual('@/app/+native-intent') as typeof import('@/app/+native-intent');
+    expect(redirectSystemPath({ path: 'drivingguide://signs/s000', initial: true })).toBe('/learn/signs/s000');
+    expect(redirectSystemPath({ path: '/x?q=%zz', initial: true })).toBe('/');
   });
 });

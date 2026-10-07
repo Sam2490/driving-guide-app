@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useApp, useDir } from '@/state/AppProvider';
-import { MAX_CONTENT_WIDTH } from '@/theme/tokens';
-import { Button, Card, Dialog, IconButton, Pips, Ring, Row, T } from '@/components/ui';
+import { useStudy } from '@/state/StudyProvider';
+import { MAX_CONTENT_WIDTH, RADIUS, SPACE } from '@/theme/tokens';
+import { Badge, Button, Dialog, EmptyState, IconButton, Notice, Pips, Row, StickyBar, Stars, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
-import { OptionButton, OptionContent, QuestionBody } from '@/components/Quiz';
+import { ResultLayout } from '@/components/ResultLayout';
+import { OptionButton, OptionContent, QuestionBody, QuestionSlide } from '@/components/Quiz';
 import { QUESTIONS } from '@/data/questions';
 import { answerRun, ATTEMPTS, completeLevel, isFailed, isUnlocked, levelCount, levelQuestions, startRun, type Run } from '@/features/levels/levels';
 
@@ -17,10 +19,10 @@ export default function LevelScreen() {
   const params = useLocalSearchParams<{ n: string }>();
   const level = Math.max(1, Math.min(TOTAL, Number.parseInt(params.n ?? '1', 10) || 1));
   const { t, c, progress, setProgress } = useApp();
+  const { addMisses, addCorrect } = useStudy();
   const L = t.levels;
   const d = useDir();
   const insets = useSafeAreaInsets();
-  const winW = useWindowDimensions().width;
   const navigation = useNavigation();
   const [attempt, setAttempt] = useState(0);
   const questions = useMemo(() => levelQuestions(QUESTIONS, level), [level, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -47,10 +49,8 @@ export default function LevelScreen() {
 
   if (!isUnlocked(progress, level, TOTAL)) {
     return (
-      <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
-        <Icon name="lock" size={36} color={c.tx2} />
-        <T center muted>{L.locked}</T>
-        <Button title={L.back} onPress={() => router.back()} />
+      <View style={{ flex: 1, backgroundColor: c.bg, justifyContent: 'center', padding: SPACE.xl }}>
+        <EmptyState icon="lock" text={L.locked} action={<Button title={L.back} onPress={() => router.back()} />} />
       </View>
     );
   }
@@ -72,7 +72,9 @@ export default function LevelScreen() {
     if (!sel) return;
     const good = sel === q.correctAnswerId;
     const { run: next, gain } = answerRun(run, good);
-    Haptics.notificationAsync(good ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error).catch(() => {});
+    Haptics.notificationAsync(good ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning).catch(() => {});
+    if (good) addCorrect([q.id]);
+    else addMisses([q.id]);
     setRun(next);
     setChecked({ good, gain });
   };
@@ -106,34 +108,37 @@ export default function LevelScreen() {
 
   if (stage !== 'play') {
     const win = stage === 'win';
+    const acc = Math.round((run.correct / Math.max(1, run.results.length)) * 100);
     return (
-      <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 16 }}>
-        <ScrollView contentContainerStyle={{ padding: 24, gap: 16, alignItems: 'stretch' }}>
-          {win ? (
-            <Ring value={run.correct / questions.length} color={c.ok} label={`${run.correct}/${questions.length}`} />
-          ) : (
-            <View style={[styles.bigIcon, { backgroundColor: c.badbg }]}><Icon name="flag" size={40} color={c.bad} /></View>
-          )}
-          <T size={28} weight="bold" center>{win ? L.fin : L.fail}</T>
-          {!win ? <T muted center>{L.failsub}</T> : null}
-          <Row gap={12} style={{ justifyContent: 'center', alignItems: 'stretch' }}>
-            {win && outcome ? (
-              <Card style={styles.stat}><T size={20} weight="bold" center>{`+${outcome.earned}`}</T><T size={12} muted center>{L.gain}</T></Card>
-            ) : null}
-            <Card style={styles.stat}><T size={20} weight="bold" center>{`${Math.round((run.correct / Math.max(1, run.results.length)) * 100)}%`}</T><T size={12} muted center>{L.acc}</T></Card>
-            {win && outcome ? (
-              <Card style={[styles.stat, { alignItems: 'center' }]}><View style={styles.pipLine}><Pips n={outcome.stars} max={3} color={c.ac} /></View><T size={12} muted center>{`${L.lvl} ${level}`}</T></Card>
-            ) : null}
-          </Row>
-          {win && outcome?.rankUp != null ? (
-            <Card accent={c.ac} style={{ backgroundColor: c.ac + '1f' }}>
-              <Row><Icon name="up" color={c.ac} /><View style={{ flex: 1 }}><T size={14} muted>{L.rankup}</T><T size={18} weight="bold">{L.ranks[outcome.rankUp]}</T></View></Row>
-            </Card>
-          ) : null}
-          {win ? (level < TOTAL ? <Button title={L.next} onPress={() => restart(level + 1)} /> : null) : <Button title={L.retry} onPress={() => restart()} />}
-          <Button kind="ghost" title={L.back} onPress={() => router.back()} />
-        </ScrollView>
-      </View>
+      <ResultLayout
+        title={`${L.lvl} ${level}`}
+        onBack={() => router.back()}
+        passed={win}
+        verdict={win ? L.fin : L.fail}
+        verdictSub={win ? undefined : L.failsub}
+        ring={{ value: run.correct / questions.length, label: String(run.correct), sub: t.rd.ofTotal(questions.length), a11y: t.test.score(run.correct, questions.length) }}
+        tiles={
+          win && outcome
+            ? [
+                { label: L.gain, value: `+${outcome.earned}`, color: c.sand },
+                { label: L.acc, value: `${acc}%` },
+                { label: `${L.lvl} ${level}`, node: <Stars n={outcome.stars} size={20} label={t.rd.stars(outcome.stars)} /> },
+              ]
+            : [
+                { label: t.test.correctN, value: String(run.correct), color: c.ok },
+                { label: t.test.wrongN, value: String(run.results.length - run.correct), color: c.bad },
+                { label: L.acc, value: `${acc}%` },
+              ]
+        }
+        actions={
+          <>
+            {win ? (level < TOTAL ? <Button title={L.next} onPress={() => restart(level + 1)} /> : null) : <Button title={L.retry} icon="loop" onPress={() => restart()} />}
+            <Button kind="secondary" title={L.back} onPress={() => router.back()} />
+          </>
+        }
+      >
+        {win && outcome?.rankUp != null ? <Notice tone="ok" title={L.rankup} text={L.ranks[outcome.rankUp]} /> : null}
+      </ResultLayout>
     );
   }
 
@@ -143,42 +148,45 @@ export default function LevelScreen() {
         <IconButton icon="close" label={L.leave} onPress={() => (run.results.length ? setAsk(true) : router.back())} />
         <View style={[styles.segs, { flexDirection: d.row }]} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: questions.length, now: run.results.length }}>
           {questions.map((_, k) => (
-            <View key={k} style={[styles.seg, { backgroundColor: k < run.results.length ? (run.results[k] ? c.ok : c.bad) : k === run.index ? c.ac + '8c' : c.fill }]} />
+            <View key={k} style={[styles.seg, { backgroundColor: k < run.results.length ? (run.results[k] ? c.ok : c.bad) : k === run.index ? c.acSolid : c.fill, opacity: k === run.index && k >= run.results.length ? 0.45 : 1 }]} />
           ))}
         </View>
         {/* Attempts: dots plus a visible count, so the meaning does not rely on colour alone. */}
-        <View accessible accessibilityLabel={`${L.attempts}: ${run.attempts}`} style={{ alignItems: 'center', gap: 4 }}>
+        <View accessible accessibilityLabel={`${L.attempts}: ${run.attempts}`} style={{ alignItems: 'center', gap: SPACE.xxs }}>
           <Pips n={run.attempts} max={ATTEMPTS} color={c.bad} />
-          <T size={12} muted>{t.ux.attemptsLeft(run.attempts)}</T>
+          <T size={12} muted maxScale={1.3}>{t.ux.attemptsLeft(run.attempts)}</T>
         </View>
       </View>
-      <ScrollView ref={scroll} contentContainerStyle={{ padding: 20, gap: 12, paddingBottom: 24, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' }}>
-        <Row style={{ justifyContent: 'space-between' }}>
-          <T size={14} muted>{`${L.lvl} ${level} · ${run.index + 1}/${questions.length}`}</T>
-          {run.combo >= 3 ? <Row gap={4}><Icon name="bolt" size={16} color={c.ac} filled /><T size={14} weight="semibold" color={c.ac}>{`${L.combo} ×${run.combo}`}</T></Row> : null}
-        </Row>
-        <QuestionBody q={q} />
-        <View style={{ gap: 12, marginTop: 8 }}>
-          {q.options.map((o, k) => {
-            const state = checked ? (o.id === q.correctAnswerId ? 'ok' : o.id === sel ? 'bad' : 'dim') : sel === o.id ? 'selected' : 'idle';
-            return <OptionButton key={o.id} q={q} option={o} index={k} state={state} disabled={!!checked} onPress={() => setSel(o.id)} />;
-          })}
-        </View>
+      <ScrollView ref={scroll} contentContainerStyle={styles.body}>
+        <QuestionSlide id={q.id}>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <T size={14} muted>{`${L.lvl} ${level} · ${run.index + 1}/${questions.length}`}</T>
+            {run.combo >= 3 ? <Badge tone="sand" icon="bolt" text={`${L.combo} ×${run.combo}`} /> : null}
+          </Row>
+          <QuestionBody q={q} />
+          <View accessibilityRole="radiogroup" style={{ gap: SPACE.sm, marginTop: SPACE.xs }}>
+            {q.options.map((o, k) => {
+              const state = checked ? (o.id === q.correctAnswerId ? 'ok' : o.id === sel ? 'bad' : 'dim') : sel === o.id ? 'selected' : 'idle';
+              return <OptionButton key={o.id} q={q} option={o} index={k} state={state} disabled={!!checked} onPress={() => setSel(o.id)} />;
+            })}
+          </View>
+        </QuestionSlide>
       </ScrollView>
-      <View style={[styles.dock, { width: Math.min(winW - 24, MAX_CONTENT_WIDTH - 16), backgroundColor: checked ? (checked.good ? c.okbg : c.badbg) : c.glass, borderColor: checked ? (checked.good ? c.ok : c.bad) : c.glassBorder, marginBottom: Math.max(insets.bottom, 12) }]}>
+      {/* The feedback strip rises in the sticky footer, with the correct answer when the choice was wrong. */}
+      <StickyBar tone={checked ? (checked.good ? 'ok' : 'bad') : undefined}>
         {checked ? (
-          <Row style={{ marginBottom: 12, alignItems: 'flex-start' }}>
+          <Row style={{ alignItems: 'flex-start' }} gap={SPACE.sm}>
             <Icon name={checked.good ? 'check' : 'close'} size={24} color={checked.good ? c.ok : c.bad} />
-            <View style={{ flex: 1, gap: 4 }}>
-              <T size={18} weight="bold" color={checked.good ? c.ok : c.bad}>{checked.good ? L.good : L.bad}</T>
-              {checked.good ? <T size={14} muted>{`+${checked.gain} ${L.xp}`}</T> : (
-                <View style={{ gap: 4 }}><T size={14} muted>{L.right}</T><OptionContent q={q} option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} /></View>
+            <View style={{ flex: 1, gap: SPACE.xxs }} accessibilityLiveRegion="polite">
+              <T role="title" color={checked.good ? c.ok : c.bad}>{checked.good ? L.good : L.bad}</T>
+              {checked.good ? <T size={14} color={c.sand} weight="semibold">{`+${checked.gain} ${L.xp}`}</T> : (
+                <View style={{ gap: SPACE.xxs }}><T size={14} muted>{L.right}</T><OptionContent q={q} option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} /></View>
               )}
             </View>
           </Row>
         ) : null}
-        <Button kind={checked?.good ? 'ok' : 'primary'} title={checked ? L.cont : L.check} disabled={!checked && !sel} onPress={checked ? cont : check} />
-      </View>
+        <Button title={checked ? L.cont : L.check} disabled={!checked && !sel} onPress={checked ? cont : check} />
+      </StickyBar>
       <Dialog
         visible={ask}
         text={L.quit}
@@ -186,7 +194,7 @@ export default function LevelScreen() {
         actions={
           <>
             <Button title={L.stay} onPress={() => { pending.current = null; setAsk(false); }} />
-            <Button kind="ghost" title={L.leave} onPress={leave} />
+            <Button kind="destructive" title={L.leave} onPress={leave} />
           </>
         }
       />
@@ -195,12 +203,8 @@ export default function LevelScreen() {
 }
 
 const styles = StyleSheet.create({
-  top: { alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingVertical: 12, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
-  segs: { flex: 1, gap: 4 },
-  seg: { flex: 1, height: 6, borderRadius: 3 },
-  dock: { alignSelf: 'center', padding: 12, borderRadius: 24, borderWidth: 1 },
-  stat: { flex: 1, paddingVertical: 12, paddingHorizontal: 8, gap: 4, justifyContent: 'center' },
-  // Same height as the 20 pt numbers in the other stat cards, so all three cards match.
-  pipLine: { height: 28, justifyContent: 'center' },
-  bigIcon: { width: 76, height: 76, borderRadius: 24, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' },
+  top: { alignItems: 'center', gap: SPACE.sm, paddingHorizontal: SPACE.lg, paddingVertical: SPACE.sm, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
+  segs: { flex: 1, gap: SPACE.xxs },
+  seg: { flex: 1, height: 6, borderRadius: RADIUS.pill },
+  body: { padding: SPACE.lg, paddingBottom: SPACE.xl, width: '100%', maxWidth: MAX_CONTENT_WIDTH, alignSelf: 'center' },
 });
