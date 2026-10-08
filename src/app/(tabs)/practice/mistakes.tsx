@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { useApp } from '@/state/AppProvider';
 import { useStudy } from '@/state/StudyProvider';
-import { Badge, Button, Dialog, EmptyState, Screen, T } from '@/components/ui';
+import { View } from 'react-native';
+import { Badge, Button, Dialog, EmptyState, Grid, Screen, T, useListColumns } from '@/components/ui';
 import { MistakeCard } from '@/components/Quiz';
 import { QUESTIONS } from '@/data/questions';
 import { MASTERED_AFTER, mistakeIds } from '@/features/progress/progress';
@@ -17,9 +18,11 @@ export default function Mistakes() {
   const [ask, setAsk] = useState(false);
   const ids = useMemo(() => mistakeIds(mistakes), [mistakes]);
   const shown = ids.slice(0, 50);
+  const { cols, maxWidth } = useListColumns();
   return (
     <Screen
       back
+      maxWidth={maxWidth}
       title={t.rd.savedMistakes(ids.length)}
       footer={ids.length ? <Button title={t.rd.practiseThese(ids.length)} icon="loop" onPress={() => router.push('/drill')} /> : undefined}
     >
@@ -28,16 +31,18 @@ export default function Mistakes() {
       ) : (
         <>
           <T muted>{t.rd.mistakesSub}</T>
-          {shown.map((id) => {
-            const q = BY_ID.get(id);
-            if (!q) return null;
-            return (
-              <React.Fragment key={id}>
-                {mistakes[id] > 0 ? <Badge tone="ok" icon="check" text={`${mistakes[id]}/${MASTERED_AFTER}`} /> : null}
-                <MistakeCard q={q} hideYours />
-              </React.Fragment>
-            );
-          })}
+          <Grid cols={cols}>
+            {shown.map((id) => {
+              const q = BY_ID.get(id);
+              if (!q) return null;
+              return (
+                <View key={id} style={{ gap: SPACE.xs }}>
+                  {mistakes[id] > 0 ? <Badge tone="ok" icon="check" text={`${mistakes[id]}/${MASTERED_AFTER}`} /> : null}
+                  <MistakeCard q={q} hideYours />
+                </View>
+              );
+            })}
+          </Grid>
           <Button kind="tertiary" title={t.rd.clearMistakes} icon="trash" onPress={() => setAsk(true)} style={{ marginTop: SPACE.md }} />
         </>
       )}

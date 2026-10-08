@@ -120,6 +120,7 @@ export const ur: Strings = {
     flag: 'بعد کے لیے نشان لگائیں', unflag: 'نشان ہٹائیں', flagged: 'نشان زدہ',
     timeWarn: (m) => `${m} منٹ باقی`, ofTotal: (n) => `${n} میں سے`, stars: (n) => `3 میں سے ${n} ستارے`,
     fee: (a) => `${a} ریال`, more: 'مزید', less: 'کم',
+    doneStages: (n) => (n === 1 ? 'مرحلہ 1 مکمل' : `مراحل 1–${n} مکمل`), allStages: (n) => `تمام مراحل دکھائیں (${n})`, fewerStages: 'کم مراحل دکھائیں',
     markRead: 'پڑھ لیا', isRead: 'پڑھا ہوا', readCount: (r, n) => `${n} میں سے ${r} پڑھے`,
     practiseGroup: 'اس قسم کی مشق کریں', welcomeLines: ['تھیوری امتحان کی مشق کریں', 'ٹریفک نشانات سیکھیں', 'ڈرائیونگ اسکول تلاش کریں'],
     textSize: 'متن کا سائز آپ کے فون کی ترتیب کے مطابق ہے۔', progressT: 'آپ کی پیش رفت', endExam: 'ختم کریں اور حذف کریں', backToPractice: 'مشق پر واپس',

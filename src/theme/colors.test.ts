@@ -56,3 +56,12 @@ it('type scale starts at 12 px and every text role is on the scale', () => {
   expect(Math.min(...Object.values(TYPE))).toBe(12);
   for (const r of Object.values(TEXT)) expect(Object.values(TYPE)).toContain(r.size);
 });
+
+it('the web focus ring (action green) keeps 3:1 against the page in both themes', () => {
+  for (const p of [light, dark]) expect(ratio(rgb(p.acSolid), rgb(p.bg))).toBeGreaterThanOrEqual(3);
+});
+
+it('the sign panel is softened at night but still stands out from the card', () => {
+  expect(dark.paper).not.toBe('#ffffff');
+  expect(ratio(rgb(dark.paper), rgb(dark.card))).toBeGreaterThanOrEqual(3);
+});

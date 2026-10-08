@@ -120,11 +120,11 @@ export default function ExamScreen() {
       {/* Thumb-reach footer: Next is the wide primary action; Submit replaces it on the last question. */}
       <StickyBar>
         <Row gap={SPACE.sm}>
-          <Button kind="secondary" title={t.test.prev} disabled={i === 0} onPress={() => setI(i - 1)} style={{ flex: 1 }} />
+          <Button kind="secondary" dense title={t.test.prev} disabled={i === 0} onPress={() => setI(i - 1)} style={{ flex: 1 }} />
           {last ? (
-            <Button title={t.test.submit} icon="check" onPress={() => setAsk('submit')} style={{ flex: 2 }} />
+            <Button dense title={t.test.submit} icon="check" onPress={() => setAsk('submit')} style={{ flex: 1.4 }} />
           ) : (
-            <Button title={t.test.next} onPress={() => setI(i + 1)} style={{ flex: 2 }} />
+            <Button dense title={t.test.next} onPress={() => setI(i + 1)} style={{ flex: 1.4 }} />
           )}
         </Row>
       </StickyBar>

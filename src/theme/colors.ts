@@ -26,7 +26,7 @@ export type Palette = {
   info: string; infobg: string;
   /** color.brand.sand: XP, rank, stars and fees. The only accent besides green. */
   sand: string;
-  /** White panel behind sign and question artwork, in both themes. */
+  /** Panel behind sign and question artwork: white by day, a soft off-white at night so it does not glare. */
   paper: string;
   scrim: string;
   /** Overlay shadow colour (level 3 only). */
@@ -52,7 +52,7 @@ export const dark: Palette = {
   bad: '#ff6b5e', badbg: 'rgba(255,107,94,0.16)', badSolid: '#c4291c',
   warn: '#f2b84b', warnbg: 'rgba(242,184,75,0.16)',
   info: '#6aaeff', infobg: 'rgba(106,174,255,0.16)',
-  sand: '#e2b65a', paper: '#ffffff', scrim: 'rgba(0,0,0,0.6)', shadow: '#000000',
+  sand: '#e2b65a', paper: '#e6e9e5', scrim: 'rgba(0,0,0,0.6)', shadow: '#000000',
 };
 
 /** The semantic token names used in the design system, mapped to palette keys. */

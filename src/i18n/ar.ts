@@ -1,3 +1,4 @@
+import { AR, arCount } from './arCount';
 import type { Strings } from './en';
 
 export const ar: Strings = {
@@ -23,7 +24,7 @@ export const ar: Strings = {
   },
   guide: {
     title: 'دليل المتدرب', sub: 'ملخص لأهم ما ورد في دليل تعليم القيادة النظري الصادر عن الإدارة العامة للمرور.', search: 'ابحث في الدليل…',
-    note: 'ملخص للتعلم ولا يغني عن الدليل الرسمي والأنظمة المحدثة.', topics: (n) => `${n} موضوعاً`,
+    note: 'ملخص للتعلم ولا يغني عن الدليل الرسمي والأنظمة المحدثة.', topics: (n) => arCount(n, AR.topic),
     licenseCard: 'خطوات استخراج الرخصة', licenseCardSub: 'الشروط والحجز والاختبارات والرسوم',
   },
   license: {
@@ -32,16 +33,16 @@ export const ar: Strings = {
     note: 'المعلومات مجمعة من مصادر خدمية عامة وقد تتغير الرسوم والشروط، تأكد منها عبر أبشر أو الإدارة العامة للمرور.',
   },
   signs: {
-    title: 'علامات المرور', sub: (n) => `${n} علامة من علامات المرور في السعودية، مرتبة حسب النوع.`, search: 'ابحث عن علامة…',
+    title: 'علامات المرور', sub: (n) => `${arCount(n, AR.sign)} من علامات المرور في السعودية، مرتبة حسب النوع.`, search: 'ابحث عن علامة…',
     practice: 'وضع التدريب', reveal: 'اضغط للكشف', hint: 'اضغط على العلامة لكشف اسمها، واضغط مرة أخرى لإخفائه.',
-    count: (n) => `${n} علامة`, group: 'النوع',
+    count: (n) => arCount(n, AR.sign), group: 'النوع',
     groups: {},
     credit: 'رسومات العلامات من مكتبة \u2066road-signs\u2069 مفتوحة المصدر (\u2066MIT\u2069)، وأصلها ملفات من ويكيميديا كومنز بتراخيص حرة (غالباً \u2066CC BY-SA 4.0)\u2069.',
   },
   test: {
     title: 'الاختبار النظري', modes: ['اختبار تجريبي', 'تحدّي المستويات'],
     disclaimer: 'محاكي للتدريب وليس الاختبار الرسمي.',
-    exTitle: 'الاختبار التجريبي', exSub: (n, m, p) => `${n} سؤالاً · ${m} دقيقة · النجاح من ${p}`,
+    exTitle: 'الاختبار التجريبي', exSub: (n, m, p) => `${arCount(n, AR.question)} · ${arCount(m, AR.minute)} · النجاح من ${p}`,
     rules: ['تظهر الإجابات الصحيحة بعد التسليم فقط.', 'يمكنك الرجوع وتغيير إجاباتك قبل التسليم.'],
     start: 'ابدأ الاختبار', resume: 'متابعة الاختبار', qOf: (i, n) => `السؤال ${i} من ${n}`,
     prev: 'السابق', next: 'التالي', submit: 'تسليم', grid: 'كل الأسئلة', answered: (n, m) => `أجبت عن ${n} من ${m}`,
@@ -66,7 +67,7 @@ export const ar: Strings = {
   schools: {
     men: 'للرجال', women: 'للنساء', fromAbsher: 'مدرجة في أبشر', publicSource: 'من مصادر عامة · غير مؤكدة في أبشر',
     title: 'مدارس القيادة', findNearby: 'ابحث عن أقرب مدرسة', region: 'المنطقة', city: 'المدينة', allReg: 'كل المناطق', allCity: 'كل المدن',
-    search: 'ابحث عن مدرسة…', count: (n) => `${n} مدرسة`,
+    search: 'ابحث عن مدرسة…', count: (n) => arCount(n, AR.school),
     permTitle: 'استخدام موقعك؟', permBody: 'يُستخدم موقعك مرة واحدة على هذا الجهاز لترتيب المدارس حسب المسافة، ولا يُحفظ أو يُرسل إلى أي جهة.',
     allow: 'اسمح بالموقع', notNow: 'ليس الآن', locating: 'جارٍ تحديد موقعك…',
     denied: 'يلزم إذن الموقع للعثور على مدارس القيادة القريبة منك.', deniedSettings: 'الموقع محظور لهذا التطبيق. يمكنك السماح به من إعدادات الجهاز.',
@@ -106,11 +107,11 @@ export const ar: Strings = {
   },
   rd: {
     readyTitle: 'الجاهزية', readyLevels: { none: 'لم تُقس بعد', practise: 'واصل التدريب', almost: 'قريب من الجاهزية', ready: 'جاهز للاختبار' },
-    readySub: (passed, n) => `نجحت في ${passed} من آخر ${n} ${n === 1 ? 'اختبار' : 'اختبارات'}`,
+    readySub: (passed, n) => `نجحت في ${passed} من آخر ${arCount(n, AR.examGen)}`,
     readyEmpty: 'أجرِ أول اختبار تجريبي لتعرف مدى جاهزيتك.',
     readyA11y: (p, passed, n) => `الجاهزية ${p} بالمئة. نجحت في ${passed} من آخر ${n} اختبارات.`,
     readyDelta: (d) => `الجاهزية ${d > 0 ? '+' : ''}${d}٪`,
-    continueT: 'متابعة', levelRow: (n) => `المستوى ${n}`, levelSub: 'مستواك التالي', mistakesRow: (n) => `راجع ${n} أخطاء`,
+    continueT: 'متابعة', levelRow: (n) => `المستوى ${n}`, levelSub: 'مستواك التالي', mistakesRow: (n) => `راجع ${arCount(n, AR.mistakeAcc)}`,
     mistakesSub: 'تدرّب على كل سؤال حتى تجيبه صحيحاً مرتين', stepsRow: (d, n) => `خطوات الرخصة · أنجزت ${d} من ${n}`,
     tipT: 'نصيحة اليوم', tipMore: 'المزيد من النصائح',
     practiceTitle: 'التدريب', pathTitle: 'مسار المستويات', learnTitle: 'تعلّم', sections: ['العلامات', 'الدليل', 'الخطوات'],
@@ -118,8 +119,9 @@ export const ar: Strings = {
     noMistakes: 'لا توجد أخطاء للمراجعة. أحسنت!', clearMistakes: 'مسح الأخطاء المحفوظة', clearAsk: 'حذف كل الأخطاء المحفوظة؟ لا يمكن التراجع عن ذلك.',
     drillTitle: 'التدريب على الأخطاء', drillDone: 'اكتمل التدريب', drillSub: (m, left) => `أتقنت ${m} · بقي ${left}`,
     flag: 'ضع علامة للرجوع', unflag: 'إزالة العلامة', flagged: 'عليه علامة',
-    timeWarn: (m) => `بقي ${m} ${m === 1 ? 'دقيقة' : 'دقائق'}`, ofTotal: (n) => `من ${n}`, stars: (n) => `${n} من 3 نجوم`,
+    timeWarn: (m) => `بقيت ${arCount(m, AR.minute)}`, ofTotal: (n) => `من ${n}`, stars: (n) => `${n} من 3 نجوم`,
     fee: (a) => `${a} ريال`, more: 'المزيد', less: 'أقل',
+    doneStages: (n) => (n === 1 ? 'المرحلة 1 مكتملة' : `المراحل 1–${n} مكتملة`), allStages: (n) => `عرض كل المراحل (${n})`, fewerStages: 'عرض مراحل أقل',
     markRead: 'تمت القراءة', isRead: 'مقروء', readCount: (r, n) => `قرأت ${r} من ${n}`,
     practiseGroup: 'تدرّب على هذا النوع', welcomeLines: ['تدرّب على الاختبار النظري', 'تعلّم علامات المرور', 'ابحث عن مدرسة قيادة'],
     textSize: 'يتبع حجم النص إعدادات هاتفك.', progressT: 'تقدّمك', endExam: 'إنهاء وحذف', backToPractice: 'العودة إلى التدريب',

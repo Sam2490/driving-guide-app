@@ -400,8 +400,8 @@ describe('Road-ready redesign', () => {
     expect(Object.keys(JSON.parse((await AsyncStorage.getItem('mistakes.v1'))!))).toHaveLength(30);
     await open('/');
     await waitFor(() => expect(screen.getByText('واصل التدريب')).toBeTruthy());
-    expect(screen.getByText('نجحت في 0 من آخر 1 اختبار')).toBeTruthy();
-    expect(screen.getByText('راجع 30 أخطاء')).toBeTruthy();
+    expect(screen.getByText('نجحت في 0 من آخر اختبار')).toBeTruthy();
+    expect(screen.getByText('راجع 30 خطأً')).toBeTruthy();
   });
 
   it('a flagged question is saved and marked in the question grid', async () => {

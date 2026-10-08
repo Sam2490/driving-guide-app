@@ -99,7 +99,7 @@ export const hi: Strings = {
   ux: {
     welcomeTitle: 'अपनी भाषा चुनें', welcomeSub: 'आप इसे कभी भी सेटिंग्स में बदल सकते हैं।', welcomeGo: 'आगे बढ़ें',
     relatedSigns: 'इसी प्रकार के और संकेत', revealAll: 'सभी दिखाएँ', hideAll: 'सभी छिपाएँ',
-    category: 'श्रेणी', bookAbsher: 'अबशर पर बुक करें',
+    category: 'श्रेणी', bookAbsher: 'अबशिर पर बुक करें',
     resultTitle: 'परीक्षा का परिणाम', lastResult: (s, n, pass) => `पिछला परिणाम: ${s}/${n} · ${pass ? 'पास' : 'अभी नहीं'}`, best: (s, n) => `सर्वश्रेष्ठ: ${s}/${n}`,
     reviewFilter: ['सभी', 'गलत', 'बिना जवाब'], attemptsLeft: (n) => `${n} बाकी`,
     nextTopic: 'अगला विषय', prevTopic: 'पिछला विषय', markStep: 'पूरा चिह्नित करें',
@@ -120,6 +120,7 @@ export const hi: Strings = {
     flag: 'बाद के लिए निशान लगाएँ', unflag: 'निशान हटाएँ', flagged: 'निशान लगा है',
     timeWarn: (m) => `${m} मिनट बाकी`, ofTotal: (n) => `/ ${n}`, stars: (n) => `3 में से ${n} स्टार`,
     fee: (a) => `${a} रियाल`, more: 'और', less: 'कम',
+    doneStages: (n) => (n === 1 ? 'चरण 1 पूरा' : `चरण 1–${n} पूरे`), allStages: (n) => `सभी चरण दिखाएँ (${n})`, fewerStages: 'कम चरण दिखाएँ',
     markRead: 'पढ़ लिया', isRead: 'पढ़ा हुआ', readCount: (r, n) => `${n} में से ${r} पढ़े`,
     practiseGroup: 'इस प्रकार का अभ्यास करें', welcomeLines: ['थ्योरी टेस्ट का अभ्यास करें', 'ट्रैफिक संकेत सीखें', 'ड्राइविंग स्कूल खोजें'],
     textSize: 'टेक्स्ट का आकार आपके फ़ोन की सेटिंग के अनुसार है।', progressT: 'आपकी प्रगति', endExam: 'खत्म करें और मिटाएँ', backToPractice: 'अभ्यास पर वापस',

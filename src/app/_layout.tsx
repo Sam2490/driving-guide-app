@@ -25,9 +25,25 @@ if (Platform.OS !== 'web' && I18nManager.isRTL) {
   I18nManager.forceRTL(false);
 }
 
+/**
+ * Keyboard focus ring for the web version (WCAG 2.4.7). It shows only for keyboard focus (:focus-visible), in the
+ * theme's action green, which keeps at least 3:1 against the background in both themes.
+ */
+function useWebFocusRing(color: string) {
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const el = document.createElement('style');
+    el.setAttribute('data-focus-ring', '');
+    el.textContent = `[role="button"]:focus-visible,[role="tab"]:focus-visible,[role="radio"]:focus-visible,[role="checkbox"]:focus-visible,[role="link"]:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid ${color};outline-offset:2px;}`;
+    document.head.appendChild(el);
+    return () => el.remove();
+  }, [color]);
+}
+
 function Root() {
   const { ready, c, isDark, firstRun } = useApp();
   const reduce = useReducedMotion();
+  useWebFocusRing(c.acSolid);
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(c.bg).catch(() => {});
   }, [c.bg]);

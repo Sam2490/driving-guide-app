@@ -99,7 +99,7 @@ export const bn: Strings = {
   ux: {
     welcomeTitle: 'আপনার ভাষা বেছে নিন', welcomeSub: 'সেটিংসে যেকোনো সময় এটি বদলাতে পারবেন।', welcomeGo: 'চালিয়ে যান',
     relatedSigns: 'একই ধরনের আরও সাইন', revealAll: 'সব দেখান', hideAll: 'সব লুকান',
-    category: 'বিভাগ', bookAbsher: 'আবশেরে বুক করুন',
+    category: 'বিভাগ', bookAbsher: 'আবশিরে বুক করুন',
     resultTitle: 'পরীক্ষার ফলাফল', lastResult: (s, n, pass) => `শেষ ফলাফল: ${s}/${n} · ${pass ? 'পাস' : 'এখনও নয়'}`, best: (s, n) => `সেরা: ${s}/${n}`,
     reviewFilter: ['সব', 'ভুল', 'উত্তর নেই'], attemptsLeft: (n) => `${n} বাকি`,
     nextTopic: 'পরের বিষয়', prevTopic: 'আগের বিষয়', markStep: 'সম্পন্ন হিসেবে চিহ্নিত করুন',
@@ -120,6 +120,7 @@ export const bn: Strings = {
     flag: 'পরে দেখার জন্য চিহ্ন দিন', unflag: 'চিহ্ন সরান', flagged: 'চিহ্নিত',
     timeWarn: (m) => `${m} মিনিট বাকি`, ofTotal: (n) => `/ ${n}`, stars: (n) => `3টির মধ্যে ${n}টি তারা`,
     fee: (a) => `${a} রিয়াল`, more: 'আরও', less: 'কম',
+    doneStages: (n) => (n === 1 ? 'পর্ব 1 সম্পন্ন' : `পর্ব 1–${n} সম্পন্ন`), allStages: (n) => `সব পর্ব দেখুন (${n})`, fewerStages: 'কম পর্ব দেখুন',
     markRead: 'পড়া হয়েছে', isRead: 'পড়া', readCount: (r, n) => `${n}টির ${r}টি পড়া`,
     practiseGroup: 'এই ধরনের অনুশীলন করুন', welcomeLines: ['তত্ত্বীয় পরীক্ষার অনুশীলন করুন', 'ট্রাফিক সাইন শিখুন', 'ড্রাইভিং স্কুল খুঁজুন'],
     textSize: 'লেখার আকার আপনার ফোনের সেটিং অনুযায়ী।', progressT: 'আপনার অগ্রগতি', endExam: 'শেষ করুন ও মুছুন', backToPractice: 'অনুশীলনে ফিরুন',

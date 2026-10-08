@@ -1,7 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
-import { fontFor, lineHeightFor } from '@/theme/fonts';
+import * as Font from 'expo-font';
+import { fontFor, lineHeightFor, loadFontsFor } from '@/theme/fonts';
 import { LANGUAGES } from '@/i18n';
 import type { Lang } from '@/data/types';
 import { RADIUS, SPACE, TYPE } from '@/theme/tokens';
@@ -11,13 +12,26 @@ import { Icon } from './Icon';
 export function LanguageList({ value, onPick, pending }: { value: Lang; onPick: (l: Lang) => void; pending?: Lang | null }) {
   const { c } = useApp();
   const d = useDir();
+  // A name drawn in a script font that is still loading is measured with the fallback font and then clipped
+  // ("বাং" for "বাংলা"). Names use the system font until their own font is ready, and the row is re-created
+  // (new key) once it is, so it is measured again.
+  const [, setReady] = React.useState(0);
+  React.useEffect(() => {
+    let alive = true;
+    for (const id of [value, pending].filter(Boolean) as Lang[]) loadFontsFor(id).then(() => alive && setReady((n) => n + 1));
+    return () => {
+      alive = false;
+    };
+  }, [value, pending]);
   return (
     <View accessibilityRole="radiogroup" style={{ gap: SPACE.xxs }}>
       {LANGUAGES.map((l) => {
         const on = l.id === value;
+        const family = fontFor(l.id, on ? 'semibold' : 'regular');
+        const loaded = Font.isLoaded(family);
         return (
           <Pressable
-            key={l.id}
+            key={`${l.id}-${loaded ? 'font' : 'system'}`}
             accessibilityRole="radio"
             accessibilityState={{ selected: on, busy: pending === l.id }}
             accessibilityLabel={l.id === 'en' ? l.name : `${l.name}, ${l.english}`}
@@ -25,7 +39,7 @@ export function LanguageList({ value, onPick, pending }: { value: Lang; onPick: 
             style={({ pressed }) => [styles.row, { flexDirection: d.row, backgroundColor: on ? c.acSoft : 'transparent', borderColor: on ? c.acSolid : 'transparent', opacity: pressed ? 0.85 : 1 }]}
           >
             <View style={{ flex: 1, flexDirection: d.row, alignItems: 'baseline', gap: SPACE.xs, flexWrap: 'wrap' }}>
-              <Text style={{ fontFamily: fontFor(l.id, on ? 'semibold' : 'regular'), fontSize: TYPE.bodyLg, lineHeight: lineHeightFor(l.id, TYPE.bodyLg), color: on ? c.onAcSoft : c.tx }}>{l.name}</Text>
+              <Text style={{ fontFamily: loaded ? family : undefined, fontWeight: loaded ? undefined : on ? '600' : '400', fontSize: TYPE.bodyLg, lineHeight: lineHeightFor(l.id, TYPE.bodyLg), color: on ? c.onAcSoft : c.tx }}>{l.name}</Text>
               {l.id !== 'en' ? <Text style={{ fontFamily: fontFor('en', 'regular'), fontSize: TYPE.label, color: c.tx2 }}>{l.english}</Text> : null}
             </View>
             {pending === l.id ? <ActivityIndicator color={c.ac} /> : on ? <Icon name="check" size={20} color={c.onAcSoft} /> : null}

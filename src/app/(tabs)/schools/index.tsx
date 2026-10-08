@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
-import { BottomSheet, Button, Chip, EmptyState, IconTile, Notice, PickerSheet, Row, Screen, SearchBox, Skeleton, T } from '@/components/ui';
+import { BottomSheet, Button, Chip, EmptyState, Grid, IconTile, Notice, PickerSheet, Row, Screen, SearchBox, Skeleton, T, useListColumns } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { SchoolCard } from '@/components/SchoolCard';
 import { SCHOOLS, SCHOOLS_CHECKED } from '@/data/schools';
@@ -35,6 +35,7 @@ export default function Schools() {
   const [q, setQ] = useState('');
   const [picker, setPicker] = useState<null | 'region' | 'city'>(null);
   const [loc, setLoc] = useState<Loc>({ phase: 'idle' });
+  const { cols, maxWidth } = useListColumns();
 
   // Search text for each school, built once per language instead of on every keystroke.
   const haystack = useMemo(
@@ -62,7 +63,7 @@ export default function Schools() {
     r.status === 'denied' ? (r.canAskAgain ? t.schools.denied : t.schools.deniedSettings) : r.status === 'services-off' ? t.schools.servicesOff : t.schools.unavailable;
 
   return (
-    <Screen title={t.schools.title} large>
+    <Screen title={t.schools.title} large maxWidth={maxWidth}>
       <SearchBox value={q} onChange={(v) => { setQ(v); if (near) reset(); }} placeholder={t.schools.search} />
       <Row gap={SPACE.xs} style={{ flexWrap: 'wrap' }}>
         <Chip label={t.schools.findNearby} icon="locate" on={near} onPress={() => (near ? reset() : setLoc({ phase: 'explain' }))} />
@@ -94,7 +95,7 @@ export default function Schools() {
             <T role="h3" header>{t.schools.nearbyTitle}</T>
             <Button small kind="tertiary" title={t.schools.viewAll} onPress={reset} />
           </Row>
-          {loc.list.map((n) => <SchoolCard key={n.school.id} school={n.school} distance={{ km: n.km, city: n.city }} />)}
+          <Grid cols={cols}>{loc.list.map((n) => <SchoolCard key={n.school.id} school={n.school} distance={{ km: n.km, city: n.city }} />)}</Grid>
         </View>
       ) : (
         <View style={{ gap: SPACE.sm }}>
@@ -103,7 +104,7 @@ export default function Schools() {
             <View style={{ flex: 1 }}><Select label={t.schools.city} value={city ? cityName(city, lang) : t.schools.allCity} onPress={() => setPicker('city')} /></View>
           </Row>
           {list.length === 0 ? <EmptyState text={t.common.noResults} action={<Button small kind="secondary" title={t.schools.viewAll} onPress={() => { setRegion(''); setCity(''); setQ(''); }} />} /> : null}
-          {list.map((s) => <SchoolCard key={s.id} school={s} />)}
+          <Grid cols={cols}>{list.map((s) => <SchoolCard key={s.id} school={s} />)}</Grid>
         </View>
       )}
       <T size={14} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>

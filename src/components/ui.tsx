@@ -1,11 +1,11 @@
 import React from 'react';
-import { ActivityIndicator, Animated, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type LayoutChangeEvent, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Animated, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type LayoutChangeEvent, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
 import { useApp, useDir } from '@/state/AppProvider';
 import { LATIN_FONT, type Weight } from '@/theme/fonts';
-import { ELEVATION, ICON, LAYOUT, MAX_CONTENT_WIDTH, MOTION, RADIUS, SPACE, TEXT, TOUCH, type TextRole, type TypeSize } from '@/theme/tokens';
+import { BREAKPOINTS, ELEVATION, ICON, LAYOUT, MAX_CONTENT_WIDTH, MOTION, RADIUS, SPACE, TEXT, TOUCH, type TextRole, type TypeSize } from '@/theme/tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Icon, type IconName } from './Icon';
 import { LANGUAGES } from '@/i18n';
@@ -32,10 +32,15 @@ type TProps = {
   /** Cap on the system font-size multiplier (decorative numbers, chrome). Body text is never capped. */
   maxScale?: number;
   onTextLayout?: React.ComponentProps<typeof Text>['onTextLayout'];
+  /**
+   * A short label that should stay on one line (chips, badges, row labels). Android can draw a label a hair wider
+   * than it measured it; instead of wrapping or cutting a letter, the text shrinks slightly (never below 80%).
+   */
+  fit?: boolean;
 };
 
 /** Text that picks the right font, line height and alignment for the current language. */
-export function T({ children, size, role, weight, color, muted, content, latin, center, style, numberOfLines, header, maxScale, onTextLayout }: TProps) {
+export function T({ children, size, role, weight, color, muted, content, latin, center, style, numberOfLines, header, maxScale, onTextLayout, fit }: TProps) {
   const { c, font, lh } = useApp();
   const d = useDir();
   const spec = role ? TEXT[role] : undefined;
@@ -44,7 +49,9 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   return (
     <Text
       accessibilityRole={header ? 'header' : undefined}
-      numberOfLines={numberOfLines}
+      numberOfLines={fit ? 1 : numberOfLines}
+      adjustsFontSizeToFit={fit || undefined}
+      minimumFontScale={fit ? 0.8 : undefined}
       onTextLayout={onTextLayout}
       maxFontSizeMultiplier={maxScale ?? spec?.maxScale}
       // Android's default "highQuality" line breaking measures a little wider than Yoga allots.
@@ -56,25 +63,27 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   );
 }
 
-/**
- * A short label that must stay on one line (buttons, chips, pills, tabs). Some Android phones draw Arabic a little
- * wider than React Native measured it, which broke "ابدأ الاختبار" onto two lines beside its icon. If the label
- * wraps, it is widened to the width it actually drew (capped to `room`), so it settles on one line.
- */
-export function OneLine({ children, room, style, ...rest }: Omit<TProps, 'children' | 'onTextLayout'> & { children: string; room?: number }) {
+/** Columns for card lists on wider screens: one on phones, two from 600 pt (tablets, landscape). */
+export function useListColumns(): { cols: number; maxWidth: number } {
   const { width } = useWindowDimensions();
-  const fs = rest.size ?? (rest.role ? TEXT[rest.role].size : 16);
-  const [fix, setFix] = React.useState<{ text: string; w: number } | null>(null);
-  const need = fix?.text === children ? fix.w : 0;
-  const onTextLayout = React.useCallback(
-    (e: { nativeEvent: { lines: { width: number }[] } }) => {
-      const lines = e.nativeEvent.lines;
-      if (lines.length > 1 && need === 0) setFix({ text: children, w: Math.ceil(lines.reduce((a, l) => a + l.width, 0) + fs * 0.5) });
-    },
-    [need, fs, children],
+  return width >= BREAKPOINTS.medium ? { cols: 2, maxWidth: 1040 } : { cols: 1, maxWidth: MAX_CONTENT_WIDTH };
+}
+
+/** Lays cards out in equal columns, row by row in reading order (right to left in Arabic and Urdu). */
+export function Grid({ children, cols, gap = LAYOUT.list }: { children: React.ReactNode; cols: number; gap?: number }) {
+  const items = React.Children.toArray(children);
+  if (cols <= 1) return <View style={{ gap }}>{items}</View>;
+  const rows: React.ReactNode[][] = [];
+  for (let i = 0; i < items.length; i += cols) rows.push(items.slice(i, i + cols));
+  return (
+    <View style={{ gap }}>
+      {rows.map((r, i) => (
+        <Row key={i} gap={gap} style={{ alignItems: 'stretch' }}>
+          {Array.from({ length: cols }, (_, j) => <View key={j} style={{ flex: 1 }}>{r[j] ?? null}</View>)}
+        </Row>
+      ))}
+    </View>
   );
-  const cap = room ?? width * 0.8;
-  return <T {...rest} style={[{ flexShrink: 1 }, need ? { minWidth: Math.min(need, cap) } : null, style]} onTextLayout={onTextLayout}>{children}</T>;
 }
 
 export function Row({ children, style, gap = SPACE.sm, onLayout }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; gap?: number; onLayout?: (e: LayoutChangeEvent) => void }) {
@@ -197,7 +206,11 @@ export function Card({ children, style, onPress, label, accent, checked }: { chi
 
 export type ButtonKind = 'primary' | 'secondary' | 'tertiary' | 'destructive';
 type LegacyKind = 'ghost' | 'ok' | 'danger';
-type BtnProps = { title: string; onPress: () => void; kind?: ButtonKind | LegacyKind; icon?: IconName; disabled?: boolean; loading?: boolean; style?: StyleProp<ViewStyle>; small?: boolean; label?: string };
+type BtnProps = {
+  title: string; onPress: () => void; kind?: ButtonKind | LegacyKind; icon?: IconName; disabled?: boolean; loading?: boolean; style?: StyleProp<ViewStyle>; small?: boolean; label?: string;
+  /** Tighter side padding for buttons that share a row (exam footer), so a long word keeps its line. */
+  dense?: boolean;
+};
 
 const KIND: Record<ButtonKind | LegacyKind, ButtonKind> = { primary: 'primary', secondary: 'secondary', tertiary: 'tertiary', destructive: 'destructive', ghost: 'secondary', ok: 'primary', danger: 'destructive' };
 
@@ -205,15 +218,15 @@ const KIND: Record<ButtonKind | LegacyKind, ButtonKind> = { primary: 'primary', 
  * One primary button per screen; secondary is tinted green; tertiary is text only; destructive only in confirmations.
  * Disabled is outlined and dashed (reads as "not yet"); loading keeps the label and swaps the icon for a spinner.
  */
-export function Button({ title, onPress, kind = 'primary', icon, disabled, loading, style, small, label }: BtnProps) {
+export function Button({ title, onPress, kind = 'primary', icon, disabled, loading, style, small, label, dense }: BtnProps) {
   const { c } = useApp();
   const k = KIND[kind];
   const press = usePressScale();
-  const [room, setRoom] = React.useState(0);
-  const size = small ? 16 : 18;
+  const size: TypeSize = small ? 16 : 18;
   const fg = disabled ? c.tx2 : k === 'secondary' ? c.onAcSoft : k === 'tertiary' ? c.ac : c.onAc;
   const bg = (pressed: boolean) =>
     disabled ? 'transparent' : k === 'primary' ? (pressed ? c.acPressed : c.acSolid) : k === 'destructive' ? c.badSolid : k === 'secondary' ? (pressed ? c.ln : c.acSoft) : pressed ? c.fill : 'transparent';
+  const glyph = loading ? <ActivityIndicator color={fg} size="small" /> : icon ? <Icon name={icon} size={ICON.control} color={fg} /> : null;
   return (
     <Animated.View style={[{ transform: [{ scale: press.scale }] }, style]}>
       <Pressable
@@ -224,14 +237,59 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, loadi
         onPress={onPress}
         onPressIn={press.onPressIn}
         onPressOut={press.onPressOut}
-        style={({ pressed }) => [styles.btn, small && styles.btnSmall, k === 'tertiary' && styles.btnTertiary, { backgroundColor: bg(pressed), borderColor: disabled ? c.lnStrong : 'transparent', borderStyle: disabled ? 'dashed' : 'solid' }]}
+        style={({ pressed }) => [styles.btn, small && styles.btnSmall, k === 'tertiary' && styles.btnTertiary, dense && styles.btnDense, { backgroundColor: bg(pressed), borderColor: disabled ? c.lnStrong : 'transparent', borderStyle: disabled ? 'dashed' : 'solid' }]}
       >
-        <Row gap={SPACE.xs} style={{ justifyContent: 'center' }} onLayout={(e) => setRoom(e.nativeEvent.layout.width)}>
-          {loading ? <ActivityIndicator color={fg} /> : icon ? <Icon name={icon} size={ICON.control} color={fg} /> : null}
-          <OneLine size={size} weight="semibold" color={fg} center room={room ? room - (icon || loading ? ICON.control + SPACE.xs : 0) : undefined}>{title}</OneLine>
-        </Row>
+        <ButtonLabel title={title} size={size} color={fg} glyph={glyph} />
       </Pressable>
     </Animated.View>
+  );
+}
+
+const GLYPH_SLOT = ICON.control + SPACE.xs;
+
+/**
+ * Button label. The text box always spans the button's full width, so Android never shrinks it to "fit" the text
+ * (that is what cut off "أبشر" and pushed icons under labels on some phones). It wraps to a second line only when
+ * the words truly do not fit. The icon is drawn beside the text as laid out, using the widest line's width, and
+ * the same space is kept free on both sides so the text stays centred. The web has no such measuring issue and
+ * does not report line widths, so it uses a plain row.
+ */
+function ButtonLabel({ title, size, color, glyph }: { title: string; size: TypeSize; color: string; glyph: React.ReactNode }) {
+  const d = useDir();
+  const [drawn, setDrawn] = React.useState<{ text: string; w: number } | null>(null);
+  const label = (
+    <T size={size} weight="semibold" color={color} center numberOfLines={2} style={glyph && Platform.OS !== 'web' ? { paddingHorizontal: GLYPH_SLOT } : undefined}
+      onTextLayout={glyph && Platform.OS !== 'web' ? (e) => {
+        const w = Math.ceil(Math.max(0, ...e.nativeEvent.lines.map((l) => l.width)));
+        if (drawn?.text !== title || drawn.w !== w) setDrawn({ text: title, w });
+      } : undefined}
+    >
+      {title}
+    </T>
+  );
+  if (!glyph) return label;
+  if (Platform.OS === 'web') {
+    return (
+      <Row gap={SPACE.xs} style={{ justifyContent: 'center' }}>
+        {glyph}
+        <View style={{ flexShrink: 1 }}>{label}</View>
+      </Row>
+    );
+  }
+  const w = drawn?.text === title ? drawn.w : null;
+  // Centre of the box, minus half the drawn text, minus the gap and the icon: the icon sits at the reading start.
+  const offset = w === null ? 0 : -(w / 2) - GLYPH_SLOT;
+  return (
+    <View style={{ alignSelf: 'stretch', justifyContent: 'center' }}>
+      {label}
+      <View
+        testID="button-icon"
+        pointerEvents="none"
+        style={[{ position: 'absolute', top: 0, bottom: 0, justifyContent: 'center', opacity: w === null ? 0 : 1 }, d.rtl ? { right: '50%', marginRight: offset } : { left: '50%', marginLeft: offset }]}
+      >
+        {glyph}
+      </View>
+    </View>
   );
 }
 
@@ -241,7 +299,7 @@ export function Chip({ label, on, onPress, icon }: { label: string; on?: boolean
   if (!onPress) {
     return (
       <View style={[styles.chip, styles.chipStatic, { backgroundColor: c.fill }]}>
-        <OneLine role="caption" size={14} weight="medium">{label}</OneLine>
+        <T role="caption" size={14} weight="medium" fit>{label}</T>
       </View>
     );
   }
@@ -249,7 +307,7 @@ export function Chip({ label, on, onPress, icon }: { label: string; on?: boolean
     <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: !!on }} onPress={onPress} hitSlop={{ top: 4, bottom: 4 }} style={({ pressed }) => [styles.chip, { backgroundColor: on ? c.acSolid : pressed ? c.ln : c.card, borderColor: on ? c.acSolid : c.ln }]}>
       <Row gap={SPACE.xxs}>
         {on ? <Icon name="check" size={ICON.inline} color={c.onAc} /> : icon ? <Icon name={icon} size={ICON.inline} color={c.ac} /> : null}
-        <OneLine size={14} weight="semibold" color={on ? c.onAc : c.tx}>{label}</OneLine>
+        <T size={14} weight="semibold" color={on ? c.onAc : c.tx} fit>{label}</T>
       </Row>
     </Pressable>
   );
@@ -258,12 +316,15 @@ export function Chip({ label, on, onPress, icon }: { label: string; on?: boolean
 /** Small read-only label: sources, fees, counts, "new". */
 export function Badge({ text, tone = 'neutral', icon }: { text: string; tone?: 'neutral' | 'brand' | 'sand' | 'ok' | 'bad' | 'warn'; icon?: IconName }) {
   const { c } = useApp();
+  const d = useDir();
+  // Short badges stay on one line; long ones (e.g. "from public sources · not confirmed on Absher") may wrap.
+  const short = text.length <= 28;
   const fg = tone === 'brand' ? c.ac : tone === 'sand' ? c.sand : tone === 'ok' ? c.ok : tone === 'bad' ? c.bad : tone === 'warn' ? c.warn : c.tx2;
   const bg = tone === 'ok' ? c.okbg : tone === 'bad' ? c.badbg : tone === 'warn' ? c.warnbg : c.fill;
   return (
-    <Row gap={SPACE.xxs} style={[styles.badge, { backgroundColor: bg }]}>
+    <Row gap={SPACE.xxs} style={[styles.badge, { backgroundColor: bg, alignSelf: d.start }]}>
       {icon ? <Icon name={icon} size={12} color={fg} /> : null}
-      <T size={12} weight="semibold" color={fg} maxScale={1.5}>{text}</T>
+      <T size={12} weight="semibold" color={fg} maxScale={1.5} fit={short} style={short ? undefined : { flexShrink: 1 }}>{text}</T>
     </Row>
   );
 }
@@ -275,7 +336,7 @@ export function Segmented({ options, value, onChange }: { options: string[]; val
     <View accessibilityRole="tablist" style={[styles.seg, { backgroundColor: c.bg2, borderColor: c.ln, flexDirection: d.row }]}>
       {options.map((o, i) => (
         <Pressable key={o} accessibilityRole="tab" accessibilityLabel={o} accessibilityState={{ selected: value === i }} onPress={() => onChange(i)} style={[styles.segBtn, value === i && { backgroundColor: c.card, borderColor: c.ln, borderWidth: 1 }]}>
-          <OneLine size={16} weight="semibold" center color={value === i ? c.tx : c.tx2} maxScale={1.3}>{o}</OneLine>
+          <T size={16} weight="semibold" center color={value === i ? c.tx : c.tx2} maxScale={1.3} numberOfLines={2}>{o}</T>
         </Pressable>
       ))}
     </View>
@@ -594,7 +655,7 @@ export function LanguagePill() {
       style={({ pressed }) => [{ flexDirection: d.row, alignItems: 'center', gap: SPACE.xxs, minHeight: TOUCH, paddingHorizontal: SPACE.sm, borderRadius: RADIUS.pill, borderWidth: 1, borderColor: c.ln, backgroundColor: pressed ? c.ln : c.fill }]}
     >
       <Icon name="globe" size={ICON.control} color={c.tx} />
-      <OneLine size={14} weight="semibold" maxScale={1.3}>{name}</OneLine>
+      <T size={14} weight="semibold" maxScale={1.3} fit>{name}</T>
     </Pressable>
   );
 }
@@ -608,9 +669,10 @@ const styles = StyleSheet.create({
   btn: { minHeight: 52, borderRadius: RADIUS.md, paddingHorizontal: LAYOUT.buttonX, paddingVertical: SPACE.sm, justifyContent: 'center', borderWidth: 1 },
   btnSmall: { minHeight: TOUCH, paddingVertical: SPACE.xs, paddingHorizontal: SPACE.md },
   btnTertiary: { minHeight: TOUCH, paddingVertical: SPACE.xs },
+  btnDense: { paddingHorizontal: SPACE.sm },
   chip: { minHeight: 36, paddingHorizontal: 14, paddingVertical: SPACE.xxs, borderRadius: RADIUS.pill, justifyContent: 'center', borderWidth: 1 },
   chipStatic: { minHeight: 28, paddingHorizontal: SPACE.sm, borderWidth: 0 },
-  badge: { minHeight: 24, paddingHorizontal: SPACE.xs, borderRadius: RADIUS.sm, alignSelf: 'flex-start' },
+  badge: { minHeight: 24, paddingHorizontal: SPACE.xs, borderRadius: RADIUS.sm, maxWidth: '100%' },
   seg: { padding: SPACE.xxs, borderRadius: RADIUS.pill, borderWidth: 1, gap: SPACE.xxs },
   segBtn: { flex: 1, minHeight: TOUCH, borderRadius: RADIUS.pill, justifyContent: 'center', paddingHorizontal: SPACE.xs, borderWidth: 1, borderColor: 'transparent' },
   search: { alignItems: 'center', gap: SPACE.xs, borderRadius: RADIUS.md, borderWidth: 1, paddingHorizontal: SPACE.md, minHeight: 52 },

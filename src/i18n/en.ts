@@ -118,6 +118,7 @@ export const en = {
     flag: 'Flag for later', unflag: 'Remove flag', flagged: 'Flagged',
     timeWarn: (m: number) => `${m} ${m === 1 ? 'minute' : 'minutes'} left`, ofTotal: (n: number) => `of ${n}`, stars: (n: number) => `${n} of 3 stars`,
     fee: (a: string) => `${a} SAR`, more: 'More', less: 'Less',
+    doneStages: (n: number) => (n === 1 ? 'Stage 1 complete' : `Stages 1–${n} complete`), allStages: (n: number) => `Show all stages (${n})`, fewerStages: 'Show fewer stages',
     markRead: 'Mark as read', isRead: 'Read', readCount: (r: number, n: number) => `${r} of ${n} read`,
     practiseGroup: 'Practise this group', welcomeLines: ['Practise the theory test', 'Learn the road signs', 'Find a driving school'],
     textSize: 'Text follows your phone\'s font size.', progressT: 'Your progress', endExam: 'End and delete', backToPractice: 'Back to Practice',

@@ -6,7 +6,7 @@ import { QUESTIONS } from '@/data/questions';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { currentLevel, levelCount, LEVELS_PER_STAGE, rankFor, rankProgress, stageCount } from '@/features/levels/levels';
 import { RADIUS, SPACE } from '@/theme/tokens';
-import { Card, IconTile, ProgressBar, Row, Stars, T } from './ui';
+import { Button, Card, IconTile, ProgressBar, Row, Stars, T } from './ui';
 import { Icon } from './Icon';
 
 const TOTAL = levelCount(QUESTIONS.length);
@@ -57,11 +57,24 @@ export function LevelPath() {
   const d = useDir();
   const L = t.levels;
   const cur = currentLevel(progress, TOTAL);
-  const [open, setOpen] = useState<Record<number, boolean>>({ [Math.floor((cur - 1) / LEVELS_PER_STAGE)]: true });
+  const curStage = Math.floor((cur - 1) / LEVELS_PER_STAGE);
+  const [open, setOpen] = useState<Record<number, boolean>>({ [curStage]: true });
+  // The path is long (17 stages). By default it shows the current stage and the next one; finished stages fold
+  // into one row and later stages behind "Show all stages".
+  const [all, setAll] = useState(false);
+  const first = all ? 0 : curStage;
+  const last = all ? STAGES - 1 : Math.min(STAGES - 1, curStage + 1);
 
   return (
     <View style={{ gap: SPACE.sm }}>
-      {Array.from({ length: STAGES }, (_, u) => {
+      {!all && curStage > 0 ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={`${t.rd.doneStages(curStage)}. ${t.rd.allStages(STAGES)}`} onPress={() => setAll(true)} style={({ pressed }) => [styles.stage, styles.stageHead, { flexDirection: d.row, backgroundColor: pressed ? c.fill : c.card, borderColor: c.ln }]}>
+          <View style={[styles.stageIcon, { backgroundColor: c.acSolid }]}><Icon name="check" size={20} color={c.onAc} /></View>
+          <View style={{ flex: 1 }}><T role="title">{t.rd.doneStages(curStage)}</T></View>
+          <Icon name="down" size={20} color={c.tx2} />
+        </Pressable>
+      ) : null}
+      {Array.from({ length: last - first + 1 }, (_, k) => first + k).map((u) => {
         const levels = Array.from({ length: Math.min(LEVELS_PER_STAGE, TOTAL - u * LEVELS_PER_STAGE) }, (_, i) => u * LEVELS_PER_STAGE + i + 1);
         const n = levels.filter((l) => progress.done[l]).length;
         const isOpen = !!open[u];
@@ -123,6 +136,9 @@ export function LevelPath() {
           </View>
         );
       })}
+      {last < STAGES - 1 || all ? (
+        <Button kind="tertiary" title={all ? t.rd.fewerStages : t.rd.allStages(STAGES)} onPress={() => setAll(!all)} />
+      ) : null}
     </View>
   );
 }
