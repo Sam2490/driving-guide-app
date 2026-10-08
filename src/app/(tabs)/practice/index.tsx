@@ -43,7 +43,11 @@ export default function Practice() {
       ))}
       {exam ? (
         <>
-          <Button title={`${t.test.resume} · ${t.test.answered(answeredCount(exam), exam.questions.length)}`} icon="loop" onPress={() => router.push('/exam')} />
+          {/* The count sits under the button: inside the label it wrapped and left one word or number alone. */}
+          <View style={{ gap: SPACE.xxs }}>
+            <Button title={t.test.resume} label={`${t.test.resume} · ${t.test.answered(answeredCount(exam), exam.questions.length)}`} icon="loop" onPress={() => router.push('/exam')} />
+            <T size={14} muted center>{t.test.answered(answeredCount(exam), exam.questions.length)}</T>
+          </View>
           <Button kind="secondary" title={t.test.again} onPress={begin} />
         </>
       ) : (

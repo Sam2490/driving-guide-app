@@ -3,7 +3,7 @@ import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 import { useApp } from '@/state/AppProvider';
 import { RADIUS, SPACE } from '@/theme/tokens';
 import { Icon } from './Icon';
-import { Ring, Row, Screen, StatTile, T } from './ui';
+import { CenteredLabel, Ring, Row, Screen, StatTile, T } from './ui';
 
 export type ResultTile = { label: string; value?: string; color?: string; node?: React.ReactNode };
 
@@ -33,10 +33,7 @@ export function ResultLayout({ title, onBack, passed, verdict, verdictSub, ring,
   return (
     <Screen back title={title} onBack={onBack} tabSpace={false}>
       <View style={[styles.verdict, { backgroundColor: passed ? c.okbg : c.badbg }]} accessibilityRole="summary">
-        <Row gap={SPACE.xs} style={{ justifyContent: 'center' }}>
-          <Icon name={passed ? 'check' : 'close'} size={24} color={tone} />
-          <T role="h1" color={tone} center maxScale={1.4}>{verdict}</T>
-        </Row>
+        <CenteredLabel title={verdict} role="h1" color={tone} maxScale={1.4} slot={24 + SPACE.xs} glyph={<Icon name={passed ? 'check' : 'close'} size={24} color={tone} />} />
         {verdictSub ? <T size={14} center color={tone}>{verdictSub}</T> : null}
       </View>
       <Ring value={ring.value} size={164} color={tone} label={ring.label} sub={ring.sub} a11y={ring.a11y} animate />

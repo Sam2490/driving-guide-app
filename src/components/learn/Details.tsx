@@ -28,7 +28,7 @@ export function SignDetailBody({ id, onOpen, onPractise, showTitle }: { id: stri
           <Chip label={`${t.signs.group}: ${lang === 'ar' ? s.group : t.signs.groups[s.group] ?? s.group}`} />
         </Row>
       </Card>
-      <Button kind="secondary" icon="eye" title={t.rd.practiseGroup} onPress={() => onPractise(s.group)} />
+      <Button kind="secondary" icon="loop" title={t.rd.practiseGroup} onPress={() => onPractise(s.group)} />
       {related.length ? (
         <Section title={t.ux.relatedSigns}>
           <View style={[styles.grid, { flexDirection: d.row }]}>
@@ -69,8 +69,8 @@ export function TopicBody({ id, onNav, showTitle }: { id: string; onNav: (id: st
   return (
     <View style={{ gap: LAYOUT.list }}>
       {showTitle ? <T role="h2" header content={ar}>{tx.title}</T> : null}
-      <Row style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <SourceBadge kind="official" />
+      <Row gap={SPACE.sm} style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <SourceBadge kind="official" style={{ flexGrow: 1, flexShrink: 1, flexBasis: 160 }} />
         {read ? <Badge tone="ok" icon="check" text={t.rd.isRead} /> : null}
       </Row>
       {tx.blocks.map((b, i) =>
@@ -96,8 +96,9 @@ export function TopicBody({ id, onNav, showTitle }: { id: string; onNav: (id: st
       {read ? null : <Button kind="secondary" icon="check" title={t.rd.markRead} onPress={() => markRead(item.id)} />}
       {/* Keep reading without going back to the list. */}
       <Row gap={SPACE.sm} style={{ marginTop: SPACE.xs }}>
-        {prev ? <Button small kind="secondary" title={t.ux.prevTopic} onPress={() => onNav(prev.id)} style={{ flex: 1 }} /> : <View style={{ flex: 1 }} />}
-        {next ? <Button small title={t.ux.nextTopic} onPress={() => { markRead(item.id); onNav(next.id); }} style={{ flex: 1 }} /> : <View style={{ flex: 1 }} />}
+        {/* A lone button takes the full width rather than half the row beside an empty slot. */}
+        {prev ? <Button small kind="secondary" title={t.ux.prevTopic} onPress={() => onNav(prev.id)} style={{ flex: 1 }} /> : null}
+        {next ? <Button small title={t.ux.nextTopic} onPress={() => { markRead(item.id); onNav(next.id); }} style={{ flex: 1 }} /> : null}
       </Row>
     </View>
   );

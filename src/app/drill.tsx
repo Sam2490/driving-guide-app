@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useApp, useDir } from '@/state/AppProvider';
@@ -24,9 +24,13 @@ export default function Drill() {
   const d = useDir();
   const insets = useSafeAreaInsets();
   const [round, setRound] = useState(0);
+  // From an exam review, only that exam's wrong answers (still saved) are practised; otherwise every saved mistake.
+  const { ids } = useLocalSearchParams<{ ids?: string }>();
+  const only = ids ? ids.split(',') : null;
+  const pool = () => (only ? mistakeIds(mistakes).filter((id) => only.includes(id)) : mistakeIds(mistakes));
   // The round is fixed when it starts, so answering does not reshuffle the questions under the learner.
   const questions = useMemo(
-    () => mistakeIds(mistakes).slice(0, ROUND).map((id) => BY_ID.get(id)).filter((q) => q !== undefined).map((q) => prepareQuestion(q)),
+    () => pool().slice(0, ROUND).map((id) => BY_ID.get(id)).filter((q) => q !== undefined).map((q) => prepareQuestion(q)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [round],
   );
@@ -45,16 +49,18 @@ export default function Drill() {
     );
   }
 
-  const left = Object.keys(mistakes).length;
+  const left = only ? pool().length : Object.keys(mistakes).length;
   if (done) {
     const mastered = questions.filter((q) => !(q.id in mistakes)).length;
+    // Right once so far: one more correct answer in a later round clears it.
+    const halfway = questions.filter((q) => mistakes[q.id] === 1).length;
     return (
       <ResultLayout
         title={t.rd.drillTitle}
         onBack={() => router.back()}
         passed={right * 2 >= questions.length}
         verdict={t.rd.drillDone}
-        verdictSub={t.rd.drillSub(mastered, left)}
+        verdictSub={t.rd.drillSub(mastered, left, halfway)}
         ring={{ value: right / questions.length, label: String(right), sub: t.rd.ofTotal(questions.length), a11y: t.test.score(right, questions.length) }}
         tiles={[
           { label: t.test.correctN, value: String(right), color: c.ok },

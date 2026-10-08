@@ -23,8 +23,8 @@ export function GuideSection({ onOpen, selected }: { onOpen: (id: string) => voi
   return (
     <View style={{ gap: SPACE.sm }}>
       <T muted>{t.guide.sub}</T>
-      <Row style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <SourceBadge kind="official" />
+      <Row gap={SPACE.sm} style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
+        <SourceBadge kind="official" style={{ flexGrow: 1, flexShrink: 1, flexBasis: 160 }} />
         <Badge tone={read ? 'ok' : 'neutral'} icon="book" text={t.rd.readCount(read, GUIDE_TOPICS.length)} />
       </Row>
       <SearchBox value={q} onChange={setQ} placeholder={t.guide.search} />
@@ -47,7 +47,8 @@ export function GuideSection({ onOpen, selected }: { onOpen: (id: string) => voi
       })}
       <T size={14} muted>{t.guide.note}</T>
 
-      <Section title={t.home.quick}>
+      {/* Quick tips are not searched, so they step aside while a search is running. */}
+      {q.trim() ? null : <Section title={t.home.quick}>
         {TIPS[lang].map((tip) => (
           <Card key={tip.title} style={{ gap: SPACE.xs }}>
             <Row gap={SPACE.xs}>
@@ -74,7 +75,7 @@ export function GuideSection({ onOpen, selected }: { onOpen: (id: string) => voi
             ))}
           </View>
         </Card>
-      </Section>
+      </Section>}
     </View>
   );
 }

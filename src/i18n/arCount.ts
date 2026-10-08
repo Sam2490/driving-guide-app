@@ -23,6 +23,8 @@ export const AR = {
   question: { one: 'سؤال واحد', two: 'سؤالان', few: 'أسئلة', many: 'سؤالاً', other: 'سؤال' },
   minute: { one: 'دقيقة واحدة', two: 'دقيقتان', few: 'دقائق', many: 'دقيقة' },
   school: { one: 'مدرسة واحدة', two: 'مدرستان', few: 'مدارس', many: 'مدرسة' },
+  /** Consecutive days, with the adjective agreeing ("يومان متتاليان", "5 أيام متتالية", "12 يوماً متتالياً"). */
+  dayStreak: { one: 'يوم واحد متتالٍ', two: 'يومان متتاليان', few: 'أيام متتالية', many: 'يوماً متتالياً', other: 'يوم متتالٍ' },
   /** After "من آخر …" (genitive). */
   examGen: { one: 'اختبار', two: 'اختبارين', few: 'اختبارات', many: 'اختباراً', other: 'اختبار' },
 } satisfies Record<string, ArForms>;

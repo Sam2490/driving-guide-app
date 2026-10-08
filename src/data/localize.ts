@@ -34,8 +34,26 @@ const questionsFor = (lang: TLang) => (questionCache[lang] ??= loadQuestions(lan
 const guideFor = (lang: TLang) => (guideCache[lang] ??= loadGuide(lang));
 
 /** Content in the reader's language; Arabic is the source, the other languages are translations. */
+/**
+ * Display tidy-up for the Arabic question bank, which comes with typing habits of its source: a space before the
+ * final "؟" or ":" ("الطريق ؟"), and ".." before a question mark ("الإشارة .. ؟"). The data stays as published.
+ */
+export function tidyArabic(s: string): string {
+  return s
+    .replace(/\s*\.{2,}\s*([؟?])/g, '$1')
+    .replace(/[ \u00a0]+([؟?:،!])/g, '$1')
+    .trim();
+}
+
+const tidied = new Map<string, string>();
+function tidyQ(s: string): string {
+  let v = tidied.get(s);
+  if (v === undefined) tidied.set(s, (v = tidyArabic(s)));
+  return v;
+}
+
 export function questionText(q: Question, lang: Lang): string {
-  return lang === 'ar' ? q.question : questionsFor(lang)[q.id]?.q ?? q.question;
+  return lang === 'ar' ? tidyQ(q.question) : questionsFor(lang)[q.id]?.q ?? tidyQ(q.question);
 }
 
 export function optionText(q: Question, o: QuestionOption, lang: Lang): string | undefined {

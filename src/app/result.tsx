@@ -11,7 +11,7 @@ import { readinessChange } from '@/features/progress/progress';
 
 export default function Result() {
   const { t, c } = useApp();
-  const { examDone, setExam, setExamDone, history } = useExam();
+  const { examDone, setExam, setExamDone, history, ready } = useExam();
   React.useEffect(() => {
     if (examDone) {
       const r = scoreExam(examDone.session.questions, examDone.session.answers, examDone.session.config.passMark);
@@ -59,7 +59,7 @@ export default function Result() {
       {timedOut ? <Notice tone="warn" text={t.test.timeUp} /> : null}
       <Row style={{ justifyContent: 'center', flexWrap: 'wrap' }} gap={8}>
         <T muted center>{t.test.timeUsed(formatClock(used))}</T>
-        {delta !== null && delta !== 0 ? <Badge tone={delta > 0 ? 'ok' : 'bad'} text={t.rd.readyDelta(delta)} /> : null}
+        {delta !== null && delta !== 0 ? <Badge tone={delta > 0 ? 'ok' : 'bad'} text={t.rd.readyDelta(ready.percent - delta, ready.percent)} /> : null}
       </Row>
     </ResultLayout>
   );

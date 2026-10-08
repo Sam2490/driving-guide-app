@@ -73,11 +73,12 @@ export default function Schools() {
       {loc.phase === 'error' ? (
         <View style={{ gap: SPACE.sm }}>
           <Notice tone="bad" text={`${errorText(loc.result)} ${t.rd.searchInstead}`} />
-          <Row gap={SPACE.sm}>
+          {/* No icon here: two half-width buttons must keep their labels on one line and the same height. */}
+          <Row gap={SPACE.sm} style={{ alignItems: 'stretch' }}>
             {loc.result.status === 'denied' && !loc.result.canAskAgain ? (
               <Button small title={t.schools.openSettings} onPress={() => Linking.openSettings().catch(() => {})} style={{ flex: 1 }} />
             ) : (
-              <Button small title={t.common.tryAgain} icon="locate" onPress={locate} style={{ flex: 1 }} />
+              <Button small title={t.common.tryAgain} onPress={locate} style={{ flex: 1 }} />
             )}
             <Button small kind="secondary" title={t.schools.viewAll} onPress={reset} style={{ flex: 1 }} />
           </Row>

@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useApp, useDir } from '@/state/AppProvider';
 import { useExam } from '@/state/ExamProvider';
 import { useStudy } from '@/state/StudyProvider';
-import { Badge, Button, Card, IconButton, LanguagePill, ListRow, Ring, Row, Screen, Section, T } from '@/components/ui';
+import { Button, Card, IconButton, LanguagePill, ListRow, Ring, Row, Screen, Section, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { QUESTIONS } from '@/data/questions';
 import { STEPS } from '@/data/steps';
@@ -48,6 +48,8 @@ export default function Home() {
         </View>
       </Row>
       <Button title={exam ? t.test.resume : t.home.start} icon={exam ? 'loop' : 'exam'} onPress={start} />
+      {/* The exam in progress is resumed here only (no second "continue" row below), with its count under the button. */}
+      {exam ? <T size={14} muted center style={{ marginTop: -SPACE.xs }}>{t.test.answered(answeredCount(exam), exam.questions.length)}</T> : null}
     </Card>
   );
 
@@ -67,9 +69,6 @@ export default function Home() {
       {readiness}
       <View style={{ flex: wide ? 1 : undefined, marginTop: wide ? -SPACE.md : 0 }}>
       <Section title={t.rd.continueT}>
-        {exam ? (
-          <ListRow icon="exam" title={t.test.resume} sub={t.test.answered(answeredCount(exam), exam.questions.length)} onPress={() => router.push('/exam')} />
-        ) : null}
         <ListRow icon="road" title={t.rd.levelRow(level)} sub={t.rd.levelSub} onPress={() => router.push({ pathname: '/level/[n]', params: { n: String(level) } })} />
         {missed ? (
           <ListRow icon="loop" title={t.rd.mistakesRow(missed)} sub={t.rd.mistakesSub} tileBg={c.badbg} tileColor={c.bad} onPress={() => router.push('/practice/mistakes')} />
@@ -98,9 +97,6 @@ export default function Home() {
           </Card>
         </Section>
       ) : null}
-      <Row style={{ justifyContent: 'center', marginTop: SPACE.xs }}>
-        <Badge icon="info" text={t.test.disclaimer} />
-      </Row>
     </Screen>
   );
 }

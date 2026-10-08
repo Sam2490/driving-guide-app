@@ -18,11 +18,13 @@ export function LanguageList({ value, onPick, pending }: { value: Lang; onPick: 
   const [, setReady] = React.useState(0);
   React.useEffect(() => {
     let alive = true;
-    for (const id of [value, pending].filter(Boolean) as Lang[]) loadFontsFor(id).then(() => alive && setReady((n) => n + 1));
+    // Every name is drawn in its own script font, so all five are loaded here (not only the current language's);
+    // otherwise unloaded names fall back to the system font and the rows look uneven.
+    for (const l of LANGUAGES) loadFontsFor(l.id).then(() => alive && setReady((n) => n + 1));
     return () => {
       alive = false;
     };
-  }, [value, pending]);
+  }, []);
   return (
     <View accessibilityRole="radiogroup" style={{ gap: SPACE.xxs }}>
       {LANGUAGES.map((l) => {

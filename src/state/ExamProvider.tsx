@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { DEFAULT_EXAM, isCorrect, scoreExam, type ExamSession } from '@/features/quiz/engine';
+import { answeredCount, DEFAULT_EXAM, isCorrect, scoreExam, type ExamSession } from '@/features/quiz/engine';
 import { readiness, type Readiness } from '@/features/progress/progress';
 import { useStudy } from './StudyProvider';
 import { QUESTIONS } from '@/data/questions';
@@ -52,13 +52,17 @@ export function ExamProvider({ children }: { children: React.ReactNode }) {
   const setExamDone = useCallback((d: ExamDone | null) => {
     setExamDoneState(d);
     if (!d) return;
+    // An exam with no answers (time ran out untouched) is not a result: it would drag readiness down and fill the
+    // mistakes list with questions the learner never saw.
+    if (answeredCount(d.session) === 0) return;
     const r = scoreExam(d.session.questions, d.session.answers, d.session.config.passMark);
     const rec = { at: d.finishedAt, correct: r.correct, total: r.total, passed: r.passed };
     setHistory((h) => [rec, ...h.filter((x) => x.at !== rec.at)].slice(0, 20));
     storage.addHistory(rec);
-    // Wrong and skipped questions go to the mistakes list; right answers count toward clearing saved ones.
+    // Wrong answers go to the mistakes list (skipped ones do not: the learner may never have read them); right
+    // answers count toward clearing saved ones.
     const qs = d.session.questions;
-    addMisses(qs.filter((q) => !isCorrect(q, d.session.answers[q.id])).map((q) => q.id));
+    addMisses(qs.filter((q) => d.session.answers[q.id] !== undefined && !isCorrect(q, d.session.answers[q.id])).map((q) => q.id));
     addCorrect(qs.filter((q) => isCorrect(q, d.session.answers[q.id])).map((q) => q.id));
   }, [addMisses, addCorrect]);
 

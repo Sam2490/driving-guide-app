@@ -115,7 +115,7 @@ export default function LevelScreen() {
         onBack={() => router.back()}
         passed={win}
         verdict={win ? L.fin : L.fail}
-        verdictSub={win ? undefined : L.failsub}
+        verdictSub={win ? undefined : run.results.length < questions.length ? L.failOut(run.results.length, questions.length) : L.failsub}
         ring={{ value: run.correct / questions.length, label: String(run.correct), sub: t.rd.ofTotal(questions.length), a11y: t.test.score(run.correct, questions.length) }}
         tiles={
           win && outcome
@@ -152,9 +152,10 @@ export default function LevelScreen() {
           ))}
         </View>
         {/* Attempts: dots plus a visible count, so the meaning does not rely on colour alone. */}
-        <View accessible accessibilityLabel={`${L.attempts}: ${run.attempts}`} style={{ alignItems: 'center', gap: SPACE.xxs }}>
-          <Pips n={run.attempts} max={ATTEMPTS} color={c.bad} />
-          <T size={12} muted maxScale={1.3}>{t.ux.attemptsLeft(run.attempts)}</T>
+        {/* Stretched to a fixed minimum width so the count's box is never content-sized (it wrapped in Hindi). */}
+        <View accessible accessibilityLabel={`${L.attempts}: ${run.attempts}`} style={{ alignItems: 'stretch', minWidth: 72, gap: SPACE.xxs }}>
+          <View style={{ alignItems: 'center' }}><Pips n={run.attempts} max={ATTEMPTS} color={c.bad} /></View>
+          <T size={12} muted center maxScale={1.3}>{t.ux.attemptsLeft(run.attempts)}</T>
         </View>
       </View>
       <ScrollView ref={scroll} contentContainerStyle={styles.body}>

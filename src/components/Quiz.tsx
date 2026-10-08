@@ -59,7 +59,7 @@ export function OptionButton({ q, option, index, state, onPress, disabled }: { q
       style={({ pressed }) => [styles.opt, { flexDirection: d.row, backgroundColor: pressed && state === 'idle' ? c.fill : bg, borderColor: border, borderWidth: state === 'idle' || state === 'dim' ? 1 : 2, opacity: state === 'dim' ? 0.5 : 1 }]}
     >
       <Animated.View style={[styles.letter, { backgroundColor: letterBg, transform: [{ scale: pop }] }]}>
-        {state === 'ok' ? <Icon name="check" size={16} color={c.onAc} /> : state === 'bad' ? <Icon name="close" size={16} color={c.onAc} /> : <T size={14} weight="semibold" center color={state === 'selected' ? c.onAc : c.tx2} maxScale={1.2} style={{ lineHeight: 20 }}>{letter}</T>}
+        {state === 'ok' ? <Icon name="check" size={16} color={c.onAc} /> : state === 'bad' ? <Icon name="close" size={16} color={c.onAc} /> : <T size={14} weight="semibold" center content={lang === 'ur'} color={state === 'selected' ? c.onAc : c.tx2} maxScale={1.2} style={{ lineHeight: lang === 'ur' ? 24 : 20 }}>{letter}</T>}
       </Animated.View>
       <View style={{ flex: 1 }}><OptionContent q={q} option={option} /></View>
     </Pressable>
@@ -116,8 +116,9 @@ export function MistakeCard({ q, answer, label, hideYours }: { q: Question; answ
       {q.image ? <Media image={q.image} height={130} /> : null}
       <QuestionText q={q} size={18} />
       {hideYours ? null : (
-        <View style={[styles.answer, side, { backgroundColor: c.badbg, borderColor: c.bad }]}>
-          <Row gap={SPACE.xs}><Icon name="close" size={16} color={c.bad} /><T size={14} weight="semibold" color={c.bad}>{t.test.yours}</T></Row>
+        // A skipped question is not a wrong answer: it gets a neutral box, not the red one.
+        <View style={[styles.answer, side, yours ? { backgroundColor: c.badbg, borderColor: c.bad } : { backgroundColor: c.fill, borderColor: c.lnStrong }]}>
+          <Row gap={SPACE.xs}><Icon name={yours ? 'close' : 'info'} size={16} color={yours ? c.bad : c.tx2} /><T size={14} weight="semibold" color={yours ? c.bad : c.tx2}>{t.test.yours}</T></Row>
           {yours ? <OptionContent q={q} option={yours} size={64} /> : <T size={16} muted>{t.test.notAnswered}</T>}
         </View>
       )}

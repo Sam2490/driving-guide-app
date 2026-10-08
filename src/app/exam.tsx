@@ -154,13 +154,21 @@ export default function ExamScreen() {
 
       <Dialog
         visible={ask === 'submit'}
-        text={t.test.submitAsk(unanswered)}
+        text={answered ? t.test.submitAsk(unanswered) : t.rd.emptyExamAsk}
         onClose={() => setAsk(null)}
         actions={
-          <>
-            <Button title={t.test.submit} onPress={() => { setAsk(null); finish(false); }} />
-            <Button kind="secondary" title={t.test.keepGoing} onPress={() => setAsk(null)} />
-          </>
+          answered ? (
+            <>
+              <Button title={t.test.submit} onPress={() => { setAsk(null); finish(false); }} />
+              <Button kind="secondary" title={t.test.keepGoing} onPress={() => setAsk(null)} />
+            </>
+          ) : (
+            // Nothing answered: there is no result to keep, so the choice is to carry on or leave without a record.
+            <>
+              <Button title={t.test.keepGoing} onPress={() => setAsk(null)} />
+              <Button kind="destructive" title={t.rd.endExam} onPress={leave} />
+            </>
+          )
         }
       />
       <Dialog

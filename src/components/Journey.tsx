@@ -26,14 +26,15 @@ export function RankCard() {
           <T size={14} muted>{L.rank}</T>
           <T role="title">{L.ranks[r]}</T>
         </View>
-        <View style={{ alignItems: 'center' }}>
+        {/* Stretched (not centred) so the unit's box is the column's width: Android drops the end of a content-sized label. */}
+        <View style={{ alignItems: 'stretch', minWidth: 64 }}>
           <T role="h2" size={24} center color={c.sand} maxScale={1.3}>{String(progress.xp)}</T>
           <T size={12} muted center>{L.xp}</T>
         </View>
       </Row>
       <ProgressBar value={rankProgress(progress.xp)} color={c.sand} label={L.rank} />
       <Row gap={SPACE.md}>
-        <Row gap={SPACE.xs}><Icon name="flame" size={16} color={c.tx2} /><T size={14} muted>{`${progress.streak} ${L.streak}`}</T></Row>
+        <Row gap={SPACE.xs}><Icon name="flame" size={16} color={c.tx2} /><T size={14} muted>{L.streak(progress.streak)}</T></Row>
         <Row gap={SPACE.xs}><Icon name="check" size={16} color={c.tx2} /><T size={14} muted>{`${doneCount}/${TOTAL} ${L.done}`}</T></Row>
       </Row>
     </Card>

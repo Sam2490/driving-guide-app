@@ -235,11 +235,12 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, loadi
         accessibilityState={{ disabled: !!disabled, busy: !!loading }}
         disabled={disabled || loading}
         onPress={onPress}
+        hitSlop={k === 'tertiary' ? { left: SPACE.sm, right: SPACE.sm } : undefined}
         onPressIn={press.onPressIn}
         onPressOut={press.onPressOut}
         style={({ pressed }) => [styles.btn, small && styles.btnSmall, k === 'tertiary' && styles.btnTertiary, dense && styles.btnDense, { backgroundColor: bg(pressed), borderColor: disabled ? c.lnStrong : 'transparent', borderStyle: disabled ? 'dashed' : 'solid' }]}
       >
-        <ButtonLabel title={title} size={size} color={fg} glyph={glyph} />
+        <CenteredLabel title={title} size={size} color={fg} weight="semibold" glyph={glyph} />
       </Pressable>
     </Animated.View>
   );
@@ -248,17 +249,20 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, loadi
 const GLYPH_SLOT = ICON.control + SPACE.xs;
 
 /**
- * Button label. The text box always spans the button's full width, so Android never shrinks it to "fit" the text
- * (that is what cut off "أبشر" and pushed icons under labels on some phones). It wraps to a second line only when
- * the words truly do not fit. The icon is drawn beside the text as laid out, using the widest line's width, and
- * the same space is kept free on both sides so the text stays centred. The web has no such measuring issue and
- * does not report line widths, so it uses a plain row.
+ * Centred label with an optional icon at its reading start (buttons, result verdicts). The text box always spans the
+ * full width, so Android never shrinks it to "fit" the text: a content-sized box is measured a little narrower than
+ * Indic and Arabic text is drawn, and the last word disappears (that cut off "أبشر", "नहीं" and "নয়"). It wraps to a
+ * second line only when the words truly do not fit. The icon is drawn beside the text as laid out, using the widest
+ * line's width, and the same space is kept free on both sides so the text stays centred. The web has no such
+ * measuring issue and does not report line widths, so it uses a plain row.
  */
-function ButtonLabel({ title, size, color, glyph }: { title: string; size: TypeSize; color: string; glyph: React.ReactNode }) {
+export function CenteredLabel({ title, size, color, glyph, weight, role, maxScale, slot = GLYPH_SLOT }: {
+  title: string; size?: TypeSize; color: string; glyph?: React.ReactNode; weight?: TProps['weight']; role?: TProps['role']; maxScale?: number; slot?: number;
+}) {
   const d = useDir();
   const [drawn, setDrawn] = React.useState<{ text: string; w: number } | null>(null);
   const label = (
-    <T size={size} weight="semibold" color={color} center numberOfLines={2} style={glyph && Platform.OS !== 'web' ? { paddingHorizontal: GLYPH_SLOT } : undefined}
+    <T size={size} role={role} weight={weight} color={color} center numberOfLines={2} maxScale={maxScale} style={glyph && Platform.OS !== 'web' ? { paddingHorizontal: slot } : undefined}
       onTextLayout={glyph && Platform.OS !== 'web' ? (e) => {
         const w = Math.ceil(Math.max(0, ...e.nativeEvent.lines.map((l) => l.width)));
         if (drawn?.text !== title || drawn.w !== w) setDrawn({ text: title, w });
@@ -267,7 +271,7 @@ function ButtonLabel({ title, size, color, glyph }: { title: string; size: TypeS
       {title}
     </T>
   );
-  if (!glyph) return label;
+  if (!glyph) return <View style={{ alignSelf: 'stretch' }}>{label}</View>;
   if (Platform.OS === 'web') {
     return (
       <Row gap={SPACE.xs} style={{ justifyContent: 'center' }}>
@@ -278,7 +282,7 @@ function ButtonLabel({ title, size, color, glyph }: { title: string; size: TypeS
   }
   const w = drawn?.text === title ? drawn.w : null;
   // Centre of the box, minus half the drawn text, minus the gap and the icon: the icon sits at the reading start.
-  const offset = w === null ? 0 : -(w / 2) - GLYPH_SLOT;
+  const offset = w === null ? 0 : -(w / 2) - slot;
   return (
     <View style={{ alignSelf: 'stretch', justifyContent: 'center' }}>
       {label}
@@ -464,15 +468,16 @@ export function Notice({ text, tone = 'info', title }: { text: string; tone?: To
   );
 }
 
-export function SourceBadge({ kind }: { kind: 'official' | 'general' }) {
+/** `style` lets a row give it the free space beside a sibling badge (flex: 1). */
+export function SourceBadge({ kind, style }: { kind: 'official' | 'general'; style?: StyleProp<ViewStyle> }) {
   const { c, t } = useApp();
-  const d = useDir();
   const color = kind === 'official' ? c.ok : c.tx2;
-  // Sits at the reading start: right in Arabic and Urdu, left otherwise.
+  // Sits at the reading start (Row follows the reading direction).
   return (
-    <Row gap={SPACE.xs} style={{ alignSelf: d.start }}>
-      <Icon name={kind === 'official' ? 'check' : 'info'} size={ICON.inline} color={color} />
-      <T size={14} color={color}>{kind === 'official' ? t.common.official : t.common.general}</T>
+    // The text fills the rest of the row (never content-sized), so Android cannot drop its last word.
+    <Row gap={SPACE.xs} style={[{ alignSelf: 'stretch', alignItems: 'flex-start' }, style]}>
+      <View style={{ paddingTop: 2 }}><Icon name={kind === 'official' ? 'check' : 'info'} size={ICON.inline} color={color} /></View>
+      <View style={{ flex: 1 }}><T size={14} color={color}>{kind === 'official' ? t.common.official : t.common.general}</T></View>
     </Row>
   );
 }
@@ -668,7 +673,8 @@ const styles = StyleSheet.create({
   card: { borderRadius: RADIUS.lg, padding: LAYOUT.card, borderWidth: 1 },
   btn: { minHeight: 52, borderRadius: RADIUS.md, paddingHorizontal: LAYOUT.buttonX, paddingVertical: SPACE.sm, justifyContent: 'center', borderWidth: 1 },
   btnSmall: { minHeight: TOUCH, paddingVertical: SPACE.xs, paddingHorizontal: SPACE.md },
-  btnTertiary: { minHeight: TOUCH, paddingVertical: SPACE.xs },
+  // Text-only: no side padding, so the label lines up with the text above it; hitSlop keeps the touch target.
+  btnTertiary: { minHeight: TOUCH, paddingVertical: SPACE.xs, paddingHorizontal: 0 },
   btnDense: { paddingHorizontal: SPACE.sm },
   chip: { minHeight: 36, paddingHorizontal: 14, paddingVertical: SPACE.xxs, borderRadius: RADIUS.pill, justifyContent: 'center', borderWidth: 1 },
   chipStatic: { minHeight: 28, paddingHorizontal: SPACE.sm, borderWidth: 0 },

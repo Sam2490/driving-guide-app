@@ -20,3 +20,10 @@ test('app strings use the inflected forms', () => {
   expect(ar.schools.count(1)).toBe('مدرسة واحدة');
   expect(ar.rd.timeWarn(5)).toBe('بقيت 5 دقائق');
 });
+
+test('the day streak agrees with its number', () => {
+  expect(ar.levels.streak(1)).toBe('يوم واحد متتالٍ');
+  expect(ar.levels.streak(2)).toBe('يومان متتاليان');
+  expect(ar.levels.streak(5)).toBe('5 أيام متتالية');
+  expect(ar.levels.streak(12)).toBe('12 يوماً متتالياً');
+});

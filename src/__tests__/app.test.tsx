@@ -24,6 +24,15 @@ beforeEach(async () => {
   await AsyncStorage.clear();
   await AsyncStorage.setItem('settings.v1', JSON.stringify({ lang: 'ar', theme: 'dark' }));
 });
+/** Saves an exam in progress whose first question has a wrong answer and the other 29 none. */
+async function seedExamWithOneWrong() {
+  const x = startExam(QUESTIONS);
+  const first = QUESTIONS[0];
+  const wrong = first.options.find((o) => o.id !== first.correctAnswerId)!;
+  const exam = selectAnswer({ ...x, questions: [first, ...x.questions.filter((q) => q.id !== first.id).slice(0, 29)] }, first.id, wrong.id);
+  await AsyncStorage.setItem('exam.v1', JSON.stringify(serializeExam(exam)));
+}
+
 async function settle() {
   for (let i = 0; i < 6; i++) await act(async () => {});
 }
@@ -187,8 +196,9 @@ describe('exam survives the app closing', () => {
     const withFirst = selectAnswer({ ...x, questions: [first, ...x.questions.filter((q) => q.id !== first.id).slice(0, 29)] }, first.id, first.options[0].id);
     await AsyncStorage.setItem('exam.v1', JSON.stringify(serializeExam(withFirst)));
     await open('/practice');
-    await waitFor(() => expect(screen.getByText('متابعة الاختبار · أجبت عن 1 من 30')).toBeTruthy());
-    await fireEvent.press(screen.getByText('متابعة الاختبار · أجبت عن 1 من 30'));
+    // The count sits under the button (in its accessibility label too), not inside the button text.
+    await waitFor(() => expect(screen.getByText('أجبت عن 1 من 30')).toBeTruthy());
+    await fireEvent.press(screen.getByRole('button', { name: 'متابعة الاختبار · أجبت عن 1 من 30' }));
     await settle();
     expect(screen.getByText('السؤال 1 من 30')).toBeTruthy();
     expect(screen.getByRole('radio', { selected: true })).toBeTruthy();
@@ -319,19 +329,20 @@ describe('UI/UX audit fixes', () => {
     expect(screen.getByText('السؤال 1 من 30')).toBeTruthy();
   });
 
-  it('source badge sits at the reading start in Arabic (right) and English (left)', async () => {
+  it('source badge starts at the reading start in Arabic (right) and its text fills the row', async () => {
     await open('/learn?section=guide');
-    const badge = (text: string) => {
-      let n: any = screen.getAllByText(text)[0];
-      while (n && n.props?.style && !JSON.stringify(n.props.style).includes('alignSelf')) n = n.parent;
-      return JSON.stringify(n?.props?.style);
-    };
-    expect(badge('من دليل المتدرب الرسمي')).toContain('"alignSelf":"flex-end"');
+    let n: any = screen.getAllByText('من دليل المتدرب الرسمي')[0];
+    // The text's own box takes the free space (flex: 1), never its content width (Android drops the last word).
+    while (n && !JSON.stringify(n.props?.style ?? '').includes('"flex":1')) n = n.parent;
+    expect(n).toBeTruthy();
+    while (n && !JSON.stringify(n.props?.style ?? '').includes('flexDirection')) n = n.parent;
+    expect(JSON.stringify(n.props.style)).toContain('"flexDirection":"row-reverse"');
   });
 
   it('result screen leads with the verdict, and the Test tab remembers the last result', async () => {
+    await seedExamWithOneWrong();
     await open('/practice');
-    await fireEvent.press(screen.getByText('ابدأ الاختبار'));
+    await fireEvent.press(await screen.findByRole('button', { name: 'متابعة الاختبار · أجبت عن 1 من 30' }));
     await settle();
     await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
@@ -341,14 +352,29 @@ describe('UI/UX audit fixes', () => {
     expect(screen.getByText('لم تنجح بعد')).toBeTruthy();
     await fireEvent.press(screen.getByText('مراجعة الأخطاء'));
     await settle();
+    // The footer practises this exam's wrong answers: the one saved mistake.
+    expect(screen.getByText('تدرّب عليها (1)')).toBeTruthy();
     await fireEvent.press(screen.getByRole('tab', { name: 'الخاطئة' }));
-    expect(screen.getByText('لا توجد نتائج.')).toBeTruthy(); // nothing was answered, so no wrong answers
+    expect(screen.queryAllByText('لم تُجب').length).toBe(0);
     await fireEvent.press(screen.getByRole('tab', { name: 'دون إجابة' }));
     expect(screen.getAllByText('لم تُجب').length).toBeGreaterThan(0);
     const h = JSON.parse((await AsyncStorage.getItem('history.v1'))!);
     expect(h[0]).toMatchObject({ correct: 0, total: 30, passed: false });
     await open('/practice');
     await waitFor(() => expect(screen.getByText('آخر نتيجة: 0 من 30 · لم تنجح بعد')).toBeTruthy());
+  });
+
+  it('an exam with nothing answered can be left, and leaves no result or mistakes behind', async () => {
+    await open('/practice');
+    await fireEvent.press(screen.getByText('ابدأ الاختبار'));
+    await settle();
+    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
+    expect(screen.getByText('لم تُجب عن أي سؤال. هل تريد الخروج من الاختبار؟ لن يُحفظ شيء.')).toBeTruthy();
+    await fireEvent.press(screen.getByText('إنهاء وحذف'));
+    await settle();
+    expect(await AsyncStorage.getItem('history.v1')).toBeNull();
+    expect(JSON.parse((await AsyncStorage.getItem('mistakes.v1')) ?? '{}')).toEqual({});
   });
 
   it('school cards open details on tap and keep directions as a secondary icon button', async () => {
@@ -388,20 +414,24 @@ describe('Road-ready redesign', () => {
   afterEach(() => jest.restoreAllMocks());
 
   it('Home shows readiness from the last mock exams, and the exam saves its mistakes', async () => {
+    await seedExamWithOneWrong();
     await open('/');
     expect(screen.getByText('لم تُقس بعد')).toBeTruthy();
     expect(screen.getByText('أجرِ أول اختبار تجريبي لتعرف مدى جاهزيتك.')).toBeTruthy();
-    await fireEvent.press(screen.getByText('ابدأ اختباراً تجريبياً'));
+    // The exam in progress is resumed from the readiness card only, with its count under the button.
+    expect(screen.getByText('أجبت عن 1 من 30')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'متابعة الاختبار' }));
     await settle();
     await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await settle();
-    expect(Object.keys(JSON.parse((await AsyncStorage.getItem('mistakes.v1'))!))).toHaveLength(30);
+    // Only the wrong answer is saved; the 29 skipped questions are not.
+    expect(Object.keys(JSON.parse((await AsyncStorage.getItem('mistakes.v1'))!))).toHaveLength(1);
     await open('/');
     await waitFor(() => expect(screen.getByText('واصل التدريب')).toBeTruthy());
     expect(screen.getByText('نجحت في 0 من آخر اختبار')).toBeTruthy();
-    expect(screen.getByText('راجع 30 خطأً')).toBeTruthy();
+    expect(screen.getByText('راجع خطأً واحداً')).toBeTruthy();
   });
 
   it('a flagged question is saved and marked in the question grid', async () => {
@@ -440,7 +470,7 @@ describe('Road-ready redesign', () => {
     await settle();
     expect(JSON.parse((await AsyncStorage.getItem('learn.v1'))!).steps).toEqual([0]);
     await open('/learn/guide/t00');
-    await fireEvent.press(screen.getByText('تمت القراءة'));
+    await fireEvent.press(screen.getByText('تحديد كمقروء'));
     await settle();
     expect(JSON.parse((await AsyncStorage.getItem('learn.v1'))!).read).toEqual(['t00']);
     expect(screen.getByText('مقروء')).toBeTruthy();

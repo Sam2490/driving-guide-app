@@ -30,9 +30,10 @@ export default function SchoolDetail() {
       {!ar ? <T content muted>{s.name}</T> : null}
       <Card style={{ gap: SPACE.sm }}>
         {rows.map(([k, v]) => (
-          // The label keeps its width on one line; the value takes the rest and sits at the reading end.
-          <Row key={k} style={{ alignItems: 'flex-start' }}>
-            <View style={{ flexShrink: 0, maxWidth: '45%' }}><T size={14} muted fit>{k}</T></View>
+          // A fixed third for the label (a content-sized box loses letters on Android, Nastaliq most of all); the value
+          // takes the rest and sits at the reading end.
+          <Row key={k} gap={SPACE.sm} style={{ alignItems: 'flex-start' }}>
+            <View style={{ width: '33%' }}><T size={14} muted numberOfLines={2}>{k}</T></View>
             <View style={{ flex: 1 }}><T size={16} weight="semibold" style={{ textAlign: rtl ? 'left' : 'right' }}>{v}</T></View>
           </Row>
         ))}
