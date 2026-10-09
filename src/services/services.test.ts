@@ -14,6 +14,7 @@ jest.mock('expo-location', () => ({
   enableNetworkProviderAsync: jest.fn(),
   getLastKnownPositionAsync: jest.fn(() => Promise.resolve(null)),
   getCurrentPositionAsync: jest.fn(),
+  watchPositionAsync: jest.fn(() => new Promise(() => {})),
 }));
 const L = Location as jest.Mocked<typeof Location>;
 
@@ -29,12 +30,17 @@ describe('location', () => {
     await expect(getPositionOnce()).resolves.toEqual({ status: 'ok', lat: 21.5, lng: 39.2 });
     expect(L.getCurrentPositionAsync).not.toHaveBeenCalled();
   });
-  it('tries again at higher accuracy when the first read fails', async () => {
+  it('takes the first fix from location updates when a one-off read gives nothing', async () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
     L.hasServicesEnabledAsync.mockResolvedValue(true);
-    L.getCurrentPositionAsync.mockRejectedValueOnce(new Error('no fix')).mockResolvedValueOnce({ coords: { latitude: 26.4, longitude: 50.1 } } as never);
+    L.getCurrentPositionAsync.mockRejectedValue(new Error('no fix'));
+    const remove = jest.fn();
+    L.watchPositionAsync.mockImplementation(async (_o, cb) => {
+      setTimeout(() => cb({ coords: { latitude: 26.4, longitude: 50.1 } } as never), 10);
+      return { remove } as never;
+    });
     await expect(getPositionOnce()).resolves.toEqual({ status: 'ok', lat: 26.4, lng: 50.1 });
-    expect(L.getCurrentPositionAsync).toHaveBeenCalledTimes(2);
+    expect(remove).toHaveBeenCalled();
   });
   it('returns the position when permission is granted', async () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
@@ -65,13 +71,17 @@ describe('location', () => {
     L.hasServicesEnabledAsync.mockResolvedValue(false);
     await expect(getPositionOnce()).resolves.toEqual({ status: 'services-off' });
   });
-  it('reports unavailable when the position cannot be read or is invalid', async () => {
+  it('reports unavailable when no valid fix arrives in time', async () => {
+    jest.useFakeTimers();
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
     L.hasServicesEnabledAsync.mockResolvedValue(true);
-    L.getCurrentPositionAsync.mockRejectedValue(new Error('no fix'));
-    await expect(getPositionOnce()).resolves.toEqual({ status: 'unavailable' });
+    L.getLastKnownPositionAsync.mockResolvedValue(null);
+    L.watchPositionAsync.mockReturnValue(new Promise(() => {}));
     L.getCurrentPositionAsync.mockResolvedValue({ coords: { latitude: NaN, longitude: 46 } } as never);
-    await expect(getPositionOnce()).resolves.toEqual({ status: 'unavailable' });
+    const r = getPositionOnce();
+    await jest.advanceTimersByTimeAsync(46_000);
+    await expect(r).resolves.toEqual({ status: 'unavailable' });
+    jest.useRealTimers();
   });
 });
 

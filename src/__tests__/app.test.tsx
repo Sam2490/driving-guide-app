@@ -17,6 +17,7 @@ jest.mock('expo-location', () => ({
   enableNetworkProviderAsync: jest.fn(),
   getLastKnownPositionAsync: jest.fn(() => Promise.resolve(null)),
   getCurrentPositionAsync: jest.fn(),
+  watchPositionAsync: jest.fn(() => new Promise(() => {})),
 }));
 jest.mock('expo-haptics', () => ({ selectionAsync: jest.fn(() => Promise.resolve()), notificationAsync: jest.fn(() => Promise.resolve()), NotificationFeedbackType: { Success: 's', Error: 'e' } }));
 const L = Location as jest.Mocked<typeof Location>;

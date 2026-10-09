@@ -10,6 +10,8 @@ export type LocationResult =
 
 /** A town-level position is enough, so a fix from the last half hour is used as is. */
 const RECENT_MS = 30 * 60_000;
+/** How long to wait for a first fix with location just switched on (indoors, mobile data only). */
+const WAIT_MS = 45_000;
 
 /**
  * Approximate location is enough: schools are sorted by distance to town centres.
@@ -20,6 +22,9 @@ const RECENT_MS = 30 * 60_000;
  * out, so "Find nearby" failed until it was tried several times; with location off it only showed a warning. Now:
  * Android is asked to switch location on (the system dialog), a recent cached fix is used straight away, and a fresh
  * read gets a longer wait at network accuracy (low-power mode can wait forever without Wi-Fi or cell positioning).
+ * Then: a one-off read on Android (FusedLocationProviderClient.getCurrentLocation) gives up and returns nothing
+ * when the phone has no fix yet, so it still took several taps. The fresh read now keeps location updates running
+ * and takes the first good fix (see firstFix).
  */
 export async function getPositionOnce(): Promise<LocationResult> {
   try {
@@ -28,15 +33,13 @@ export async function getPositionOnce(): Promise<LocationResult> {
     if (!(await servicesOn())) return { status: 'services-off' };
 
     const recent = await Location.getLastKnownPositionAsync({ maxAge: RECENT_MS }).catch(() => null);
-    if (recent && isValidCoords(recent.coords.latitude, recent.coords.longitude)) return ok(recent);
+    if (valid(recent)) return ok(recent);
 
-    for (const [accuracy, ms] of [[Location.Accuracy.Balanced, 20_000], [Location.Accuracy.High, 20_000]] as const) {
-      const pos = await withTimeout(Location.getCurrentPositionAsync({ accuracy }), ms).catch(() => null);
-      if (pos && isValidCoords(pos.coords.latitude, pos.coords.longitude)) return ok(pos);
-    }
+    const fresh = await firstFix(WAIT_MS);
+    if (fresh) return ok(fresh);
     // Still nothing fresh: an older fix is better than no list (schools are matched by town).
     const old = await Location.getLastKnownPositionAsync().catch(() => null);
-    if (old && isValidCoords(old.coords.latitude, old.coords.longitude)) return ok(old);
+    if (valid(old)) return ok(old);
     return { status: 'unavailable' };
   } catch {
     return { status: 'unavailable' };
@@ -55,22 +58,47 @@ async function servicesOn(): Promise<boolean> {
   return Location.hasServicesEnabledAsync();
 }
 
-function ok(pos: Location.LocationObject): LocationResult {
-  return { status: 'ok', lat: pos.coords.latitude, lng: pos.coords.longitude };
+/**
+ * The first usable fix from any of: continuous updates (they keep asking until the phone has a position), a one-off
+ * read, and the system's cached position (polled, since another app or the updates above may fill it). Null after
+ * `ms`. Every request is stopped once a fix arrives.
+ */
+function firstFix(ms: number): Promise<Location.LocationObject | null> {
+  return new Promise((resolve) => {
+    let done = false;
+    let sub: Location.LocationSubscription | undefined;
+    const finish = (pos: Location.LocationObject | null) => {
+      if (done) return;
+      done = true;
+      sub?.remove();
+      clearInterval(poll);
+      clearTimeout(timer);
+      resolve(pos);
+    };
+    const take = (pos: Location.LocationObject | null | undefined) => {
+      if (valid(pos)) finish(pos);
+    };
+    const timer = setTimeout(() => finish(null), ms);
+    const poll = setInterval(() => {
+      attempt(() => Location.getLastKnownPositionAsync({ maxAge: 60_000 })).then(take, () => {});
+    }, 2_000);
+    attempt(() => Location.watchPositionAsync({ accuracy: Location.Accuracy.Balanced, timeInterval: 1_000, distanceInterval: 0 }, take)).then(
+      (s) => (done ? s.remove() : (sub = s)),
+      () => {},
+    );
+    attempt(() => Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })).then(take, () => {});
+  });
 }
 
-function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('timeout')), ms);
-    p.then(
-      (v) => {
-        clearTimeout(t);
-        resolve(v);
-      },
-      (e) => {
-        clearTimeout(t);
-        reject(e);
-      },
-    );
-  });
+/** Runs a location call so that a synchronous throw becomes a rejection, like any other failure. */
+function attempt<T>(f: () => Promise<T>): Promise<T> {
+  return Promise.resolve().then(f);
+}
+
+function valid(pos: Location.LocationObject | null | undefined): pos is Location.LocationObject {
+  return !!pos && isValidCoords(pos.coords.latitude, pos.coords.longitude);
+}
+
+function ok(pos: Location.LocationObject): LocationResult {
+  return { status: 'ok', lat: pos.coords.latitude, lng: pos.coords.longitude };
 }
