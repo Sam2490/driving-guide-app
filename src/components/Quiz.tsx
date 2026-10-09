@@ -8,7 +8,7 @@ import { optionText, questionText } from '@/data/localize';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { MOTION, RADIUS, SPACE, type TypeSize } from '@/theme/tokens';
 import { Media, SignImage, sourceOf } from './Media';
-import { Card, Row, T } from './ui';
+import { Card, Row, SnugText, T } from './ui';
 import { Icon } from './Icon';
 
 export type OptionState = 'idle' | 'selected' | 'ok' | 'bad' | 'dim';
@@ -118,12 +118,12 @@ export function MistakeCard({ q, answer, label, hideYours }: { q: Question; answ
       {hideYours ? null : (
         // A skipped question is not a wrong answer: it gets a neutral box, not the red one.
         <View style={[styles.answer, side, yours ? { backgroundColor: c.badbg, borderColor: c.bad } : { backgroundColor: c.fill, borderColor: c.lnStrong }]}>
-          <Row gap={SPACE.xs}><Icon name={yours ? 'close' : 'info'} size={16} color={yours ? c.bad : c.tx2} /><T size={14} weight="semibold" color={yours ? c.bad : c.tx2}>{t.test.yours}</T></Row>
+          <Row gap={SPACE.xs}><Icon name={yours ? 'close' : 'info'} size={16} color={yours ? c.bad : c.tx2} /><SnugText size={14} weight="semibold" color={yours ? c.bad : c.tx2}>{t.test.yours}</SnugText></Row>
           {yours ? <OptionContent q={q} option={yours} size={64} /> : <T size={16} muted>{t.test.notAnswered}</T>}
         </View>
       )}
       <View style={[styles.answer, side, { backgroundColor: c.okbg, borderColor: c.ok }]}>
-        <Row gap={SPACE.xs}><Icon name="check" size={16} color={c.ok} /><T size={14} weight="semibold" color={c.ok}>{t.test.correct}</T></Row>
+        <Row gap={SPACE.xs}><Icon name="check" size={16} color={c.ok} /><SnugText size={14} weight="semibold" color={c.ok}>{t.test.correct}</SnugText></Row>
         <OptionContent q={q} option={right} size={64} />
       </View>
     </Card>

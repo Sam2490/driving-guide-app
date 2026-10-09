@@ -36,7 +36,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
         <View style={[styles.pill, { backgroundColor: on ? c.acSoft : 'transparent' }]}>
           <Icon name={ICONS[route.name] ?? 'home'} size={ICON.nav} color={on ? c.onAcSoft : c.tx2} />
         </View>
-        <T size={12} weight={on ? 'semibold' : 'medium'} color={on ? c.ac : c.tx2} center numberOfLines={1} maxScale={1.2} style={{ lineHeight: lang === 'ur' ? 22 : 16 }}>
+        <T size={12} weight={on ? 'semibold' : 'medium'} color={on ? c.ac : c.tx2} center numberOfLines={1} maxScale={1.2} style={{ lineHeight: lang === 'ur' ? 24 : 16 }}>
           {labels[route.name]}
         </T>
       </Pressable>
@@ -50,7 +50,8 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
     );
   }
   return (
-    <View style={[styles.bar, { backgroundColor: c.card, borderTopColor: c.ln, paddingBottom: Math.max(insets.bottom, SPACE.xs), flexDirection: d.row }]}>
+    <View style={[styles.bar, { backgroundColor: c.card, borderTopColor: c.ln, // Nastaliq hangs below the baseline: Urdu labels get a little more room above the gesture bar.
+      paddingBottom: Math.max(insets.bottom, SPACE.xs) + (lang === 'ur' ? SPACE.xs : 0), flexDirection: d.row }]}>
       {items}
     </View>
   );

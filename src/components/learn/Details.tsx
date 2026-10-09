@@ -8,6 +8,7 @@ import { SIGNS } from '@/data/signs';
 import { GUIDE_TOPICS } from '@/data/licenseGuide';
 import { signName, topicText } from '@/data/localize';
 import { LAYOUT, RADIUS, SPACE } from '@/theme/tokens';
+import { bulletParts, columnWeights, keepBrackets, keepUnits } from './table';
 
 /** A sign's detail: the large sign, its names and type, related signs, and a way to practise its group. */
 export function SignDetailBody({ id, onOpen, onPractise, showTitle }: { id: string; onOpen: (id: string) => void; onPractise: (group: string) => void; showTitle?: boolean }) {
@@ -41,7 +42,8 @@ export function SignDetailBody({ id, onOpen, onPractise, showTitle }: { id: stri
                 style={({ pressed }) => [styles.tile, { backgroundColor: pressed ? c.fill : c.card, borderColor: c.ln }]}
               >
                 <SignImage id={r.id} size={64} />
-                <T size={12} center content={lang === 'ar'} numberOfLines={2}>{signName(r, lang)}</T>
+                {/* Stretched to the tile's width: a centred, content-sized label lost its last word on Android ("منعطف حاد لليسار"). */}
+                <T size={12} center content={lang === 'ar'} numberOfLines={3} style={{ alignSelf: 'stretch' }}>{signName(r, lang)}</T>
               </Pressable>
             ))}
           </View>
@@ -75,21 +77,26 @@ export function TopicBody({ id, onNav, showTitle }: { id: string; onNav: (id: st
       </Row>
       {tx.blocks.map((b, i) =>
         'text' in b ? (
-          <Row key={i} gap={SPACE.sm} style={{ alignItems: 'flex-start' }}>
-            <View style={[styles.dot, { backgroundColor: c.acSolid }]} />
-            <View style={{ flex: 1 }}><T content={ar} size={17}>{b.text}</T></View>
-          </Row>
+          bulletParts(b.text).map((part, j) => (
+            <Row key={`${i}.${j}`} gap={SPACE.sm} style={{ alignItems: 'flex-start' }}>
+              <View style={[styles.dot, { backgroundColor: c.acSolid }]} />
+              <View style={{ flex: 1 }}><T content={ar} size={17}>{keepBrackets(part)}</T></View>
+            </Row>
+          ))
         ) : (
           <Card key={i} style={{ padding: 0, overflow: 'hidden', borderColor: c.info }}>
-            {b.table.map((row, r) => (
-              <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
-                {row.map((cell, k) => (
-                  <View key={k} style={{ flex: k === row.length - 1 ? 2 : 1, padding: SPACE.sm }}>
-                    <T content={ar} size={14} weight={r === 0 ? 'semibold' : 'regular'}>{cell}</T>
-                  </View>
-                ))}
-              </View>
-            ))}
+            {(() => {
+              const widths = columnWeights(b.table);
+              return b.table.map((row, r) => (
+                <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
+                  {row.map((cell, k) => (
+                    <View key={k} style={{ flex: widths[k], paddingVertical: SPACE.sm, paddingHorizontal: SPACE.xs }}>
+                      <T content={ar} size={14} weight={r === 0 ? 'semibold' : 'regular'}>{keepUnits(cell)}</T>
+                    </View>
+                  ))}
+                </View>
+              ));
+            })()}
           </Card>
         ),
       )}

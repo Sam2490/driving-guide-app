@@ -1,5 +1,5 @@
 import { QUESTIONS } from './questions';
-import { questionText, tidyArabic } from './localize';
+import { arabicLetters, optionText, questionText, tidyArabic } from './localize';
 
 describe('tidyArabic', () => {
   it('drops the space before a final question mark or colon', () => {
@@ -16,7 +16,14 @@ describe('tidyArabic', () => {
     for (const q of QUESTIONS) {
       const out = questionText(q, 'ar');
       expect(out).not.toMatch(/\s[؟?:]$/);
-      expect(out.replace(/[\s.؟?:]/g, '')).toBe(q.question.replace(/[\s.؟?:]/g, ''));
+      expect(out.replace(/[\s.؟?:]/g, '')).toBe(arabicLetters(q.question).replace(/[\s.؟?:]/g, ''));
+    }
+  });
+  it('writes Persian-keyboard letters and tatweel as plain Arabic', () => {
+    expect(tidyArabic('ھل یجب علـى السائق')).toBe('هل يجب على السائق');
+    for (const q of QUESTIONS) {
+      expect(questionText(q, 'ar')).not.toMatch(/[\u06cc\u06a9\u06be\u0640]/);
+      for (const o of q.options) expect(optionText(q, o, 'ar') ?? '').not.toMatch(/[\u06cc\u06a9\u06be\u0640]/);
     }
   });
 });

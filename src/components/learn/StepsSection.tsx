@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
 import { useStudy } from '@/state/StudyProvider';
-import { Badge, ProgressBar, Row, SourceBadge, T } from '@/components/ui';
+import { Badge, ProgressBar, Row, SnugText, SourceBadge, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { STEPS } from '@/data/steps';
 import { STEP_FEES } from '@/data/stepFees';
@@ -55,7 +55,7 @@ export function StepsSection() {
                 <Row gap={SPACE.xs} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
                   {fees?.map((f) => <Badge key={f} tone="sand" text={t.rd.fee(f)} />)}
                   <Pressable accessibilityRole="button" accessibilityState={{ expanded: isOpen }} accessibilityLabel={`${isOpen ? t.rd.less : t.rd.more}: ${s.title}`} onPress={() => setOpen({ ...open, [i]: !isOpen })} hitSlop={8} style={[styles.more, { flexDirection: d.row }]}>
-                    <T size={14} weight="semibold" color={c.ac}>{isOpen ? t.rd.less : t.rd.more}</T>
+                    <SnugText size={14} weight="semibold" color={c.ac}>{isOpen ? t.rd.less : t.rd.more}</SnugText>
                     <View style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}><Icon name="down" size={16} color={c.ac} /></View>
                   </Pressable>
                 </Row>

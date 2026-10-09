@@ -41,11 +41,16 @@ type TProps = {
 
 /** Text that picks the right font, line height and alignment for the current language. */
 export function T({ children, size, role, weight, color, muted, content, latin, center, style, numberOfLines, header, maxScale, onTextLayout, fit }: TProps) {
-  const { c, font, lh } = useApp();
+  const { c, font, lh, lang } = useApp();
   const d = useDir();
   const spec = role ? TEXT[role] : undefined;
   const fs = size ?? spec?.size ?? 16;
   const w = weight ?? spec?.weight ?? 'regular';
+  // Noto Nastaliq draws "+" as a short flat stroke that reads as a minus ("ردعمل کا فاصلہ + بریک کا فاصلہ"), so in
+  // Urdu the arithmetic signs are set in the Latin UI font.
+  if (lang === 'ur' && !latin && typeof children === 'string' && MATH_SIGN.test(children)) {
+    children = children.split(MATH_SPLIT).map((part, i) => (i % 2 ? <Text key={i} style={{ fontFamily: LATIN_FONT[w] }}>{part}</Text> : part));
+  }
   return (
     <Text
       accessibilityRole={header ? 'header' : undefined}
@@ -62,6 +67,9 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
     </Text>
   );
 }
+
+const MATH_SIGN = /[+\u2212\u00d7\u00f7=]/;
+const MATH_SPLIT = /([+\u2212\u00d7\u00f7=])/;
 
 /** Columns for card lists on wider screens: one on phones, two from 600 pt (tablets, landscape). */
 export function useListColumns(): { cols: number; maxWidth: number } {
@@ -238,7 +246,7 @@ export function Button({ title, onPress, kind = 'primary', icon, disabled, loadi
         hitSlop={k === 'tertiary' ? { left: SPACE.sm, right: SPACE.sm } : undefined}
         onPressIn={press.onPressIn}
         onPressOut={press.onPressOut}
-        style={({ pressed }) => [styles.btn, small && styles.btnSmall, k === 'tertiary' && styles.btnTertiary, dense && styles.btnDense, { backgroundColor: bg(pressed), borderColor: disabled ? c.lnStrong : 'transparent', borderStyle: disabled ? 'dashed' : 'solid' }]}
+        style={({ pressed }) => [styles.btn, small && styles.btnSmall, k === 'tertiary' && styles.btnTertiary, dense && styles.btnDense, { backgroundColor: bg(pressed), borderColor: disabled ? c.lnStrong : 'transparent', borderStyle: disabled ? 'dashed' : 'solid', opacity: disabled ? 0.6 : 1 }]}
       >
         <CenteredLabel title={title} size={size} color={fg} weight="semibold" glyph={glyph} />
       </Pressable>
@@ -296,6 +304,35 @@ export function CenteredLabel({ title, size, color, glyph, weight, role, maxScal
     </View>
   );
 }
+
+/**
+ * A short label that sizes to its own text but never loses its last word on Android. A content-sized Text is measured
+ * a little narrower than Indic and Arabic text is drawn, so the last word drops to a line nobody sees ("अभी नहीं" showed
+ * as "अभी"). The text is laid out once, hidden, in a wide box; the width it really takes (plus a few points) then
+ * sizes the visible label. Use it for labels in rows that must stay content-sized (beside an icon, at a row's end).
+ */
+export function SnugText({ children, style, ...rest }: Omit<TProps, 'children' | 'onTextLayout'> & { children: string }) {
+  const [drawn, setDrawn] = React.useState<{ text: string; w: number } | null>(null);
+  if (Platform.OS === 'web') return <T {...rest} style={style}>{children}</T>;
+  const w = drawn?.text === children ? drawn.w : undefined;
+  return (
+    <View style={{ flexShrink: 1 }}>
+      <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.snugProbe}>
+        <T {...rest} style={style} numberOfLines={1}
+          onTextLayout={(e) => {
+            const lw = Math.ceil(e.nativeEvent.lines[0]?.width ?? 0) + SNUG_SLACK;
+            if (lw > SNUG_SLACK && (drawn?.text !== children || drawn.w !== lw)) setDrawn({ text: children, w: lw });
+          }}
+        >
+          {children}
+        </T>
+      </View>
+      <T {...rest} style={[style, w !== undefined && { width: w, maxWidth: '100%' }]}>{children}</T>
+    </View>
+  );
+}
+
+const SNUG_SLACK = 4;
 
 /** A filter chip when it has `onPress` (44 pt target, selected = brand fill + check), otherwise a compact label. */
 export function Chip({ label, on, onPress, icon }: { label: string; on?: boolean; onPress?: () => void; icon?: IconName }) {
@@ -666,6 +703,8 @@ export function LanguagePill() {
 }
 
 const styles = StyleSheet.create({
+  // Off-screen, invisible, wide enough for any one-line label.
+  snugProbe: { position: 'absolute', top: 0, left: 0, width: 2000, opacity: 0 },
   // Header and content share one centred column, capped on tablets and large phones.
   header: { alignItems: 'center', gap: SPACE.sm, paddingTop: SPACE.sm, paddingBottom: SPACE.xs, minHeight: 56, width: '100%', alignSelf: 'center' },
   content: { paddingTop: SPACE.xs, gap: LAYOUT.list, width: '100%', alignSelf: 'center' },

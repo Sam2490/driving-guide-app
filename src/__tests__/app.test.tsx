@@ -5,6 +5,7 @@ import { render } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ErrorBoundary } from '@/app/_layout';
 import { QUESTIONS } from '@/data/questions';
+import { arabicLetters } from '@/data/localize';
 import { levelQuestions } from '@/features/levels/levels';
 import { selectAnswer, startExam } from '@/features/quiz/engine';
 import { serializeExam } from '@/services/storage';
@@ -92,7 +93,9 @@ describe('mock exam flow', () => {
 
     await fireEvent.press(screen.getByText('مراجعة الأخطاء'));
     await settle();
-    expect(screen.getByText(/^الأخطاء \((29|30)\)$/)).toBeTruthy();
+    // The title no longer counts blanks as mistakes; the counts sit on the filter.
+    expect(screen.getByText('الأخطاء')).toBeTruthy();
+    expect(screen.getByText(/^دون إجابة \((29|30)\)$/)).toBeTruthy();
     expect(screen.getAllByText('الإجابة الصحيحة:').length).toBeGreaterThanOrEqual(29);
   });
 });
@@ -216,6 +219,15 @@ describe('exam timer and leaving', () => {
     await waitFor(() => expect(screen.getByText('انتهى الوقت وتم تسليم إجاباتك.')).toBeTruthy(), { timeout: 4000 });
     expect(await AsyncStorage.getItem('exam.v1')).toBeNull();
   });
+  it('leaves an exam with no answers without the delete warning', async () => {
+    await open('/practice');
+    await fireEvent.press(screen.getByText('ابدأ الاختبار'));
+    await settle();
+    await fireEvent.press(screen.getByLabelText('خروج'));
+    await settle();
+    expect(screen.queryByText('هل تريد إنهاء الاختبار؟ ستُحذف إجاباتك.')).toBeNull();
+    expect(await AsyncStorage.getItem('exam.v1')).toBeNull();
+  });
   it('jumps between questions from the grid and confirms before leaving the exam', async () => {
     await open('/practice');
     await fireEvent.press(screen.getByText('ابدأ الاختبار'));
@@ -223,6 +235,8 @@ describe('exam timer and leaving', () => {
     await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
     await fireEvent.press(screen.getByLabelText('السؤال 5 من 30'));
     expect(screen.getByText('السؤال 5 من 30')).toBeTruthy();
+    // With one answer there is something to lose, so leaving asks first.
+    await fireEvent.press(screen.getAllByRole('radio')[0]);
     await fireEvent.press(screen.getByLabelText('خروج'));
     expect(screen.getByText('هل تريد إنهاء الاختبار؟ ستُحذف إجاباتك.')).toBeTruthy();
     await fireEvent.press(screen.getAllByText('متابعة').at(-1)!);
@@ -252,7 +266,7 @@ describe('level outcomes', () => {
     await open('/level/1');
     for (let i = 0; i < rounds; i++) {
       const q = qs[i];
-      const correctText = q.options.find((o) => o.id === q.correctAnswerId)!.text!;
+      const correctText = arabicLetters(q.options.find((o) => o.id === q.correctAnswerId)!.text!);
       const radios = screen.getAllByRole('radio');
       const isRight = (r: (typeof radios)[number]) => String(r.props.accessibilityLabel).slice(3) === correctText;
       await fireEvent.press(radios.find((r) => isRight(r) === right)!);
@@ -354,9 +368,9 @@ describe('UI/UX audit fixes', () => {
     await settle();
     // The footer practises this exam's wrong answers: the one saved mistake.
     expect(screen.getByText('تدرّب عليها (1)')).toBeTruthy();
-    await fireEvent.press(screen.getByRole('tab', { name: 'الخاطئة' }));
+    await fireEvent.press(screen.getByRole('tab', { name: /^الخاطئة/ }));
     expect(screen.queryAllByText('لم تُجب').length).toBe(0);
-    await fireEvent.press(screen.getByRole('tab', { name: 'دون إجابة' }));
+    await fireEvent.press(screen.getByRole('tab', { name: /^دون إجابة/ }));
     expect(screen.getAllByText('لم تُجب').length).toBeGreaterThan(0);
     const h = JSON.parse((await AsyncStorage.getItem('history.v1'))!);
     expect(h[0]).toMatchObject({ correct: 0, total: 30, passed: false });

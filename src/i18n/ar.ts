@@ -1,4 +1,4 @@
-import { AR, arCount } from './arCount';
+import { AR, arCount, arNoun } from './arCount';
 import type { Strings } from './en';
 
 export const ar: Strings = {
@@ -41,8 +41,8 @@ export const ar: Strings = {
   },
   test: {
     title: 'الاختبار النظري', modes: ['اختبار تجريبي', 'تحدّي المستويات'],
-    disclaimer: 'محاكي للتدريب وليس الاختبار الرسمي.',
-    exTitle: 'الاختبار التجريبي', exSub: (n, m, p) => `${arCount(n, AR.question)} · ${arCount(m, AR.minute)} · النجاح من ${p}`,
+    disclaimer: 'محاكٍ للتدريب، وليس الاختبار الرسمي.',
+    exTitle: 'الاختبار التجريبي', exSub: (n, m, p) => `${arCount(n, AR.question)} · ${arCount(m, AR.minute)} · النجاح من\u00a0${p}`,
     rules: ['تظهر الإجابات الصحيحة بعد التسليم فقط.', 'يمكنك الرجوع وتغيير إجاباتك قبل التسليم.'],
     start: 'ابدأ الاختبار', resume: 'متابعة الاختبار', qOf: (i, n) => `السؤال ${i} من ${n}`,
     prev: 'السابق', next: 'التالي', submit: 'تسليم', grid: 'كل الأسئلة', answered: (n, m) => `أجبت عن ${n} من ${m}`,
@@ -55,7 +55,7 @@ export const ar: Strings = {
     yours: 'إجابتك:', correct: 'الإجابة الصحيحة:', notAnswered: 'لم تُجب', mistakesTitle: 'الأخطاء',
   },
   levels: {
-    title: 'تحدّي المستويات', sub: 'رحلة من المراحل، كل مستوى 8 أسئلة.', rank: 'رتبتك', xp: 'نقطة',
+    title: 'تحدّي المستويات', sub: 'رحلة من المراحل، كل مستوى 8 أسئلة.', rank: 'رتبتك', nextRank: (name, left) => `${left} ${arNoun(left, AR.point)} حتى رتبة ${name}`, xp: 'نقطة', plus: (n) => `+${n} ${arNoun(n, AR.point)}`,
     streak: (n) => arCount(n, AR.dayStreak), done: 'مستويات منجزة', stage: 'المرحلة', lvl: 'المستوى', go: 'ابدأ', again: 'أعد',
     locked: 'يُفتح بعد المستوى السابق', check: 'تأكيد الإجابة', cont: 'متابعة', good: 'إجابة صحيحة', bad: 'إجابة خاطئة',
     right: 'الإجابة الصحيحة:', fin: 'اكتمل المستوى', fail: 'لم تكتمل هذه المرة', failsub: 'أعد المستوى لفتح المستوى التالي.', failOut: (seen, n) => `نفدت المحاولات بعد ${seen} من ${n} أسئلة.`,
@@ -118,7 +118,7 @@ export const ar: Strings = {
     savedMistakes: (n) => `أخطاء للمراجعة (${n})`, practiseThese: (n) => `تدرّب عليها (${n})`,
     noMistakes: 'لا توجد أخطاء للمراجعة. أحسنت!', noWrongHere: 'لا توجد إجابات خاطئة، والباقي دون إجابة.', noBlankHere: 'أجبت عن كل الأسئلة.', emptyExamAsk: 'لم تُجب عن أي سؤال. هل تريد الخروج من الاختبار؟ لن يُحفظ شيء.', clearMistakes: 'مسح الأخطاء المحفوظة', clearAsk: 'حذف كل الأخطاء المحفوظة؟ لا يمكن التراجع عن ذلك.',
     drillTitle: 'التدريب على الأخطاء', drillDone: 'اكتمل التدريب', drillSub: (m, left, half) => `أتقنت ${m} · ${half} في منتصف الطريق · بقي ${left}`,
-    flag: 'ضع علامة للرجوع', unflag: 'إزالة العلامة', flagged: 'عليه علامة',
+    flag: 'ضع علامة للرجوع', unflag: 'إزالة العلامة', flagged: 'عليه علامة', legendAnswered: 'مُجاب', legendCurrent: 'الحالي',
     timeWarn: (m) => `بقيت ${arCount(m, AR.minute)}`, ofTotal: (n) => `من ${n}`, stars: (n) => `${n} من 3 نجوم`,
     fee: (a) => `${a} ريال`, more: 'المزيد', less: 'أقل',
     doneStages: (n) => (n === 1 ? 'المرحلة 1 مكتملة' : `المراحل 1–${n} مكتملة`), allStages: (n) => `عرض كل المراحل (${n})`, fewerStages: 'عرض مراحل أقل',

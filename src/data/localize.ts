@@ -38,8 +38,16 @@ const guideFor = (lang: TLang) => (guideCache[lang] ??= loadGuide(lang));
  * Display tidy-up for the Arabic question bank, which comes with typing habits of its source: a space before the
  * final "؟" or ":" ("الطريق ؟"), and ".." before a question mark ("الإشارة .. ؟"). The data stays as published.
  */
+/**
+ * Letters typed on a Persian keyboard (ی, ک, ھ) and stretching tatweel (ـ) in the Arabic source. Most fonts draw them
+ * close enough, but search, copy and screen readers treat them as different letters ("الطریق" is not "الطريق").
+ */
+export function arabicLetters(s: string): string {
+  return s.replace(/\u06cc/g, '\u064a').replace(/\u06a9/g, '\u0643').replace(/\u06be/g, '\u0647').replace(/\u0640/g, '');
+}
+
 export function tidyArabic(s: string): string {
-  return s
+  return arabicLetters(s)
     .replace(/\s*\.{2,}\s*([؟?])/g, '$1')
     .replace(/[ \u00a0]+([؟?:،!])/g, '$1')
     .trim();
@@ -58,7 +66,7 @@ export function questionText(q: Question, lang: Lang): string {
 
 export function optionText(q: Question, o: QuestionOption, lang: Lang): string | undefined {
   if (!o.text) return undefined;
-  return lang === 'ar' ? o.text : questionsFor(lang)[q.id]?.o[o.id] ?? o.text;
+  return lang === 'ar' ? arabicLetters(o.text) : questionsFor(lang)[q.id]?.o[o.id] ?? o.text;
 }
 
 export function topicText(t: GuideTopic, lang: Lang): { title: string; blocks: GuideTopic['blocks'] } {

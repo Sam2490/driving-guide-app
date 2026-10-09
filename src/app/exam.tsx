@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp, useDir } from '@/state/AppProvider';
 import { MAX_CONTENT_WIDTH, RADIUS, SPACE } from '@/theme/tokens';
 import { useExam } from '@/state/ExamProvider';
-import { BottomSheet, Button, Dialog, EmptyState, IconButton, ProgressBar, Row, StickyBar, T } from '@/components/ui';
+import { BottomSheet, Button, Dialog, EmptyState, IconButton, ProgressBar, Row, SnugText, StickyBar, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { OptionButton, QuestionBody, QuestionSlide } from '@/components/Quiz';
 import { answeredCount, formatClock, remainingSeconds, selectAnswer, toggleFlag } from '@/features/quiz/engine';
@@ -43,12 +43,18 @@ export default function ExamScreen() {
   useEffect(() => {
     const unsub = navigation.addListener('beforeRemove' as never, (e: { preventDefault: () => void; data: { action: unknown } }) => {
       if (allowLeave.current || !exam) return;
+      // Nothing answered yet: there is nothing to lose, so leave without the "your answers will be deleted" warning.
+      if (answeredCount(exam) === 0) {
+        allowLeave.current = true;
+        setExam(null);
+        return;
+      }
       e.preventDefault();
       pendingAction.current = e.data.action;
       setAsk('leave');
     });
     return unsub;
-  }, [navigation, exam]);
+  }, [navigation, exam, setExam]);
 
   useEffect(() => {
     scroll.current?.scrollTo({ y: 0, animated: false });
@@ -80,7 +86,7 @@ export default function ExamScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
       <View style={[styles.top, { flexDirection: d.row }]}>
-        <IconButton icon="close" label={t.test.leave} onPress={() => setAsk('leave')} />
+        <IconButton icon="close" label={t.test.leave} onPress={() => (answered ? setAsk('leave') : leave())} />
         {/* The counter opens the question grid. */}
         <View style={{ flex: 1, alignItems: 'center' }}>
           <Pressable accessibilityRole="button" accessibilityLabel={t.test.grid} accessibilityHint={t.test.answered(answered, n)} onPress={() => setGrid(true)} hitSlop={6} style={({ pressed }) => [styles.counter, { flexDirection: d.row, backgroundColor: pressed ? c.ln : c.fill }]}>
@@ -105,7 +111,7 @@ export default function ExamScreen() {
               style={[styles.flag, { flexDirection: d.row, backgroundColor: flagged ? c.warnbg : 'transparent' }]}
             >
               <Icon name="flag" size={16} color={flagged ? c.warn : c.tx2} filled={flagged} />
-              <T size={14} weight="semibold" color={flagged ? c.warn : c.tx2}>{flagged ? t.rd.flagged : t.rd.flag}</T>
+              <SnugText size={14} weight="semibold" color={flagged ? c.warn : c.tx2}>{flagged ? t.rd.flagged : t.rd.flag}</SnugText>
             </Pressable>
           </Row>
           <QuestionBody q={q} />
@@ -149,6 +155,12 @@ export default function ExamScreen() {
             );
           })}
         </View>
+        {/* What the cell styles mean: filled = answered, thick border = this question, flag badge = flagged. */}
+        <Row gap={SPACE.md} style={{ flexWrap: 'wrap' }}>
+          <Row gap={SPACE.xs}><View style={[styles.key, { backgroundColor: c.acSolid, borderColor: c.acSolid }]} /><SnugText size={14} muted>{t.rd.legendAnswered}</SnugText></Row>
+          <Row gap={SPACE.xs}><View style={[styles.key, { backgroundColor: c.card, borderColor: c.tx, borderWidth: 3 }]} /><SnugText size={14} muted>{t.rd.legendCurrent}</SnugText></Row>
+          <Row gap={SPACE.xs}><View style={[styles.key, { backgroundColor: c.warn, borderColor: c.warn, alignItems: 'center', justifyContent: 'center' }]}><Icon name="flag" size={10} color={c.card} filled /></View><SnugText size={14} muted>{t.rd.flagged}</SnugText></Row>
+        </Row>
         <Button title={t.test.submit} icon="check" onPress={() => { setGrid(false); setAsk('submit'); }} />
       </BottomSheet>
 
@@ -194,6 +206,7 @@ const styles = StyleSheet.create({
   timer: { alignItems: 'center', gap: SPACE.xs, paddingHorizontal: SPACE.sm, minHeight: 44, borderRadius: RADIUS.pill },
   flag: { alignItems: 'center', gap: SPACE.xxs, minHeight: 36, paddingHorizontal: SPACE.sm, borderRadius: RADIUS.pill },
   gridWrap: { flexWrap: 'wrap', gap: SPACE.xs },
+  key: { width: 18, height: 18, borderRadius: 4, borderWidth: 1 },
   cell: { width: 52, minHeight: 52, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
   cellFlag: { position: 'absolute', top: 3, right: 3, width: 14, height: 14, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
 });

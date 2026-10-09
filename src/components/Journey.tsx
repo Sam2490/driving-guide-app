@@ -4,9 +4,9 @@ import { router } from 'expo-router';
 import { useApp, useDir } from '@/state/AppProvider';
 import { QUESTIONS } from '@/data/questions';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { currentLevel, levelCount, LEVELS_PER_STAGE, rankFor, rankProgress, stageCount } from '@/features/levels/levels';
+import { currentLevel, levelCount, LEVELS_PER_STAGE, RANK_XP, rankFor, rankProgress, stageCount } from '@/features/levels/levels';
 import { RADIUS, SPACE } from '@/theme/tokens';
-import { Button, Card, IconTile, ProgressBar, Row, Stars, T } from './ui';
+import { Button, Card, IconTile, ProgressBar, Row, SnugText, Stars, T } from './ui';
 import { Icon } from './Icon';
 
 const TOTAL = levelCount(QUESTIONS.length);
@@ -33,9 +33,11 @@ export function RankCard() {
         </View>
       </Row>
       <ProgressBar value={rankProgress(progress.xp)} color={c.sand} label={L.rank} />
+      {/* Says what the bar measures: points to the next rank, not levels done. */}
+      {r + 1 < RANK_XP.length ? <T size={12} muted>{L.nextRank(L.ranks[r + 1], RANK_XP[r + 1] - progress.xp)}</T> : null}
       <Row gap={SPACE.md}>
-        <Row gap={SPACE.xs}><Icon name="flame" size={16} color={c.tx2} /><T size={14} muted>{L.streak(progress.streak)}</T></Row>
-        <Row gap={SPACE.xs}><Icon name="check" size={16} color={c.tx2} /><T size={14} muted>{`${doneCount}/${TOTAL} ${L.done}`}</T></Row>
+        <Row gap={SPACE.xs} style={{ flexShrink: 1 }}><Icon name="flame" size={16} color={c.tx2} /><SnugText size={14} muted>{L.streak(progress.streak)}</SnugText></Row>
+        <Row gap={SPACE.xs} style={{ flexShrink: 1 }}><Icon name="check" size={16} color={c.tx2} /><SnugText size={14} muted>{`${doneCount}/${TOTAL} ${L.done}`}</SnugText></Row>
       </Row>
     </Card>
   );

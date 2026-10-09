@@ -180,7 +180,7 @@ export default function LevelScreen() {
             <Icon name={checked.good ? 'check' : 'close'} size={24} color={checked.good ? c.ok : c.bad} />
             <View style={{ flex: 1, gap: SPACE.xxs }} accessibilityLiveRegion="polite">
               <T role="title" color={checked.good ? c.ok : c.bad}>{checked.good ? L.good : L.bad}</T>
-              {checked.good ? <T size={14} color={c.sand} weight="semibold">{`+${checked.gain} ${L.xp}`}</T> : (
+              {checked.good ? <T size={14} color={c.sand} weight="semibold">{L.plus(checked.gain)}</T> : (
                 <View style={{ gap: SPACE.xxs }}><T size={14} muted>{L.right}</T><OptionContent q={q} option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} /></View>
               )}
             </View>

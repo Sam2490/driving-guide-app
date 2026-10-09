@@ -14,6 +14,14 @@ export function arCount(n: number, f: ArForms): string {
   return `${n} ${f.other ?? f.many}`;
 }
 
+/** The noun alone, for a count written with its digits in front ("+10 نقاط", "+12 نقطةً"). */
+export function arNoun(n: number, f: ArForms): string {
+  const r = Math.abs(n) % 100;
+  if (r >= 3 && r <= 10) return f.few;
+  if (r >= 11 && r <= 99) return f.many;
+  return f.other ?? f.many;
+}
+
 export const AR = {
   mistake: { one: 'خطأ واحد', two: 'خطآن', few: 'أخطاء', many: 'خطأً', other: 'خطأ' },
   /** Accusative, after a verb ("راجع …"). */
@@ -22,6 +30,7 @@ export const AR = {
   sign: { one: 'علامة واحدة', two: 'علامتان', few: 'علامات', many: 'علامة' },
   question: { one: 'سؤال واحد', two: 'سؤالان', few: 'أسئلة', many: 'سؤالاً', other: 'سؤال' },
   minute: { one: 'دقيقة واحدة', two: 'دقيقتان', few: 'دقائق', many: 'دقيقة' },
+  point: { one: 'نقطة واحدة', two: 'نقطتان', few: 'نقاط', many: 'نقطةً', other: 'نقطة' },
   school: { one: 'مدرسة واحدة', two: 'مدرستان', few: 'مدارس', many: 'مدرسة' },
   /** Consecutive days, with the adjective agreeing ("يومان متتاليان", "5 أيام متتالية", "12 يوماً متتالياً"). */
   dayStreak: { one: 'يوم واحد متتالٍ', two: 'يومان متتاليان', few: 'أيام متتالية', many: 'يوماً متتالياً', other: 'يوم متتالٍ' },

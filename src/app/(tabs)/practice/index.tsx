@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useApp, useDir } from '@/state/AppProvider';
 import { useExam } from '@/state/ExamProvider';
 import { useStudy } from '@/state/StudyProvider';
-import { Button, Card, IconTile, ListRow, Row, Screen, Section, T } from '@/components/ui';
+import { Button, Card, IconTile, ListRow, Row, Screen, Section, SnugText, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { LevelPath, RankCard } from '@/components/Journey';
 import { QUESTIONS } from '@/data/questions';
@@ -55,11 +55,11 @@ export default function Practice() {
       )}
       {last && best ? (
         <View style={{ gap: 2, alignItems: d.start }}>
-          <Row gap={SPACE.xs}>
+          <Row gap={SPACE.xs} style={{ flexShrink: 1 }}>
             <Icon name={last.passed ? 'check' : 'close'} size={16} color={last.passed ? c.ok : c.bad} />
-            <T size={14} weight="semibold">{t.ux.lastResult(last.correct, last.total, last.passed)}</T>
+            <SnugText size={14} weight="semibold">{t.ux.lastResult(last.correct, last.total, last.passed)}</SnugText>
           </Row>
-          <T size={14} muted>{t.ux.best(best.correct, best.total)}</T>
+          <SnugText size={14} muted>{t.ux.best(best.correct, best.total)}</SnugText>
         </View>
       ) : null}
     </Card>

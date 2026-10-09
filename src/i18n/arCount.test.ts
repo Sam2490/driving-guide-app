@@ -1,4 +1,4 @@
-import { AR, arCount } from './arCount';
+import { AR, arCount, arNoun } from './arCount';
 import { ar } from './ar';
 
 test('Arabic count words follow the number', () => {
@@ -15,7 +15,7 @@ test('Arabic count words follow the number', () => {
 test('app strings use the inflected forms', () => {
   expect(ar.rd.mistakesRow(1)).toBe('راجع خطأً واحداً');
   expect(ar.rd.mistakesRow(30)).toBe('راجع 30 خطأً');
-  expect(ar.test.exSub(30, 30, 24)).toBe('30 سؤالاً · 30 دقيقة · النجاح من 24');
+  expect(ar.test.exSub(30, 30, 24)).toBe('30 سؤالاً · 30 دقيقة · النجاح من\u00a024');
   expect(ar.signs.count(192)).toBe('192 علامة');
   expect(ar.schools.count(1)).toBe('مدرسة واحدة');
   expect(ar.rd.timeWarn(5)).toBe('بقيت 5 دقائق');
@@ -26,4 +26,12 @@ test('the day streak agrees with its number', () => {
   expect(ar.levels.streak(2)).toBe('يومان متتاليان');
   expect(ar.levels.streak(5)).toBe('5 أيام متتالية');
   expect(ar.levels.streak(12)).toBe('12 يوماً متتالياً');
+});
+
+describe('arNoun', () => {
+  it('picks the plural for 3–10 and the tanween singular for 11–99', () => {
+    expect(arNoun(10, AR.point)).toBe('نقاط');
+    expect(arNoun(12, AR.point)).toBe('نقطةً');
+    expect(arNoun(100, AR.point)).toBe('نقطة');
+  });
 });
