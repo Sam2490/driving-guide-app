@@ -75,7 +75,7 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   );
 }
 
-const NUMBER_RUN = /\d[\d.,\u066b\u066c]*(?:[ \u00a0]?[\u2013\-][ \u00a0]?\d[\d.,\u066b\u066c]*)+|\d[\d.,]*[ \u00a0]?[%\u066a]|[%\u066a]\d[\d.,]*/g;
+const NUMBER_RUN = /\d[\d.,\u066b\u066c]*(?:[ \u00a0]?[\u2013\-]\u200b?[ \u00a0]?\d[\d.,\u066b\u066c]*)+(?:[ \u00a0]?[%\u066a])?|\d[\d.,]*[ \u00a0]?[%\u066a]|[%\u066a]\d[\d.,]*/g;
 
 /** Wraps number ranges ("10–20", "2026-10-03") and percentages ("75%", "%75" → "75%") in a left-to-right isolate. */
 export function ltrNumbers(text: string): string {
@@ -399,6 +399,9 @@ export function Badge({ text, tone = 'neutral', icon }: { text: string; tone?: '
 export function Segmented({ options, value, onChange, counts }: { options: string[]; value: number; onChange: (i: number) => void; counts?: number[] }) {
   const { c } = useApp();
   const d = useDir();
+  const { fontScale } = useWindowDimensions();
+  // At large system text sizes a one-line label would be cut off; let it wrap (between words) instead.
+  const oneLine = !!counts && fontScale <= 1.2;
   return (
     <View accessibilityRole="tablist" style={[styles.seg, { backgroundColor: c.bg2, borderColor: c.ln, flexDirection: d.row }]}>
       {options.map((o, i) => {
@@ -406,7 +409,7 @@ export function Segmented({ options, value, onChange, counts }: { options: strin
         const n = counts?.[i];
         return (
           <Pressable key={o} accessibilityRole="tab" accessibilityLabel={n === undefined ? o : `${o}, ${n}`} accessibilityState={{ selected: on }} onPress={() => onChange(i)} style={[styles.segBtn, on && { backgroundColor: c.card, borderColor: c.ln, borderWidth: 1 }]}>
-            <T size={16} weight="semibold" center color={on ? c.tx : c.tx2} maxScale={1.3} numberOfLines={counts ? 1 : 2} fit={!!counts}>{o}</T>
+            <T size={16} weight="semibold" center color={on ? c.tx : c.tx2} maxScale={1.3} numberOfLines={oneLine ? 1 : 2} fit={oneLine}>{o}</T>
             {n !== undefined ? <T size={12} center color={on ? c.tx : c.tx2} maxScale={1.3} style={{ fontVariant: ['tabular-nums'] }}>{String(n)}</T> : null}
           </Pressable>
         );

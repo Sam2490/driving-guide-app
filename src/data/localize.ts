@@ -33,11 +33,6 @@ function loadGuide(lang: TLang): Record<string, TopicText> {
 const questionsFor = (lang: TLang) => (questionCache[lang] ??= loadQuestions(lang));
 const guideFor = (lang: TLang) => (guideCache[lang] ??= loadGuide(lang));
 
-/** Content in the reader's language; Arabic is the source, the other languages are translations. */
-/**
- * Display tidy-up for the Arabic question bank, which comes with typing habits of its source: a space before the
- * final "؟" or ":" ("الطريق ؟"), and ".." before a question mark ("الإشارة .. ؟"). The data stays as published.
- */
 /**
  * Letters typed on a Persian keyboard (ی, ک, ھ) and stretching tatweel (ـ) in the Arabic source. Most fonts draw them
  * close enough, but search, copy and screen readers treat them as different letters ("الطریق" is not "الطريق").
@@ -147,6 +142,12 @@ const TAMYIZ: Record<string, string> = {
 };
 const TAMYIZ_RE = new RegExp(`(^|[^\\d.,])(\\d+)[ \u00a0]+(${Object.keys(TAMYIZ).join('|')})(?=$|[^${L}])`, 'g');
 
+/** "ان" is "إن" when it opens a question (after any opening « or bracket) or follows حيث / قال; otherwise "أن". */
+function inna(before: string, question: boolean): boolean {
+  if (question && /^[\s\u00ab(]*$/.test(before)) return true;
+  return /(^|[^\u0621-\u064a])(?:\u062d\u064a\u062b|\u0642\u0627\u0644|\u0642\u0627\u0644\u062a)[\s\u00a0]+$/.test(before);
+}
+
 /**
  * Display tidy-up for the Arabic question bank, which comes with typing habits of its source. The data stays as
  * published; the reader sees standard spelling:
@@ -164,14 +165,17 @@ export function tidyArabic(s: string, question = true): string {
     .replace(/\u0627\u0644\u0627\u062a\u064a(?=$|[^\u0621-\u064a])/g, '\u0627\u0644\u0622\u062a\u064a') // الاتي → الآتي
     .replace(word('\u0644\u0627\u0634\u064a\u0621'), (_m, pre: string) => `${pre}\u0644\u0627 \u0634\u064a\u0621`) // لاشيء → لا شيء
     .replace(/\u0623\u0645\u0648\u0631\u0627\u0644\u062a\u064a|\u0627\u0645\u0648\u0631\u0627\u0644\u062a\u064a/g, '\u0623\u0645\u0648\u0631 \u0627\u0644\u062a\u064a') // امورالتي → أمور التي
-    .replace(word('\u0627\u0646'), (_m, pre: string, _w: string, at: number) => pre + (question && at === 0 && pre === '' ? '\u0625\u0646' : '\u0623\u0646'))
-    .replace(word('\u0623\u0646 \u0644\u0627'), (_m, pre: string) => `${pre}\u0623\u0644\u0651\u0627`)
+    .replace(word('\u0627\u0646'), (_m, pre: string, _w: string, at: number, all: string) => pre + (inna(all.slice(0, at + pre.length), question) ? '\u0625\u0646' : '\u0623\u0646'))
+    .replace(word('\u0628?[\u0623\u0627]\u0646 \u0644\u0627'), (m, pre: string) => `${pre}${m.slice(pre.length).startsWith('\u0628') ? '\u0628' : ''}\u0623\u0644\u0651\u0627`)
     .replace(LA_RE, (_m, pre: string, w: string) => (w.startsWith('\u0648') ? `${pre}\u0648\u0644\u0627 ${w.slice(3)}` : `${pre}\u0644\u0627 ${w.slice(2)}`))
     .replace(word('\u0645\u0627\u0630\u0643\u0631'), (_m, pre: string) => `${pre}\u0645\u0627 \u0630\u064f\u0643\u0631`)
+    .replace(word('\u0645\u0627\u0647(?:\u0648|\u064a)'), (_m, pre: string, w: string) => `${pre}\u0645\u0627 ${w.slice(2)}`) // ماهو → ما هو
+    .replace(/\u0627\u064e(?=$|[^\u0621-\u064a])/g, '\u0627\u064b') // مستعداَ → مستعداً
     .replace(TAMYIZ_RE, (m, pre: string, n: string, noun: string) => {
       const r = Number(n) % 100;
       return r >= 11 && r <= 99 ? `${pre}${n} ${TAMYIZ[noun]}` : m;
     })
+    .replace(/(\d[ \u00a0]+\u0645\u062a\u0631)\u0627\u064b(?=[ \u00a0]+\u0645(?:\u0631\u0628\u0639|\u0643\u0639\u0628))/g, '$1') // an adjective follows: leave "20 متر مربع"
     .replace(/\s*\.{2,}\s*([؟?])/g, '$1')
     .replace(/[ \u00a0]+([؟?:،!؛])/g, '$1')
     .replace(/[ \u00a0]+\.(?!\.)/g, '.')
@@ -180,12 +184,14 @@ export function tidyArabic(s: string, question = true): string {
     .replace(/([^\s(\u00ab])\(/g, '$1 (') // "3(باللون" → "3 (باللون"
     .replace(/\)(?=[\u0621-\u064a])/g, ') ') // "2)بعد" → "2) بعد"
     .replace(/([\u0621-\u064a])\u00ab/g, '$1 \u00ab') // "أو«" → "أو «"
+    .replace(/\u00ab[ \u00a0]+/g, '\u00ab')
+    .replace(/[ \u00a0]+\u00bb/g, '\u00bb')
     .replace(/:-$/, ':')
-    .replace(/(^|\s)\u0648\s+(?=[\u0621-\u064a])/g, '$1\u0648') // "و أكثر" → "وأكثر"
+    .replace(/(^|[\u0621-\u064a]{2}[\s\u060c]+)\u0648\s+(?=[\u0621-\u064a])/g, '$1\u0648') // "و أكثر" → "وأكثر"; not "أ و ب"
     .trim();
   // A one-letter preposition that ends the stem keeps its joining stroke: "يقصد ب" → "يقصد بـ…".
   if (question && /(^|\s)[\u0628\u0644\u0643]$/.test(v)) v += '\u0640';
-  if (question && v && !/[؟?.:!…]$/.test(v)) v += '…';
+  if (question && v && !/[؟?.:!…](\s*\([^()]*\))?$/.test(v)) v += '…';
   return v;
 }
 

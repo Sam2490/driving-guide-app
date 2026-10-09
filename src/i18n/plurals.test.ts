@@ -23,7 +23,8 @@ it('the mistakes-practice summary explains the two-in-a-row rule in every langua
     expect(s.rd.drillLeft.length).toBeGreaterThan(2);
     expect(s.rd.drillSub(0, 23, 10)).toContain('10');
   }
-  expect(STRINGS.en.rd.drillSub(0, 23, 10)).toBe('0 mastered · 10 need one more right answer · 23 still to fix');
+  expect(STRINGS.en.rd.drillSub(0, 23, 10)).toBe('0 mastered · 10 need one more correct answer · 23 still to fix');
+  expect(STRINGS.en.rd.drillSub(0, 23, 1)).toBe('0 mastered · 1 needs one more correct answer · 23 still to fix');
   expect(STRINGS.ar.rd.drillSub(0, 23, 10)).not.toContain('منتصف الطريق');
 });
 

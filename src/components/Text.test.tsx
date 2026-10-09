@@ -34,13 +34,24 @@ describe('Urdu text keeps room for Nastaliq overhangs (QA_1 U1: "کی" drawn as 
 });
 
 describe('Segmented counts (QA_1 U3: "Unanswere / d (15)")', () => {
-  it('puts each count on its own line and keeps the label on one line', async () => {
+  const RN = jest.requireActual('react-native');
+  const withFontScale = (fontScale: number) => jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 360, height: 800, scale: 3, fontScale });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('puts each count on its own line and keeps the label on one line at normal text sizes', async () => {
+    withFontScale(1);
     await inLang('en', <Segmented options={['All', 'Incorrect', 'Unanswered']} counts={[25, 10, 15]} value={0} onChange={() => {}} />);
     const label = screen.getByText('Unanswered');
     expect(label.props.numberOfLines).toBe(1);
     expect(screen.getByText('15')).toBeTruthy();
     expect(screen.queryByText(/Unanswered \(/)).toBeNull();
     expect(screen.getByRole('tab', { name: 'Unanswered, 15' })).toBeTruthy();
+  });
+
+  it('lets the label wrap between words at large text sizes instead of cutting it off', async () => {
+    withFontScale(1.3);
+    await inLang('en', <Segmented options={['All', 'Incorrect', 'Unanswered']} counts={[25, 10, 15]} value={0} onChange={() => {}} />);
+    expect(screen.getByText('Unanswered').props.numberOfLines).toBe(2);
   });
 });
 
@@ -65,4 +76,9 @@ it('the empty-state action spans the column instead of wrapping in a narrow box 
   const inner = StyleSheet.flatten(screen.getByTestId('empty-action').props.children.props.style);
   expect(inner.width).toBe('100%');
   expect(inner.maxWidth).toBe(320);
+});
+
+it('isolates guide-table ranges that carry a zero-width break, and a range followed by % (review)', () => {
+  expect(ltrNumbers('5–​10')).toBe('⁦5–​10⁩');
+  expect(ltrNumbers('10–20% أو أكثر')).toBe('⁦10–20%⁩ أو أكثر');
 });

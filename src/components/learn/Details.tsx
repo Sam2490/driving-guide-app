@@ -108,7 +108,8 @@ function GuideTable({ rows }: { rows: string[][] }) {
   const [width, setWidth] = React.useState(0);
   const ar = lang === 'ar';
   const fs = 14;
-  const layout = width ? columnWidths(rows, width - 2, fs * fontScale, lang === 'ur' ? 2 * nastaliqPad(fs) : 0) : null;
+  const layout = width ? columnWidths(rows, width - 2, fs * fontScale, lang === 'ur' ? 2 * nastaliqPad(fs) : 0, lang === 'ur') : null;
+  const scroller = React.useRef<ScrollView>(null);
   const body = rows.map((row, r) => (
     <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
       {row.map((cell, k) => (
@@ -122,7 +123,8 @@ function GuideTable({ rows }: { rows: string[][] }) {
     <Card style={{ padding: 0, overflow: 'hidden', borderColor: c.info }}>
       <View onLayout={(e) => setWidth(Math.floor(e.nativeEvent.layout.width))}>
         {layout?.scroll ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ flexDirection: 'column' }}>
+          // Rows run right to left in Arabic and Urdu, so a scrolling table opens at its right end (the first column).
+          <ScrollView ref={scroller} horizontal showsHorizontalScrollIndicator contentContainerStyle={{ flexDirection: 'column' }} onContentSizeChange={() => d.rtl && scroller.current?.scrollToEnd({ animated: false })}>
             <View>{body}</View>
           </ScrollView>
         ) : (

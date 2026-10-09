@@ -116,7 +116,7 @@ export const ur: Strings = {
     practiceTitle: 'مشق', pathTitle: 'لیولز کا راستہ', learnTitle: 'سیکھیں', sections: ['نشانات', 'گائیڈ', 'مراحل'],
     savedMistakes: (n) => `درست کرنے کی غلطیاں (${n})`, practiseThese: (n) => `ان کی مشق کریں (${n})`,
     noMistakes: 'دیکھنے کو کوئی غلطی نہیں۔ بہت خوب!', noWrongHere: 'کوئی غلط جواب نہیں، باقی کا جواب نہیں دیا گیا۔', noBlankHere: 'آپ نے ہر سوال کا جواب دیا۔', emptyExamAsk: 'آپ نے کسی سوال کا جواب نہیں دیا۔ امتحان چھوڑ دیں؟ کچھ محفوظ نہیں ہوگا۔', clearMistakes: 'محفوظ غلطیاں مٹائیں', clearAsk: 'تمام محفوظ غلطیاں حذف کریں؟ یہ واپس نہیں ہو سکتا۔',
-    drillTitle: 'غلطیوں کی مشق', drillDone: 'مشق مکمل', drillSub: (m, left, half) => `${m} پکی ہو گئیں · ${half} کو ایک اور درست جواب چاہیے · ${left} باقی`,
+    drillTitle: 'غلطیوں کی مشق', drillDone: 'مشق مکمل', drillSub: (m, left, half) => `${m} سوال پکے ہو گئے · ${half} کے لیے ایک اور درست جواب درکار · ${left} باقی`,
     drillRule: 'لگاتار دو درست جوابات کے بعد سوال فہرست سے ہٹ جاتا ہے۔', drillLeft: 'فہرست میں باقی',
     flag: 'مارک کریں', unflag: 'مارک ہٹائیں', flagged: 'مارک شدہ', legendAnswered: 'جواب دیا', legendCurrent: 'موجودہ',
     timeWarn: (m) => `${m} منٹ باقی`, ofTotal: (n) => `${n} میں سے`, stars: (n) => `3 میں سے ${n} ستارے`,

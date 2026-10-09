@@ -51,13 +51,15 @@ async function servicesOn(): Promise<boolean> {
   if (await Location.hasServicesEnabledAsync()) return true;
   if (Platform.OS !== 'android') return false;
   // The dialog shares expo-location's settings queue, which can stop answering; time-box it (long enough to tap OK).
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const asked = await Promise.race([
     attempt(() => Location.enableNetworkProviderAsync()).then(
       () => true,
       () => false, // declined
     ),
-    sleep(30_000).then(() => false),
+    new Promise<boolean>((r) => (timer = setTimeout(() => r(false), 30_000))),
   ]);
+  clearTimeout(timer);
   if (!asked) return Location.hasServicesEnabledAsync();
   // Location can take a moment to report "on" after the user accepts.
   for (let i = 0; i < 6; i++) {

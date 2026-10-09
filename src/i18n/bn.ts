@@ -116,7 +116,7 @@ export const bn: Strings = {
     practiceTitle: 'অনুশীলন', pathTitle: 'লেভেলের পথ', learnTitle: 'শিখুন', sections: ['সাইন', 'গাইড', 'ধাপ'],
     savedMistakes: (n) => `যে ভুলগুলো ঠিক করতে হবে (${n})`, practiseThese: (n) => `এগুলো অনুশীলন করুন (${n})`,
     noMistakes: 'পর্যালোচনার জন্য কোনো ভুল নেই। দারুণ!', noWrongHere: 'কোনো ভুল উত্তর নেই; বাকিগুলোর উত্তর দেওয়া হয়নি।', noBlankHere: 'আপনি সব প্রশ্নের উত্তর দিয়েছেন।', emptyExamAsk: 'আপনি কোনো প্রশ্নের উত্তর দেননি। পরীক্ষা ছেড়ে যাবেন? কিছুই সংরক্ষিত হবে না।', clearMistakes: 'সংরক্ষিত ভুল মুছুন', clearAsk: 'সব সংরক্ষিত ভুল মুছবেন? এটি ফেরানো যাবে না।',
-    drillTitle: 'ভুলের অনুশীলন', drillDone: 'অনুশীলন সম্পন্ন', drillSub: (m, left, half) => `${m}টি আয়ত্ত · ${half}টিতে আরও একটি সঠিক উত্তর দরকার · ${left}টি বাকি`,
+    drillTitle: 'ভুলের অনুশীলন', drillDone: 'অনুশীলন সম্পন্ন', drillSub: (m, left, half) => `${m}টি আয়ত্ত · ${half}টির জন্য আরও একটি সঠিক উত্তর দরকার · ${left}টি বাকি`,
     drillRule: 'পরপর দুবার সঠিক উত্তর দিলে প্রশ্নটি তালিকা থেকে সরে যায়।', drillLeft: 'তালিকায় বাকি',
     flag: 'মার্ক', unflag: 'মার্ক সরান', flagged: 'মার্ক করা', legendAnswered: 'উত্তর দেওয়া', legendCurrent: 'বর্তমান',
     timeWarn: (m) => `${m} মিনিট বাকি`, ofTotal: (n) => `/ ${n}`, stars: (n) => `3টির মধ্যে ${n}টি তারা`,

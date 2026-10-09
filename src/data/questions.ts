@@ -7346,7 +7346,7 @@ export const QUESTIONS: Question[] = [
  },
  {
   "id": "q296",
-  "question": "أجعل رحلتك آمنة و أكثر متعة بـ",
+  "question": "اجعل رحلتك آمنة و أكثر متعة بـ",
   "options": [
    {
     "id": "a",

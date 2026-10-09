@@ -45,7 +45,7 @@ describe('tidyArabic', () => {
   it('ends a question that stops mid-sentence with an ellipsis, as the translations do (QA_1 A8)', () => {
     expect(tidyArabic('تعتبر معابر المشاة من بين الأماكن التي')).toBe('تعتبر معابر المشاة من بين الأماكن التي…');
     expect(tidyArabic('ما هي النقطة العمياء؟')).toBe('ما هي النقطة العمياء؟');
-    for (const q of QUESTIONS) expect(questionText(q, 'ar')).toMatch(/[؟?.:!…]$/);
+    for (const q of QUESTIONS) expect(questionText(q, 'ar')).toMatch(/[؟?.:!…](\s*\([^()]*\))?$/);
   });
   it('leaves no hamza-less common word in any question or option', () => {
     const bare = /(^|[^\u0621-\u064a])(الى|او|اذا|اقصى|اعلاه|انت|ان|ماذكر|لاتقل|لايسمح)(?=$|[^\u0621-\u064a])/;
@@ -84,4 +84,24 @@ describe('tidyArabic spacing around brackets and quotes', () => {
 it('joins a detached و to the next word', () => {
   expect(tidyArabic('آمنة و أكثر متعة', false)).toBe('آمنة وأكثر متعة');
   expect(tidyArabic('واحد', false)).toBe('واحد');
+});
+
+describe('tidyArabic edge cases from the independent review', () => {
+  it('uses إن after حيث / قال and at a question start behind « or (', () => {
+    expect(tidyArabic('وذلك حيث ان السرعة عالية', false)).toBe('وذلك حيث إن السرعة عالية');
+    expect(tidyArabic('«ان القيادة فن وذوق»')).toBe('«إن القيادة فن وذوق»…');
+  });
+  it('writes بأن لا as بألّا, ماهو as ما هو, and اَ at a word end as اً', () => {
+    expect(tidyArabic('أقر بان لا أتجاوز', false)).toBe('أقر بألّا أتجاوز');
+    expect(tidyArabic('ماهو الحد الأقصى؟')).toBe('ما هو الحد الأقصى؟');
+    expect(tidyArabic('كن مستعداَ', false)).toBe('كن مستعداً');
+  });
+  it('leaves the counted noun alone before an adjective, and a و between single letters', () => {
+    expect(tidyArabic('مساحة 20 متر مربع', false)).toBe('مساحة 20 متر مربع');
+    expect(tidyArabic('الخياران أ و ب', false)).toBe('الخياران أ و ب');
+  });
+  it('removes spaces just inside «» and adds no ellipsis after a bracketed note', () => {
+    expect(tidyArabic('اترك « حق الأولوية »', false)).toBe('اترك «حق الأولوية»');
+    expect(tidyArabic('أي واحدة منها؟ (الأسهم الصغيرة)')).toBe('أي واحدة منها؟ (الأسهم الصغيرة)');
+  });
 });

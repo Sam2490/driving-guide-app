@@ -31,12 +31,12 @@ export const CELL_PAD = 8;
 const MARK = /[\u0300-\u036f\u064b-\u065f\u0670\u0900-\u0903\u093a-\u094f\u0951-\u0957\u0962\u0963\u0981-\u0983\u09bc\u09be-\u09cd\u09d7\u09e2\u09e3\u200b-\u200f\u2060\u2066-\u2069]/;
 
 /** Approximate drawn width of `text` at `fontSize`, in points (an estimate per script, on the generous side). */
-export function textWidth(text: string, fontSize: number): number {
+export function textWidth(text: string, fontSize: number, nastaliq = false): number {
   let em = 0;
   for (const ch of text) {
     if (MARK.test(ch)) continue;
     const c = ch.codePointAt(0)!;
-    if (c >= 0x0600 && c <= 0x06ff) em += 0.5; // Arabic script joins tightly
+    if (c >= 0x0600 && c <= 0x06ff) em += nastaliq ? 0.62 : 0.5; // Arabic script joins tightly; Urdu Nastaliq is wider
     else if (c >= 0x0900 && c <= 0x09ff) em += 0.66; // Devanagari, Bengali
     else if (ch === ' ' || ch === NBSP) em += 0.28;
     else if (c >= 0x30 && c <= 0x39) em += 0.58; // digits
@@ -53,7 +53,7 @@ export function textWidth(text: string, fontSize: number): number {
  * Space left over goes to the columns whose text still wraps. When even the minimum widths don't fit, the table
  * scrolls sideways instead of squeezing (`scroll`).
  */
-export function columnWidths(rows: string[][], available: number, fontSize = 14, extraPad = 0): { widths: number[]; scroll: boolean } {
+export function columnWidths(rows: string[][], available: number, fontSize = 14, extraPad = 0, nastaliq = false): { widths: number[]; scroll: boolean } {
   const n = Math.max(0, ...rows.map((r) => r.length));
   const min: number[] = [];
   const pref: number[] = [];
@@ -63,8 +63,8 @@ export function columnWidths(rows: string[][], available: number, fontSize = 14,
     rows.forEach((r, i) => {
       const size = i === 0 ? fontSize * 1.06 : fontSize; // header row is semibold
       const cell = keepUnits(r[k] ?? '');
-      for (const piece of cell.split(/[ \t\n\u200b]+/)) lo = Math.max(lo, textWidth(piece, size));
-      hi = Math.max(hi, textWidth(cell, size));
+      for (const piece of cell.split(/[ \t\n\u200b]+/)) lo = Math.max(lo, textWidth(piece, size, nastaliq));
+      hi = Math.max(hi, textWidth(cell, size, nastaliq));
     });
     min.push(lo + 2 * CELL_PAD + extraPad + 2);
     pref.push(Math.max(lo, hi) + 2 * CELL_PAD + extraPad + 2);

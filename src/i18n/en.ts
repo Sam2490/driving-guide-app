@@ -114,7 +114,7 @@ export const en = {
     practiceTitle: 'Practice', pathTitle: 'Level path', learnTitle: 'Learn', sections: ['Signs', 'Guide', 'Steps'],
     savedMistakes: (n: number) => `Mistakes to fix (${n})`, practiseThese: (n: number) => `Practise these (${n})`,
     noMistakes: 'No mistakes to review. Nice work.', noWrongHere: 'No wrong answers. The rest were left blank.', noBlankHere: 'You answered every question.', emptyExamAsk: 'You have not answered any questions. Leave the exam? Nothing will be saved.', clearMistakes: 'Clear saved mistakes', clearAsk: 'Remove every saved mistake? This cannot be undone.',
-    drillTitle: 'Mistakes practice', drillDone: 'Practice complete', drillSub: (m: number, left: number, half: number) => `${m} mastered · ${half} need one more right answer · ${left} still to fix`,
+    drillTitle: 'Mistakes practice', drillDone: 'Practice complete', drillSub: (m: number, left: number, half: number) => `${m} mastered · ${half} ${half === 1 ? 'needs' : 'need'} one more correct answer · ${left} still to fix`,
     drillRule: 'A question leaves your list after two correct answers in a row.', drillLeft: 'Still on your list',
     flag: 'Flag for later', unflag: 'Remove flag', flagged: 'Flagged', legendAnswered: 'Answered', legendCurrent: 'Current',
     timeWarn: (m: number) => `${m} ${m === 1 ? 'minute' : 'minutes'} left`, ofTotal: (n: number) => `of ${n}`, stars: (n: number) => `${n} of 3 stars`,
