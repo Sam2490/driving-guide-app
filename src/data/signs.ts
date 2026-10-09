@@ -75,7 +75,7 @@ export const SIGNS: Sign[] = [
   "id": "s010",
   "group": "تحذيرية",
   "nameAr": "الطريق يضيق من الجانبين",
-  "nameEn": "Road narrows — two-sided"
+  "nameEn": "Road narrows on both sides"
  },
  {
   "id": "s011",
@@ -87,7 +87,7 @@ export const SIGNS: Sign[] = [
   "id": "s012",
   "group": "تحذيرية",
   "nameAr": "الطريق يضيق من اليمين",
-  "nameEn": "Road narrows - on the right"
+  "nameEn": "Road narrows on the right"
  },
  {
   "id": "s013",
@@ -123,7 +123,7 @@ export const SIGNS: Sign[] = [
   "id": "s018",
   "group": "تحذيرية",
   "nameAr": "حصى متناثر",
-  "nameEn": "Loose chippings"
+  "nameEn": "Loose gravel"
  },
  {
   "id": "s019",
@@ -159,7 +159,7 @@ export const SIGNS: Sign[] = [
   "id": "s024",
   "group": "تحذيرية",
   "nameAr": "عبور حيوانات",
-  "nameEn": "Animal Crossing"
+  "nameEn": "Animal crossing"
  },
  {
   "id": "s025",
@@ -219,7 +219,7 @@ export const SIGNS: Sign[] = [
   "id": "s034",
   "group": "تحذيرية",
   "nameAr": "إشارة أعطِ الأولوية أمامك",
-  "nameEn": "Yield sign ahead"
+  "nameEn": "Give way sign ahead"
  },
  {
   "id": "s035",
@@ -321,7 +321,7 @@ export const SIGNS: Sign[] = [
   "id": "s051",
   "group": "تحذيرية",
   "nameAr": "إشارات ضوئية أمامك",
-  "nameEn": "Traffic signals ahead"
+  "nameEn": "Traffic lights ahead"
  },
  {
   "id": "s052",
@@ -333,7 +333,7 @@ export const SIGNS: Sign[] = [
   "id": "s053",
   "group": "تحذيرية",
   "nameAr": "شخص ينظم المرور أمامك",
-  "nameEn": "Flagman ahead"
+  "nameEn": "Person directing traffic ahead"
  },
  {
   "id": "s054",
@@ -387,7 +387,7 @@ export const SIGNS: Sign[] = [
   "id": "s062",
   "group": "أولوية",
   "nameAr": "قف (نسخة أخرى)",
-  "nameEn": "Stop"
+  "nameEn": "Stop (variant)"
  },
  {
   "id": "s063",
@@ -399,7 +399,7 @@ export const SIGNS: Sign[] = [
   "id": "s064",
   "group": "أولوية",
   "nameAr": "أعطِ الأولوية",
-  "nameEn": "Yield"
+  "nameEn": "Give way"
  },
  {
   "id": "s065",
@@ -417,7 +417,7 @@ export const SIGNS: Sign[] = [
   "id": "s067",
   "group": "ممنوعات",
   "nameAr": "قيد على الشاحنات",
-  "nameEn": "Truck limit"
+  "nameEn": "Truck restriction"
  },
  {
   "id": "s068",
@@ -453,7 +453,7 @@ export const SIGNS: Sign[] = [
   "id": "s073",
   "group": "ممنوعات",
   "nameAr": "ممنوع المركبات ذات المحرك عدا الدراجات النارية",
-  "nameEn": "No motor vehicles, expect motorcycles"
+  "nameEn": "No motor vehicles except motorcycles"
  },
  {
   "id": "s074",
@@ -513,7 +513,7 @@ export const SIGNS: Sign[] = [
   "id": "s083",
   "group": "ممنوعات",
   "nameAr": "ممنوع المركبات ذات المحرك والمجرورة بالحيوانات",
-  "nameEn": "No motor and animal-drawn vehicles"
+  "nameEn": "No motor vehicles or animal-drawn vehicles"
  },
  {
   "id": "s084",
@@ -567,7 +567,7 @@ export const SIGNS: Sign[] = [
   "id": "s092",
   "group": "ممنوعات",
   "nameAr": "ممنوع استخدام المنبه",
-  "nameEn": "No horns"
+  "nameEn": "No use of horn"
  },
  {
   "id": "s093",
@@ -585,7 +585,7 @@ export const SIGNS: Sign[] = [
   "id": "s095",
   "group": "ممنوعات",
   "nameAr": "أعطِ الأولوية للقادم من الجهة المقابلة",
-  "nameEn": "Yield to oncoming traffic"
+  "nameEn": "Give way to oncoming traffic"
  },
  {
   "id": "s096",
@@ -609,7 +609,7 @@ export const SIGNS: Sign[] = [
   "id": "s099",
   "group": "ممنوعات",
   "nameAr": "نهاية منع تجاوز الشاحنات",
-  "nameEn": "End of overtaking by trucks prohibition"
+  "nameEn": "End of no overtaking for trucks"
  },
  {
   "id": "s100",
@@ -717,7 +717,7 @@ export const SIGNS: Sign[] = [
   "id": "s117",
   "group": "إلزامية",
   "nameAr": "للمشاة فقط",
-  "nameEn": "Pedestrian only"
+  "nameEn": "Pedestrians only"
  },
  {
   "id": "s118",
@@ -729,25 +729,25 @@ export const SIGNS: Sign[] = [
   "id": "s119",
   "group": "ممنوعات",
   "nameAr": "ممنوع الانعطاف لليمين (نسخة أخرى)",
-  "nameEn": "No Turn Right"
+  "nameEn": "No right turn (variant)"
  },
  {
   "id": "s120",
   "group": "ممنوعات",
   "nameAr": "السرعة القصوى 120",
-  "nameEn": "Maximum Speed (120)"
+  "nameEn": "Speed limit 120"
  },
  {
   "id": "s121",
   "group": "ممنوعات",
   "nameAr": "السرعة القصوى 125",
-  "nameEn": "Maximum Speed (125)"
+  "nameEn": "Speed limit 125"
  },
  {
   "id": "s122",
   "group": "إرشادية",
   "nameAr": "لوحة طريق سريع",
-  "nameEn": "Highway sign"
+  "nameEn": "Motorway sign"
  },
  {
   "id": "s123",
@@ -759,13 +759,13 @@ export const SIGNS: Sign[] = [
   "id": "s124",
   "group": "إرشادية",
   "nameAr": "لوحة اتجاه مكة المكرمة",
-  "nameEn": "Mecca guidance sign"
+  "nameEn": "Makkah direction sign"
  },
  {
   "id": "s125",
   "group": "إرشادية",
   "nameAr": "لوحة طريق فرعي",
-  "nameEn": "Branch Road sign"
+  "nameEn": "Side road sign"
  },
  {
   "id": "s126",
@@ -837,7 +837,7 @@ export const SIGNS: Sign[] = [
   "id": "s137",
   "group": "إرشادية",
   "nameAr": "محطة وقود",
-  "nameEn": "Gas station"
+  "nameEn": "Fuel station"
  },
  {
   "id": "s138",
@@ -885,31 +885,31 @@ export const SIGNS: Sign[] = [
   "id": "s145",
   "group": "إرشادية",
   "nameAr": "طريق سريع",
-  "nameEn": "Motorway"
+  "nameEn": "Expressway"
  },
  {
   "id": "s146",
   "group": "إرشادية",
   "nameAr": "نهاية الطريق السريع",
-  "nameEn": "End of motorway"
+  "nameEn": "End of expressway"
  },
  {
   "id": "s147",
   "group": "إرشادية",
   "nameAr": "وسط المدينة",
-  "nameEn": "Downtown"
+  "nameEn": "City centre"
  },
  {
   "id": "s148",
   "group": "إرشادية",
   "nameAr": "اسم الشارع",
-  "nameEn": "Street Name"
+  "nameEn": "Street name"
  },
  {
   "id": "s149",
   "group": "إرشادية",
   "nameAr": "متاحف ومراكز ترفيه ومزارع",
-  "nameEn": "Museums and Entertainment Centers and Farms"
+  "nameEn": "Museums, entertainment centres and farms"
  },
  {
   "id": "s150",
@@ -921,13 +921,13 @@ export const SIGNS: Sign[] = [
   "id": "s151",
   "group": "إرشادية",
   "nameAr": "لوحة اتجاهات (النوع 2)",
-  "nameEn": "Directional Sign (Type II)"
+  "nameEn": "Directional sign (Type II)"
  },
  {
   "id": "s152",
   "group": "إرشادية",
   "nameAr": "وسط المدينة (النوع 2)",
-  "nameEn": "Downtown"
+  "nameEn": "City centre (Type II)"
  },
  {
   "id": "s153",
@@ -957,210 +957,210 @@ export const SIGNS: Sign[] = [
   "id": "s157",
   "group": "لوحات الطرق",
   "nameAr": "لوحة طريق فرعي فارغة",
-  "nameEn": "Branch Road Blank"
+  "nameEn": "Side road sign (blank)"
  },
  {
   "id": "s158",
   "group": "لوحات الطرق",
   "nameAr": "لوحة طريق فرعي",
-  "nameEn": "Branch"
+  "nameEn": "Side road sign"
  },
  {
   "id": "s159",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة فارغة",
-  "nameEn": "City road Blank"
+  "nameEn": "City sign (blank)"
  },
  {
   "id": "s160",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s161",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s162",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s163",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s164",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s165",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s166",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s167",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s168",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s169",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s170",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s171",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s172",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s173",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s174",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s175",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s176",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s177",
   "group": "لوحات الطرق",
   "nameAr": "لوحة مدينة",
-  "nameEn": "City"
+  "nameEn": "City sign"
  },
  {
   "id": "s178",
   "group": "لوحات الطرق",
   "nameAr": "لوحة طريق سريع فارغة",
-  "nameEn": "Highway Blank"
+  "nameEn": "Motorway sign (blank)"
  },
  {
   "id": "s179",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 10",
-  "nameEn": "Highway-10"
+  "nameEn": "Motorway 10"
  },
  {
   "id": "s180",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 15",
-  "nameEn": "Highway-15"
+  "nameEn": "Motorway 15"
  },
  {
   "id": "s181",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 2",
-  "nameEn": "Highway-2"
+  "nameEn": "Motorway 2"
  },
  {
   "id": "s182",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 30",
-  "nameEn": "Highway-30"
+  "nameEn": "Motorway 30"
  },
  {
   "id": "s183",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 5",
-  "nameEn": "Highway-5"
+  "nameEn": "Motorway 5"
  },
  {
   "id": "s184",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 50",
-  "nameEn": "Highway-50"
+  "nameEn": "Motorway 50"
  },
  {
   "id": "s185",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 60",
-  "nameEn": "Highway-60"
+  "nameEn": "Motorway 60"
  },
  {
   "id": "s186",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 65",
-  "nameEn": "Highway-65"
+  "nameEn": "Motorway 65"
  },
  {
   "id": "s187",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 70",
-  "nameEn": "Highway-70"
+  "nameEn": "Motorway 70"
  },
  {
   "id": "s188",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 75",
-  "nameEn": "Highway-75"
+  "nameEn": "Motorway 75"
  },
  {
   "id": "s189",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 80",
-  "nameEn": "Highway-80"
+  "nameEn": "Motorway 80"
  },
  {
   "id": "s190",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 85",
-  "nameEn": "Highway-85"
+  "nameEn": "Motorway 85"
  },
  {
   "id": "s191",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 95",
-  "nameEn": "Highway-95"
+  "nameEn": "Motorway 95"
  }
 ];
