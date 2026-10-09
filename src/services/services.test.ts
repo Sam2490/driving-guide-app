@@ -41,6 +41,9 @@ describe('location', () => {
     });
     await expect(getPositionOnce()).resolves.toEqual({ status: 'ok', lat: 26.4, lng: 50.1 });
     expect(remove).toHaveBeenCalled();
+    // Straight to the provider: no settings dialog that can leave requests queued (Xiaomi, network location off).
+    expect(L.watchPositionAsync.mock.calls[0][0]).toMatchObject({ accuracy: 4, mayShowUserSettingsDialog: false });
+    expect(L.getCurrentPositionAsync.mock.calls[0][0]).toMatchObject({ mayShowUserSettingsDialog: false });
   });
   it('returns the position when permission is granted', async () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);

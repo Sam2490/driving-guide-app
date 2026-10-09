@@ -50,12 +50,25 @@ export async function getPositionOnce(): Promise<LocationResult> {
 async function servicesOn(): Promise<boolean> {
   if (await Location.hasServicesEnabledAsync()) return true;
   if (Platform.OS !== 'android') return false;
-  try {
-    await Location.enableNetworkProviderAsync();
-  } catch {
-    return false; // dialog declined
+  // The dialog shares expo-location's settings queue, which can stop answering; time-box it (long enough to tap OK).
+  const asked = await Promise.race([
+    attempt(() => Location.enableNetworkProviderAsync()).then(
+      () => true,
+      () => false, // declined
+    ),
+    sleep(30_000).then(() => false),
+  ]);
+  if (!asked) return Location.hasServicesEnabledAsync();
+  // Location can take a moment to report "on" after the user accepts.
+  for (let i = 0; i < 6; i++) {
+    if (await Location.hasServicesEnabledAsync()) return true;
+    await sleep(500);
   }
-  return Location.hasServicesEnabledAsync();
+  return false;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 /**
@@ -78,16 +91,28 @@ function firstFix(ms: number): Promise<Location.LocationObject | null> {
     const take = (pos: Location.LocationObject | null | undefined) => {
       if (valid(pos)) finish(pos);
     };
-    const timer = setTimeout(() => finish(null), ms);
+    const timer = setTimeout(() => {
+      note('timeout', `${ms} ms`);
+      finish(null);
+    }, ms);
     const poll = setInterval(() => {
       attempt(() => Location.getLastKnownPositionAsync({ maxAge: 60_000 })).then(take, () => {});
     }, 2_000);
-    attempt(() => Location.watchPositionAsync({ accuracy: Location.Accuracy.Balanced, timeInterval: 1_000, distanceInterval: 0 }, take)).then(
+    // mayShowUserSettingsDialog: false — with Android's network location off (common on Xiaomi when Google Location
+    // Accuracy is off), expo-location otherwise parks each request behind a settings dialog; on some phones that dialog
+    // never reports back and every later request queues behind it until the app restarts. Location itself is already
+    // on (servicesOn), so the requests go straight to the fused provider: High uses GPS, Balanced uses Wi-Fi / cell.
+    attempt(() => Location.watchPositionAsync({ accuracy: Location.Accuracy.High, timeInterval: 1_000, distanceInterval: 0, mayShowUserSettingsDialog: false }, take)).then(
       (s) => (done ? s.remove() : (sub = s)),
-      () => {},
+      (e) => note('watch', e),
     );
-    attempt(() => Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })).then(take, () => {});
+    attempt(() => Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced, mayShowUserSettingsDialog: false })).then(take, (e) => note('current', e));
   });
+}
+
+/** Shows in `adb logcat` (ReactNativeJS) why a read failed, for phone testing; nothing is stored or sent. */
+function note(step: string, e: unknown) {
+  console.warn(`[location] ${step}: ${e instanceof Error ? e.message : String(e)}`);
 }
 
 /** Runs a location call so that a synchronous throw becomes a rejection, like any other failure. */
