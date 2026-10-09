@@ -60,12 +60,12 @@ export default function Drill() {
         onBack={() => router.back()}
         passed={right * 2 >= questions.length}
         verdict={t.rd.drillDone}
-        verdictSub={t.rd.drillSub(mastered, left, halfway)}
+        verdictSub={`${t.rd.drillSub(mastered, left, halfway)}\n${t.rd.drillRule}`}
         ring={{ value: right / questions.length, label: String(right), sub: t.rd.ofTotal(questions.length), a11y: t.test.score(right, questions.length) }}
         tiles={[
           { label: t.test.correctN, value: String(right), color: c.ok },
           { label: t.test.wrongN, value: String(questions.length - right), color: c.bad },
-          { label: t.test.mistakesTitle, value: String(left) },
+          { label: t.rd.drillLeft, value: String(left) },
         ]}
         actions={
           <>

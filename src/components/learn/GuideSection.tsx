@@ -23,10 +23,11 @@ export function GuideSection({ onOpen, selected }: { onOpen: (id: string) => voi
   return (
     <View style={{ gap: SPACE.sm }}>
       <T muted>{t.guide.sub}</T>
-      <Row gap={SPACE.sm} style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <SourceBadge kind="official" style={{ flexGrow: 1, flexShrink: 1, flexBasis: 160 }} />
+      {/* One badge per line: side by side, the source badge wrapped and the read counter shrank (Bengali, QA_1 #029). */}
+      <View style={{ gap: SPACE.xs, alignItems: d.start }}>
+        <SourceBadge kind="official" />
         <Badge tone={read ? 'ok' : 'neutral'} icon="book" text={t.rd.readCount(read, GUIDE_TOPICS.length)} />
-      </Row>
+      </View>
       <SearchBox value={q} onChange={setQ} placeholder={t.guide.search} />
       {list.length === 0 ? <EmptyState text={t.common.noResults} /> : null}
       {list.map((topic) => {

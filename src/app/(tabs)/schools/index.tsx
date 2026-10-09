@@ -105,6 +105,8 @@ export default function Schools() {
             <T role="h3" header>{t.schools.nearbyTitle}</T>
             <Button small kind="tertiary" title={t.schools.viewAll} onPress={reset} />
           </Row>
+          {/* Said once here, so equal distances for schools in one city read as intended (QA_1 #083, #219). */}
+          <T size={14} muted>{t.schools.distNote}</T>
           <Grid cols={cols}>{loc.list.map((n) => <SchoolCard key={n.school.id} school={n.school} distance={{ km: n.km, city: n.city }} />)}</Grid>
         </View>
       ) : (

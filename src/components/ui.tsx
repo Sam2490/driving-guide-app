@@ -48,6 +48,13 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   const w = weight ?? spec?.weight ?? 'regular';
   // Noto Nastaliq draws "+" as a short flat stroke that reads as a minus ("ردعمل کا فاصلہ + بریک کا فاصلہ"), so in
   // Urdu the arithmetic signs are set in the Latin UI font.
+  // Noto Nastaliq draws some letters past the text box: the top stroke of a line-initial ک / گ / پ on the right and the
+  // tail of a line-final ے on the left. Android clips at the box edge, so "کی" read as "لی" (QA_1 #090, #118).
+  // A little room on both sides keeps every glyph whole.
+  const pad = lang === 'ur' && !latin ? nastaliqPad(fs) : 0;
+  // In right-to-left text a number range or percentage must read left to right ("150–300", "75%"); otherwise the
+  // bidi algorithm shows "300–150" and "%75" (QA_1 #131–#133, #095).
+  if ((lang === 'ar' || lang === 'ur') && typeof children === 'string') children = ltrNumbers(children);
   if (lang === 'ur' && !latin && typeof children === 'string' && MATH_SIGN.test(children)) {
     children = children.split(MATH_SPLIT).map((part, i) => (i % 2 ? <Text key={i} style={{ fontFamily: LATIN_FONT[w] }}>{part}</Text> : part));
   }
@@ -61,11 +68,23 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
       maxFontSizeMultiplier={maxScale ?? spec?.maxScale}
       // Android's default "highQuality" line breaking measures a little wider than Yoga allots.
       textBreakStrategy="simple"
-      style={[{ fontFamily: latin ? LATIN_FONT[w] : font(w, content), fontSize: fs, lineHeight: latin ? Math.round(fs * 1.4) : lh(fs, content), color: color ?? (muted ? c.tx2 : c.tx), textAlign: center ? 'center' : content ? 'right' : d.align, writingDirection: content ? 'rtl' : d.writing }, style]}
+      style={[{ fontFamily: latin ? LATIN_FONT[w] : font(w, content), fontSize: fs, lineHeight: latin ? Math.round(fs * 1.4) : lh(fs, content), color: color ?? (muted ? c.tx2 : c.tx), textAlign: center ? 'center' : content ? 'right' : d.align, writingDirection: content ? 'rtl' : d.writing }, pad ? { paddingHorizontal: pad } : null, style]}
     >
       {children}
     </Text>
   );
+}
+
+const NUMBER_RUN = /\d[\d.,\u066b\u066c]*(?:[ \u00a0]?[\u2013\-][ \u00a0]?\d[\d.,\u066b\u066c]*)+|\d[\d.,]*[ \u00a0]?[%\u066a]|[%\u066a]\d[\d.,]*/g;
+
+/** Wraps number ranges ("10–20", "2026-10-03") and percentages ("75%", "%75" → "75%") in a left-to-right isolate. */
+export function ltrNumbers(text: string): string {
+  return text.replace(NUMBER_RUN, (m) => `\u2066${/^[%\u066a]/.test(m) ? m.slice(1) + m[0] : m}\u2069`);
+}
+
+/** Side padding for Urdu (Nastaliq) text of a given size; also added to measured widths (SnugText). */
+export function nastaliqPad(size: number): number {
+  return Math.max(4, Math.ceil(size * 0.3));
 }
 
 const MATH_SIGN = /[+\u2212\u00d7\u00f7=]/;
@@ -312,7 +331,10 @@ export function CenteredLabel({ title, size, color, glyph, weight, role, maxScal
  * sizes the visible label. Use it for labels in rows that must stay content-sized (beside an icon, at a row's end).
  */
 export function SnugText({ children, style, ...rest }: Omit<TProps, 'children' | 'onTextLayout'> & { children: string }) {
+  const { lang } = useApp();
   const [drawn, setDrawn] = React.useState<{ text: string; w: number } | null>(null);
+  // The measured line width excludes padding; T pads Urdu text on both sides.
+  const extra = lang === 'ur' && !rest.latin ? 2 * nastaliqPad(rest.size ?? (rest.role ? TEXT[rest.role].size : 16)) : 0;
   if (Platform.OS === 'web') return <T {...rest} style={style}>{children}</T>;
   const w = drawn?.text === children ? drawn.w : undefined;
   return (
@@ -320,8 +342,8 @@ export function SnugText({ children, style, ...rest }: Omit<TProps, 'children' |
       <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.snugProbe}>
         <T {...rest} style={style} numberOfLines={1}
           onTextLayout={(e) => {
-            const lw = Math.ceil(e.nativeEvent.lines[0]?.width ?? 0) + SNUG_SLACK;
-            if (lw > SNUG_SLACK && (drawn?.text !== children || drawn.w !== lw)) setDrawn({ text: children, w: lw });
+            const lw = Math.ceil(e.nativeEvent.lines[0]?.width ?? 0) + SNUG_SLACK + extra;
+            if (lw > SNUG_SLACK + extra && (drawn?.text !== children || drawn.w !== lw)) setDrawn({ text: children, w: lw });
           }}
         >
           {children}
@@ -370,16 +392,25 @@ export function Badge({ text, tone = 'neutral', icon }: { text: string; tone?: '
   );
 }
 
-export function Segmented({ options, value, onChange }: { options: string[]; value: number; onChange: (i: number) => void }) {
+/**
+ * Segmented control. `counts` (optional) shows a number on its own small line under each label, so a count never
+ * makes a label wrap or break inside a word ("Unanswere / d (15)", QA_1 #171). Labels shrink slightly rather than wrap.
+ */
+export function Segmented({ options, value, onChange, counts }: { options: string[]; value: number; onChange: (i: number) => void; counts?: number[] }) {
   const { c } = useApp();
   const d = useDir();
   return (
     <View accessibilityRole="tablist" style={[styles.seg, { backgroundColor: c.bg2, borderColor: c.ln, flexDirection: d.row }]}>
-      {options.map((o, i) => (
-        <Pressable key={o} accessibilityRole="tab" accessibilityLabel={o} accessibilityState={{ selected: value === i }} onPress={() => onChange(i)} style={[styles.segBtn, value === i && { backgroundColor: c.card, borderColor: c.ln, borderWidth: 1 }]}>
-          <T size={16} weight="semibold" center color={value === i ? c.tx : c.tx2} maxScale={1.3} numberOfLines={2}>{o}</T>
-        </Pressable>
-      ))}
+      {options.map((o, i) => {
+        const on = value === i;
+        const n = counts?.[i];
+        return (
+          <Pressable key={o} accessibilityRole="tab" accessibilityLabel={n === undefined ? o : `${o}, ${n}`} accessibilityState={{ selected: on }} onPress={() => onChange(i)} style={[styles.segBtn, on && { backgroundColor: c.card, borderColor: c.ln, borderWidth: 1 }]}>
+            <T size={16} weight="semibold" center color={on ? c.tx : c.tx2} maxScale={1.3} numberOfLines={counts ? 1 : 2} fit={!!counts}>{o}</T>
+            {n !== undefined ? <T size={12} center color={on ? c.tx : c.tx2} maxScale={1.3} style={{ fontVariant: ['tabular-nums'] }}>{String(n)}</T> : null}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -465,12 +496,15 @@ export function Pips({ n, max, color }: { n: number; max: number; color: string 
 }
 
 export function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (s: string) => void; placeholder: string }) {
-  const { c, font, t } = useApp();
+  const { c, font, t, lang } = useApp();
   const d = useDir();
   return (
     <View style={[styles.search, { backgroundColor: c.card, borderColor: c.lnStrong, flexDirection: d.row }]}>
       <Icon name="search" size={ICON.control} color={c.tx2} />
       <TextInput
+        // Remount on a language change: Android kept a blank placeholder when a mounted input changed font and
+        // placeholder text together (Arabic Schools tab after Urdu, QA_1 #136–#137).
+        key={lang}
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
@@ -553,7 +587,9 @@ export function EmptyState({ text, title, action, icon = 'search' }: { text: str
       <Icon name={icon} size={ICON.hero} color={c.tx2} />
       {title ? <T role="h3" center>{title}</T> : null}
       <T muted center>{text}</T>
-      {action}
+      {/* The action spans the column (up to 320 pt) like other primary buttons: a content-sized button wrapped
+          "ابدأ / الاختبار" onto two lines in Arabic, Hindi and Bengali (QA_1 #001, #005, #006). */}
+      {action ? <View testID="empty-action" style={{ alignSelf: 'stretch', alignItems: 'center' }}><View style={{ width: '100%', maxWidth: 320 }}>{action}</View></View> : null}
     </View>
   );
 }

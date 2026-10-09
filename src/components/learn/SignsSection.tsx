@@ -50,10 +50,13 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
         <Chip label={t.signs.practice} icon="eye" on={practice} onPress={() => { setPractice(!practice); setShown({}); }} />
       </Row>
       {practice ? (
-        <Row style={{ justifyContent: 'space-between' }}>
-          <View style={{ flex: 1 }}><T size={14} muted>{t.signs.hint}</T></View>
-          <Button small kind="tertiary" title={allShown ? t.ux.hideAll : t.ux.revealAll} onPress={() => setShown(allShown ? {} : Object.fromEntries(list.map((x) => [x.id, true])))} />
-        </Row>
+        // The link sits under the hint, not beside it: beside it, "सभी / दिखाएँ" wrapped onto two lines (QA_1 #026, #062).
+        <View style={{ gap: SPACE.xxs }}>
+          <T size={14} muted>{t.signs.hint}</T>
+          <View style={{ alignSelf: d.start }}>
+            <Button small kind="tertiary" title={allShown ? t.ux.hideAll : t.ux.revealAll} onPress={() => setShown(allShown ? {} : Object.fromEntries(list.map((x) => [x.id, true])))} />
+          </View>
+        </View>
       ) : null}
     </View>
   );

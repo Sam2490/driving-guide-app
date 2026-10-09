@@ -1,14 +1,14 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
 import { useStudy } from '@/state/StudyProvider';
-import { Badge, Button, Card, Chip, EmptyState, Row, Section, SourceBadge, T } from '@/components/ui';
+import { Badge, Button, Card, Chip, EmptyState, nastaliqPad, Row, Section, SourceBadge, T } from '@/components/ui';
 import { SignImage } from '@/components/Media';
 import { SIGNS } from '@/data/signs';
 import { GUIDE_TOPICS } from '@/data/licenseGuide';
 import { signName, topicText } from '@/data/localize';
 import { LAYOUT, RADIUS, SPACE } from '@/theme/tokens';
-import { bulletParts, columnWeights, keepBrackets, keepUnits } from './table';
+import { bulletParts, CELL_PAD, columnWidths, keepBrackets, keepUnits } from './table';
 
 /** A sign's detail: the large sign, its names and type, related signs, and a way to practise its group. */
 export function SignDetailBody({ id, onOpen, onPractise, showTitle }: { id: string; onOpen: (id: string) => void; onPractise: (group: string) => void; showTitle?: boolean }) {
@@ -58,7 +58,6 @@ export function SignDetailBody({ id, onOpen, onPractise, showTitle }: { id: stri
 export function TopicBody({ id, onNav, showTitle }: { id: string; onNav: (id: string) => void; showTitle?: boolean }) {
   const { t, c, lang } = useApp();
   const { learn, markRead } = useStudy();
-  const d = useDir();
   const item = GUIDE_TOPICS.find((x) => x.id === id);
   // A topic counts as read when the learner marks it or moves on with "Next topic", not merely on opening it.
   const read = learn.read.includes(id);
@@ -84,20 +83,7 @@ export function TopicBody({ id, onNav, showTitle }: { id: string; onNav: (id: st
             </Row>
           ))
         ) : (
-          <Card key={i} style={{ padding: 0, overflow: 'hidden', borderColor: c.info }}>
-            {(() => {
-              const widths = columnWeights(b.table);
-              return b.table.map((row, r) => (
-                <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
-                  {row.map((cell, k) => (
-                    <View key={k} style={{ flex: widths[k], paddingVertical: SPACE.sm, paddingHorizontal: SPACE.xs }}>
-                      <T content={ar} size={14} weight={r === 0 ? 'semibold' : 'regular'}>{keepUnits(cell)}</T>
-                    </View>
-                  ))}
-                </View>
-              ));
-            })()}
-          </Card>
+          <GuideTable key={i} rows={b.table} />
         ),
       )}
       {read ? null : <Button kind="secondary" icon="check" title={t.rd.markRead} onPress={() => markRead(item.id)} />}
@@ -108,6 +94,42 @@ export function TopicBody({ id, onNav, showTitle }: { id: string; onNav: (id: st
         {next ? <Button small title={t.ux.nextTopic} onPress={() => { markRead(item.id); onNav(next.id); }} style={{ flex: 1 }} /> : null}
       </Row>
     </View>
+  );
+}
+
+/**
+ * A guide table. Column widths come from the table's own measured width and the widest unbreakable piece in each
+ * column (learn/table.ts), so cells wrap between words only; if the columns can't fit, the table scrolls sideways.
+ */
+function GuideTable({ rows }: { rows: string[][] }) {
+  const { c, lang } = useApp();
+  const d = useDir();
+  const { fontScale } = useWindowDimensions();
+  const [width, setWidth] = React.useState(0);
+  const ar = lang === 'ar';
+  const fs = 14;
+  const layout = width ? columnWidths(rows, width - 2, fs * fontScale, lang === 'ur' ? 2 * nastaliqPad(fs) : 0) : null;
+  const body = rows.map((row, r) => (
+    <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
+      {row.map((cell, k) => (
+        <View key={k} style={[{ paddingVertical: SPACE.sm, paddingHorizontal: CELL_PAD }, layout ? { width: layout.widths[k] } : { flex: 1 }]}>
+          <T content={ar} size={fs} weight={r === 0 ? 'semibold' : 'regular'}>{keepUnits(cell)}</T>
+        </View>
+      ))}
+    </View>
+  ));
+  return (
+    <Card style={{ padding: 0, overflow: 'hidden', borderColor: c.info }}>
+      <View onLayout={(e) => setWidth(Math.floor(e.nativeEvent.layout.width))}>
+        {layout?.scroll ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ flexDirection: 'column' }}>
+            <View>{body}</View>
+          </ScrollView>
+        ) : (
+          body
+        )}
+      </View>
+    </Card>
   );
 }
 

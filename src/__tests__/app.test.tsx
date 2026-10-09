@@ -5,7 +5,7 @@ import { render } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ErrorBoundary } from '@/app/_layout';
 import { QUESTIONS } from '@/data/questions';
-import { arabicLetters } from '@/data/localize';
+import { optionText } from '@/data/localize';
 import { levelQuestions } from '@/features/levels/levels';
 import { selectAnswer, startExam } from '@/features/quiz/engine';
 import { serializeExam } from '@/services/storage';
@@ -98,7 +98,8 @@ describe('mock exam flow', () => {
     await settle();
     // The title no longer counts blanks as mistakes; the counts sit on the filter.
     expect(screen.getByText('الأخطاء')).toBeTruthy();
-    expect(screen.getByText(/^دون إجابة \((29|30)\)$/)).toBeTruthy();
+    // The count sits on its own line under the filter label (QA_1 U3).
+    expect(screen.getByRole('tab', { name: /^دون إجابة, (29|30)$/ })).toBeTruthy();
     expect(screen.getAllByText('الإجابة الصحيحة:').length).toBeGreaterThanOrEqual(29);
   });
 });
@@ -269,7 +270,7 @@ describe('level outcomes', () => {
     await open('/level/1');
     for (let i = 0; i < rounds; i++) {
       const q = qs[i];
-      const correctText = arabicLetters(q.options.find((o) => o.id === q.correctAnswerId)!.text!);
+      const correctText = optionText(q, q.options.find((o) => o.id === q.correctAnswerId)!, 'ar')!;
       const radios = screen.getAllByRole('radio');
       const isRight = (r: (typeof radios)[number]) => String(r.props.accessibilityLabel).slice(3) === correctText;
       await fireEvent.press(radios.find((r) => isRight(r) === right)!);
@@ -470,7 +471,7 @@ describe('Road-ready redesign', () => {
     for (let i = 0; i < 2; i++) {
       // The round starts with the least-practised question (b), then a; options are shuffled, so match by text.
       const q = i === 0 ? b : a;
-      const right = q.options.find((o) => o.id === q.correctAnswerId)!.text!;
+      const right = optionText(q, q.options.find((o) => o.id === q.correctAnswerId)!, 'ar')!;
       await fireEvent.press(screen.getAllByRole('radio').find((r) => String(r.props.accessibilityLabel).slice(3) === right)!);
       await fireEvent.press(screen.getByText('تأكيد الإجابة'));
       expect(screen.getByText('إجابة صحيحة')).toBeTruthy();

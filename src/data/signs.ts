@@ -374,7 +374,7 @@ export const SIGNS: Sign[] = [
  {
   "id": "s060",
   "group": "أولوية",
-  "nameAr": "قف (النوع 2)",
+  "nameAr": "قف (تصميم 2)",
   "nameEn": "Stop (Type II)"
  },
  {
@@ -386,7 +386,7 @@ export const SIGNS: Sign[] = [
  {
   "id": "s062",
   "group": "أولوية",
-  "nameAr": "قف (نسخة أخرى)",
+  "nameAr": "قف (تصميم آخر)",
   "nameEn": "Stop (variant)"
  },
  {
@@ -416,8 +416,8 @@ export const SIGNS: Sign[] = [
  {
   "id": "s067",
   "group": "ممنوعات",
-  "nameAr": "قيد على الشاحنات",
-  "nameEn": "Truck restriction"
+  "nameAr": "الحد الأقصى لسرعة الشاحنات",
+  "nameEn": "Speed limit for trucks"
  },
  {
   "id": "s068",
@@ -728,7 +728,7 @@ export const SIGNS: Sign[] = [
  {
   "id": "s119",
   "group": "ممنوعات",
-  "nameAr": "ممنوع الانعطاف لليمين (نسخة أخرى)",
+  "nameAr": "ممنوع الانعطاف لليمين (تصميم آخر)",
   "nameEn": "No right turn (variant)"
  },
  {
@@ -747,7 +747,7 @@ export const SIGNS: Sign[] = [
   "id": "s122",
   "group": "إرشادية",
   "nameAr": "لوحة طريق سريع",
-  "nameEn": "Motorway sign"
+  "nameEn": "Highway sign"
  },
  {
   "id": "s123",
@@ -920,37 +920,37 @@ export const SIGNS: Sign[] = [
  {
   "id": "s151",
   "group": "إرشادية",
-  "nameAr": "لوحة اتجاهات (النوع 2)",
+  "nameAr": "لوحة اتجاهات (تصميم 2)",
   "nameEn": "Directional sign (Type II)"
  },
  {
   "id": "s152",
   "group": "إرشادية",
-  "nameAr": "وسط المدينة (النوع 2)",
+  "nameAr": "وسط المدينة (تصميم 2)",
   "nameEn": "City centre (Type II)"
  },
  {
   "id": "s153",
   "group": "إرشادية",
-  "nameAr": "اتجاه الشرق (النوع 1)",
+  "nameAr": "اتجاه الشرق (تصميم 1)",
   "nameEn": "East sign (Type I)"
  },
  {
   "id": "s154",
   "group": "إرشادية",
-  "nameAr": "اتجاه الشمال (النوع 1)",
+  "nameAr": "اتجاه الشمال (تصميم 1)",
   "nameEn": "North sign (Type I)"
  },
  {
   "id": "s155",
   "group": "إرشادية",
-  "nameAr": "اتجاه الجنوب (النوع 1)",
+  "nameAr": "اتجاه الجنوب (تصميم 1)",
   "nameEn": "South sign (Type I)"
  },
  {
   "id": "s156",
   "group": "إرشادية",
-  "nameAr": "اتجاه الغرب (النوع 1)",
+  "nameAr": "اتجاه الغرب (تصميم 1)",
   "nameEn": "West sign (Type I)"
  },
  {
@@ -1083,84 +1083,84 @@ export const SIGNS: Sign[] = [
   "id": "s178",
   "group": "لوحات الطرق",
   "nameAr": "لوحة طريق سريع فارغة",
-  "nameEn": "Motorway sign (blank)"
+  "nameEn": "Highway sign (blank)"
  },
  {
   "id": "s179",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 10",
-  "nameEn": "Motorway 10"
+  "nameEn": "Highway 10"
  },
  {
   "id": "s180",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 15",
-  "nameEn": "Motorway 15"
+  "nameEn": "Highway 15"
  },
  {
   "id": "s181",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 2",
-  "nameEn": "Motorway 2"
+  "nameEn": "Highway 2"
  },
  {
   "id": "s182",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 30",
-  "nameEn": "Motorway 30"
+  "nameEn": "Highway 30"
  },
  {
   "id": "s183",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 5",
-  "nameEn": "Motorway 5"
+  "nameEn": "Highway 5"
  },
  {
   "id": "s184",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 50",
-  "nameEn": "Motorway 50"
+  "nameEn": "Highway 50"
  },
  {
   "id": "s185",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 60",
-  "nameEn": "Motorway 60"
+  "nameEn": "Highway 60"
  },
  {
   "id": "s186",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 65",
-  "nameEn": "Motorway 65"
+  "nameEn": "Highway 65"
  },
  {
   "id": "s187",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 70",
-  "nameEn": "Motorway 70"
+  "nameEn": "Highway 70"
  },
  {
   "id": "s188",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 75",
-  "nameEn": "Motorway 75"
+  "nameEn": "Highway 75"
  },
  {
   "id": "s189",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 80",
-  "nameEn": "Motorway 80"
+  "nameEn": "Highway 80"
  },
  {
   "id": "s190",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 85",
-  "nameEn": "Motorway 85"
+  "nameEn": "Highway 85"
  },
  {
   "id": "s191",
   "group": "لوحات الطرق",
   "nameAr": "طريق سريع رقم 95",
-  "nameEn": "Motorway 95"
+  "nameEn": "Highway 95"
  }
 ];

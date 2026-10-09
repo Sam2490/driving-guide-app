@@ -45,7 +45,7 @@ export default function Review() {
         ) : undefined
       }
     >
-      <Segmented options={t.ux.reviewFilter.map((o, k) => `${o} (${counts[k]})`)} value={filter} onChange={setFilter} />
+      <Segmented options={t.ux.reviewFilter} counts={counts} value={filter} onChange={setFilter} />
       {list.length === 0 ? <EmptyState icon="check" text={empty} /> : null}
       {list.map((q) => (
         <MistakeCard key={q.id} q={q} answer={session.answers[q.id]} label={t.test.qOf(session.questions.indexOf(q) + 1, session.questions.length)} />
