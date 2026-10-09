@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as Location from 'expo-location';
 import { getPositionOnce } from './location';
 import { nativeMapsUrl, webMapsUrl } from './maps';
@@ -7,15 +8,34 @@ import { QUESTIONS } from '@/data/questions';
 import { selectAnswer, startExam } from '@/features/quiz/engine';
 
 jest.mock('expo-location', () => ({
-  Accuracy: { Low: 2, Balanced: 3 },
+  Accuracy: { Low: 2, Balanced: 3, High: 4 },
   requestForegroundPermissionsAsync: jest.fn(),
   hasServicesEnabledAsync: jest.fn(),
+  enableNetworkProviderAsync: jest.fn(),
+  getLastKnownPositionAsync: jest.fn(() => Promise.resolve(null)),
   getCurrentPositionAsync: jest.fn(),
 }));
 const L = Location as jest.Mocked<typeof Location>;
 
 describe('location', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => {
+    jest.resetAllMocks();
+    L.getLastKnownPositionAsync.mockResolvedValue(null);
+  });
+  it('uses a recent cached fix without waiting for a new one', async () => {
+    L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
+    L.hasServicesEnabledAsync.mockResolvedValue(true);
+    L.getLastKnownPositionAsync.mockResolvedValue({ coords: { latitude: 21.5, longitude: 39.2 } } as never);
+    await expect(getPositionOnce()).resolves.toEqual({ status: 'ok', lat: 21.5, lng: 39.2 });
+    expect(L.getCurrentPositionAsync).not.toHaveBeenCalled();
+  });
+  it('tries again at higher accuracy when the first read fails', async () => {
+    L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
+    L.hasServicesEnabledAsync.mockResolvedValue(true);
+    L.getCurrentPositionAsync.mockRejectedValueOnce(new Error('no fix')).mockResolvedValueOnce({ coords: { latitude: 26.4, longitude: 50.1 } } as never);
+    await expect(getPositionOnce()).resolves.toEqual({ status: 'ok', lat: 26.4, lng: 50.1 });
+    expect(L.getCurrentPositionAsync).toHaveBeenCalledTimes(2);
+  });
   it('returns the position when permission is granted', async () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
     L.hasServicesEnabledAsync.mockResolvedValue(true);
@@ -26,6 +46,19 @@ describe('location', () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'denied', canAskAgain: false } as never);
     await expect(getPositionOnce()).resolves.toEqual({ status: 'denied', canAskAgain: false });
     expect(L.getCurrentPositionAsync).not.toHaveBeenCalled();
+  });
+  it('on Android, asks the system to switch location on and carries on if the user agrees', async () => {
+    const os = jest.replaceProperty(Platform, 'OS', 'android');
+    L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);
+    L.hasServicesEnabledAsync.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    L.enableNetworkProviderAsync.mockResolvedValue(undefined);
+    L.getCurrentPositionAsync.mockResolvedValue({ coords: { latitude: 24.7, longitude: 46.7 } } as never);
+    await expect(getPositionOnce()).resolves.toEqual({ status: 'ok', lat: 24.7, lng: 46.7 });
+    expect(L.enableNetworkProviderAsync).toHaveBeenCalled();
+    L.hasServicesEnabledAsync.mockResolvedValue(false);
+    L.enableNetworkProviderAsync.mockRejectedValue(new Error('declined'));
+    await expect(getPositionOnce()).resolves.toEqual({ status: 'services-off' });
+    os.restore();
   });
   it('reports GPS turned off', async () => {
     L.requestForegroundPermissionsAsync.mockResolvedValue({ status: 'granted', canAskAgain: true } as never);

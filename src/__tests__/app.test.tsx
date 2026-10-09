@@ -11,9 +11,11 @@ import { selectAnswer, startExam } from '@/features/quiz/engine';
 import { serializeExam } from '@/services/storage';
 
 jest.mock('expo-location', () => ({
-  Accuracy: { Low: 2, Balanced: 3 },
+  Accuracy: { Low: 2, Balanced: 3, High: 4 },
   requestForegroundPermissionsAsync: jest.fn(),
   hasServicesEnabledAsync: jest.fn(),
+  enableNetworkProviderAsync: jest.fn(),
+  getLastKnownPositionAsync: jest.fn(() => Promise.resolve(null)),
   getCurrentPositionAsync: jest.fn(),
 }));
 jest.mock('expo-haptics', () => ({ selectionAsync: jest.fn(() => Promise.resolve()), notificationAsync: jest.fn(() => Promise.resolve()), NotificationFeedbackType: { Success: 's', Error: 'e' } }));

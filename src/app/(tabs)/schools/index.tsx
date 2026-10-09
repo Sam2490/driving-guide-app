@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AppState, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
 import { BottomSheet, Button, Chip, EmptyState, Grid, IconTile, Notice, PickerSheet, Row, Screen, SearchBox, Skeleton, T, useListColumns } from '@/components/ui';
 import { Icon } from '@/components/Icon';
@@ -57,6 +57,15 @@ export default function Schools() {
     else setLoc({ phase: 'error', result: r });
   };
   const reset = () => setLoc({ phase: 'idle' });
+  // Back from Settings (location switched on, or permission allowed there): try again without another tap.
+  const waitingOnSettings = loc.phase === 'error' && loc.result.status !== 'unavailable';
+  useEffect(() => {
+    if (!waitingOnSettings) return;
+    const sub = AppState.addEventListener('change', (st) => {
+      if (st === 'active') locate();
+    });
+    return () => sub.remove();
+  }, [waitingOnSettings]);
   const near = loc.phase === 'done' || loc.phase === 'locating';
 
   const errorText = (r: Exclude<LocationResult, { status: 'ok' }>) =>
