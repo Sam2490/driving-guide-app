@@ -21,7 +21,8 @@ export function SignDetailBody({ id, onOpen, onPractise, showTitle }: { id: stri
   return (
     <View style={{ gap: LAYOUT.list }}>
       <Card style={{ alignItems: 'center', paddingVertical: SPACE.xl, backgroundColor: c.paper, borderColor: c.ln }}>
-        <SignImage id={s.id} size={220} label={s.nameAr} />
+        {/* No label: the sign's name is the heading right below, so the picture would only repeat it (in Arabic). */}
+        <SignImage id={s.id} size={220} />
       </Card>
       <Card style={{ gap: SPACE.xs }}>
         <T role={showTitle ? 'h2' : 'h3'} content={lang === 'ar'} header={showTitle}>{signName(s, lang)}</T>
@@ -116,7 +117,7 @@ function GuideTable({ rows }: { rows: string[][] }) {
     <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
       {row.map((cell, k) => (
         <View key={k} style={[{ paddingVertical: SPACE.sm, paddingHorizontal: tableCellPad(lang) }, r === 0 && lang === 'ur' && { paddingTop: SPACE.lg }, layout ? { width: layout.widths[k] } : { flex: 1 }]}>
-          <T content={ar} size={fs} weight={r === 0 ? 'semibold' : 'regular'}>{keepUnits(cell)}</T>
+          <T content={ar} size={fs} weight={r === 0 ? 'semibold' : 'regular'}>{keepUnits(cell, lang === 'ur')}</T>
         </View>
       ))}
     </View>

@@ -36,13 +36,24 @@ describe.each([['dark', dark], ['light', light]] as [string, Palette][])('%s the
   });
   it('status text passes 4.5:1 on its own tinted background', () => {
     for (const [fg, tint] of [[p.ok, p.okbg], [p.bad, p.badbg], [p.warn, p.warnbg], [p.info, p.infobg]]) {
-      expect(ratio(rgb(fg), rgb(tint, card))).toBeGreaterThanOrEqual(4.5);
-      expect(ratio(rgb(p.tx), rgb(tint, card))).toBeGreaterThanOrEqual(4.5);
+      // Tints sit on cards and directly on the page (badges, the result verdict): check both (a11y review A11Y-06).
+      for (const under of [card, bg]) {
+        expect(ratio(rgb(fg), rgb(tint, under))).toBeGreaterThanOrEqual(4.5);
+        expect(ratio(rgb(p.tx), rgb(tint, under))).toBeGreaterThanOrEqual(4.5);
+      }
     }
   });
   it('white text on filled buttons and the secondary button label pass 4.5:1', () => {
     for (const s of [p.acSolid, p.acPressed, p.okSolid, p.badSolid]) expect(ratio(rgb(p.onAc), rgb(s))).toBeGreaterThanOrEqual(4.5);
     expect(ratio(rgb(p.onAcSoft), rgb(p.acSoft))).toBeGreaterThanOrEqual(4.5);
+  });
+  it('progress bars and rings stand out 3:1 from their track (WCAG 1.4.11)', () => {
+    for (const under of [bg, card]) expect(ratio(rgb(p.meter), rgb(p.fill, under))).toBeGreaterThanOrEqual(3);
+  });
+  it('the selected segment and tab are marked at 3:1 against their surroundings (WCAG 1.4.11)', () => {
+    // Segmented: a 2 pt action-green border on bg2; tab bar: an action-green outline on the card.
+    expect(ratio(rgb(p.acSolid), rgb(p.bg2))).toBeGreaterThanOrEqual(3);
+    expect(ratio(rgb(p.acSolid), card)).toBeGreaterThanOrEqual(3);
   });
   it('control outlines pass 3:1 (WCAG 1.4.11)', () => {
     for (const s of [bg, card]) expect(ratio(rgb(p.lnStrong), s)).toBeGreaterThanOrEqual(3);

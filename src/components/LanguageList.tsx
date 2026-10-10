@@ -37,6 +37,8 @@ export function LanguageList({ value, onPick, pending }: { value: Lang; onPick: 
             accessibilityRole="radio"
             accessibilityState={{ selected: on, busy: pending === l.id }}
             accessibilityLabel={l.id === 'en' ? l.name : `${l.name}, ${l.english}`}
+            // iOS reads each language's own name with that language's voice.
+            accessibilityLanguage={l.id}
             onPress={() => onPick(l.id)}
             style={({ pressed }) => [styles.row, { flexDirection: d.row, backgroundColor: on ? c.acSoft : 'transparent', borderColor: on ? c.acSolid : 'transparent', opacity: pressed ? 0.85 : 1 }]}
           >

@@ -37,7 +37,7 @@ export function Welcome() {
             </Row>
           ))}
         </View>
-        <T role="h3" center style={{ marginTop: SPACE.sm }}>{t.ux.welcomeTitle}</T>
+        <T role="h3" center header style={{ marginTop: SPACE.sm }}>{t.ux.welcomeTitle}</T>
         <Card style={{ padding: SPACE.xs }}>
           <LanguageList value={pendingLang ?? lang} onPick={setLang} pending={pendingLang} />
         </Card>

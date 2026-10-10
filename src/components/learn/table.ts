@@ -8,11 +8,12 @@ const ZWSP = '​';
  * Keeps a number with its unit ("30 km/h", "9 m", "30 كم/س") and a unit with a slash ("km/h", "किमी/घंटा") in one
  * piece, so a narrow table cell never breaks "30 km/ | h".
  */
-export function keepUnits(s: string): string {
-  return s
-    // Before Arabic script the number keeps an ordinary space and a word joiner (no break either way): with a no-break
-    // space, Android drew a cell that starts with a number, "50 سے زیادہ", with the number far apart (build 34).
-    .replace(/(\d)[ \t]+(?=[\u0600-\u06ff])/g, `$1 ${WORD_JOINER}`)
+// In Urdu a number keeps an ordinary space and a word joiner before the next word (no break either way): with a
+// no-break space, Android drew a cell that starts with a number, "50 سے زیادہ", with the number far apart (build 34).
+// Elsewhere the no-break space stays: it is proven on device, and Chrome breaks after a space even before a word
+// joiner ("20 | م" in an Arabic web render), so the joiner is used only where the no-break space misbehaves.
+export function keepUnits(s: string, urdu = false): string {
+  return (urdu ? s.replace(/(\d)[ \t]+(?=[\u0600-\u06ff])/g, `$1 ${WORD_JOINER}`) : s)
     .replace(/(\d)[ \t]+(?=[^\s\u2060])/g, `$1${NBSP}`)
     // A unit never wraps before its slash or inside a word (re-audit P1-2).
     .replace(/[ \t]*\/[ \t]*/g, `${WORD_JOINER}/${WORD_JOINER}`)
@@ -165,7 +166,7 @@ export function columnWidths(rows: string[][], available: number, fontSize = 14,
     let hi = 0;
     rows.forEach((r, i) => {
       const size = i === 0 ? fontSize * 1.06 : fontSize; // header row is semibold
-      const cell = keepUnits(r[k] ?? '');
+      const cell = keepUnits(r[k] ?? '', nastaliq);
       // In Urdu any piece may start a line and carry its line-start indent (lineStartIndent).
       const indent = (w: string) => (nastaliq ? lineStartIndent(w) * NBSP_EM * size : 0);
       // A space before a word joiner does not break, so it stays inside its piece.

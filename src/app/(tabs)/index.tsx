@@ -42,7 +42,7 @@ export default function Home() {
       <Row gap={SPACE.md} style={{ alignItems: 'center' }}>
         {none ? null : <Ring value={ready.percent / 100} size={96} label={`${ready.percent}%`} a11y={t.rd.readyA11y(ready.percent, ready.passed, ready.counted)} color={ready.level === 'practise' ? c.warn : c.acSolid} />}
         <View style={{ flex: 1, gap: SPACE.xxs }}>
-          <T size={14} weight="semibold" muted>{t.rd.readyTitle}</T>
+          <T size={14} weight="semibold" muted header>{t.rd.readyTitle}</T>
           <T role="h3">{t.rd.readyLevels[ready.level]}</T>
           <T size={14} muted>{none ? t.rd.readyEmpty : t.rd.readySub(ready.passed, ready.counted)}</T>
         </View>

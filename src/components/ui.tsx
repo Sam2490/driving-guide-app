@@ -1,11 +1,11 @@
 import React from 'react';
-import { ActivityIndicator, Animated, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type LayoutChangeEvent, type NativeSyntheticEvent, type TextLayoutEventData, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Animated, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type LayoutChangeEvent, type NativeSyntheticEvent, type TextLayoutEventData, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
 import { useApp, useDir } from '@/state/AppProvider';
 import { LATIN_FONT, type Weight } from '@/theme/fonts';
-import { BREAKPOINTS, ELEVATION, ICON, LAYOUT, MAX_CONTENT_WIDTH, MOTION, RADIUS, SPACE, TEXT, TOUCH, type TextRole, type TypeSize } from '@/theme/tokens';
+import { BREAKPOINTS, ELEVATION, ICON, LAYOUT, MAX_CONTENT_WIDTH, MOTION, RADIUS, SPACE, TEXT, TOUCH, TOUCH_ANDROID, type TextRole, type TypeSize } from '@/theme/tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Icon, type IconName } from './Icon';
 import { indentWords, lineStartIndent, lineStartWords, mayNeedIndent, nastaliqHeadroom, nastaliqPad, nastaliqPads } from './learn/table';
@@ -429,6 +429,10 @@ export function SnugText({ children, style, ...rest }: Omit<TProps, 'children' |
 }
 
 const SNUG_SLACK = 4;
+/** Minimum touch target: 44 pt on iOS, Android's recommended 48 dp elsewhere. */
+const TARGET = Platform.select({ ios: TOUCH, default: TOUCH_ANDROID });
+/** A 36 pt chip reaches the touch target through its hit slop. */
+const CHIP_SLOP = (TARGET - 36) / 2;
 const NO_INDENT: number[] = [];
 const FIRST_WORD: number[] = [0];
 /** Before any layout is known, only the text's first word (always a line start) is checked for an indent. */
@@ -449,7 +453,7 @@ export function Chip({ label, on, onPress, icon }: { label: string; on?: boolean
     );
   }
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: !!on }} onPress={onPress} hitSlop={{ top: 4, bottom: 4 }} style={({ pressed }) => [styles.chip, { backgroundColor: on ? c.acSolid : pressed ? c.ln : c.card, borderColor: on ? c.acSolid : c.ln }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: !!on }} onPress={onPress} hitSlop={{ top: CHIP_SLOP, bottom: CHIP_SLOP }} style={({ pressed }) => [styles.chip, { backgroundColor: on ? c.acSolid : pressed ? c.ln : c.card, borderColor: on ? c.acSolid : c.ln }]}>
       <Row gap={SPACE.xxs}>
         {on ? <Icon name="check" size={ICON.inline} color={c.onAc} /> : icon ? <Icon name={icon} size={ICON.inline} color={c.ac} /> : null}
         <T size={14} weight="semibold" color={on ? c.onAc : c.tx} fit>{label}</T>
@@ -469,7 +473,7 @@ export function Badge({ text, tone = 'neutral', icon }: { text: string; tone?: '
   return (
     <Row gap={SPACE.xxs} style={[styles.badge, { backgroundColor: bg, alignSelf: d.start }]}>
       {icon ? <Icon name={icon} size={12} color={fg} /> : null}
-      <T size={12} weight="semibold" color={fg} maxScale={1.5} fit={short} style={short ? undefined : { flexShrink: 1 }}>{text}</T>
+      <T size={12} weight="semibold" color={fg} maxScale={2} fit={short} style={short ? undefined : { flexShrink: 1 }}>{text}</T>
     </Row>
   );
 }
@@ -482,17 +486,19 @@ export function Segmented({ options, value, onChange, counts }: { options: strin
   const { c } = useApp();
   const d = useDir();
   const { fontScale } = useWindowDimensions();
-  // At large system text sizes a one-line label would be cut off; let it wrap (between words) instead.
-  const oneLine = !!counts && fontScale <= 1.2;
+  // Labels stay on one line and shrink a little rather than wrap: a two-line label broke single words mid-letter in the
+  // narrow two-pane Learn list ("العلاما / ت", web render at 600 pt). At large system text sizes a one-line label
+  // would be cut off, so it may wrap there (between words).
+  const oneLine = fontScale <= 1.2;
   return (
     <View accessibilityRole="tablist" style={[styles.seg, { backgroundColor: c.bg2, borderColor: c.ln, flexDirection: d.row }]}>
       {options.map((o, i) => {
         const on = value === i;
         const n = counts?.[i];
         return (
-          <Pressable key={o} accessibilityRole="tab" accessibilityLabel={n === undefined ? o : `${o}, ${n}`} accessibilityState={{ selected: on }} onPress={() => onChange(i)} style={[styles.segBtn, on && { backgroundColor: c.card, borderColor: c.ln, borderWidth: 1 }]}>
-            <T size={16} weight="semibold" center color={on ? c.tx : c.tx2} maxScale={1.3} numberOfLines={oneLine ? 1 : 2} fit={oneLine}>{o}</T>
-            {n !== undefined ? <T size={12} center color={on ? c.tx : c.tx2} maxScale={1.3} style={{ fontVariant: ['tabular-nums'] }}>{String(n)}</T> : null}
+          <Pressable key={o} accessibilityRole="tab" accessibilityLabel={n === undefined ? o : `${o}, ${n}`} accessibilityState={{ selected: on }} onPress={() => onChange(i)} style={[styles.segBtn, on && { backgroundColor: c.card, borderColor: c.acSolid, borderWidth: 2 }]}>
+            <T size={16} weight="semibold" center color={on ? c.ac : c.tx2} maxScale={1.3} numberOfLines={oneLine ? 1 : 2} fit={oneLine}>{o}</T>
+            {n !== undefined ? <T size={12} center color={on ? c.ac : c.tx2} maxScale={1.3} style={{ fontVariant: ['tabular-nums'] }}>{String(n)}</T> : null}
           </Pressable>
         );
       })}
@@ -505,8 +511,8 @@ export function ProgressBar({ value, color, height = 6, label }: { value: number
   const d = useDir();
   const pct = Math.max(0, Math.min(1, value));
   return (
-    <View accessibilityRole="progressbar" accessibilityLabel={label} accessibilityValue={{ min: 0, max: 100, now: Math.round(pct * 100) }} style={{ height, borderRadius: height, backgroundColor: c.fill, overflow: 'hidden', alignItems: d.start }}>
-      <View style={{ width: `${pct * 100}%`, height: '100%', borderRadius: height, backgroundColor: color ?? c.acSolid }} />
+    <View accessible accessibilityRole="progressbar" accessibilityLabel={label} accessibilityValue={{ min: 0, max: 100, now: Math.round(pct * 100) }} style={{ height, borderRadius: height, backgroundColor: c.fill, overflow: 'hidden', alignItems: d.start }}>
+      <View style={{ width: `${pct * 100}%`, height: '100%', borderRadius: height, backgroundColor: color ?? c.meter }} />
     </View>
   );
 }
@@ -542,7 +548,7 @@ export function Ring({ value, size = 140, color, label, sub, a11y, animate }: { 
     <View style={{ width: size, height: size, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }} accessible accessibilityRole="image" accessibilityLabel={a11y ?? (sub ? `${label} ${sub}` : label)}>
       <Svg width={size} height={size} viewBox="0 0 120 120" style={StyleSheet.absoluteFill}>
         <Circle cx={60} cy={60} r={r} fill="none" stroke={c.fill} strokeWidth={stroke} />
-        <Circle cx={60} cy={60} r={r} fill="none" stroke={color ?? c.acSolid} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${circ}`} strokeDashoffset={circ * (1 - shown)} transform="rotate(-90 60 60)" />
+        <Circle cx={60} cy={60} r={r} fill="none" stroke={color ?? c.meter} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={`${circ}`} strokeDashoffset={circ * (1 - shown)} transform="rotate(-90 60 60)" />
       </Svg>
       <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5} maxFontSizeMultiplier={1.3} style={{ width: box, textAlign: 'center', fontFamily: font('bold'), fontSize: fs, lineHeight: Math.round(fs * 1.25), color: c.tx, fontVariant: ['tabular-nums'] }}>
         {count}
@@ -600,7 +606,7 @@ export function SearchBox({ value, onChange, placeholder }: { value: string; onC
         style={{ flex: 1, fontFamily: font('regular', true), fontSize: 16, color: c.tx, textAlign: d.align, paddingVertical: SPACE.sm }}
       />
       {value ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={t.common.close} onPress={() => onChange('')} hitSlop={10} style={styles.clear}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t.common.clear} onPress={() => onChange('')} hitSlop={10} style={styles.clear}>
           <Icon name="close" size={ICON.inline} color={c.tx2} />
         </Pressable>
       ) : null}
@@ -611,6 +617,10 @@ export function SearchBox({ value, onChange, placeholder }: { value: string; onC
 export type Tone = 'info' | 'ok' | 'bad' | 'warn';
 export function Notice({ text, tone = 'info', title }: { text: string; tone?: Tone; title?: string }) {
   const { c } = useApp();
+  // A problem notice appears without focus moving to it, so screen readers announce it (WCAG 4.1.3).
+  React.useEffect(() => {
+    if (tone === 'bad' || tone === 'warn') AccessibilityInfo.announceForAccessibility(title ? `${title}. ${text}` : text);
+  }, [tone, title, text]);
   const color = tone === 'ok' ? c.ok : tone === 'bad' ? c.bad : tone === 'warn' ? c.warn : c.info;
   const bg = tone === 'ok' ? c.okbg : tone === 'bad' ? c.badbg : tone === 'warn' ? c.warnbg : c.infobg;
   return (
@@ -647,7 +657,8 @@ export function Loading() {
   );
 }
 
-/** Placeholder rows shaped like the content they stand in for; they pulse gently (still with reduced motion). */
+/** Placeholder rows shaped like the content they stand in for; they pulse gently (not with reduced motion). Hidden from
+ * screen readers: the visible status text ("Locating…") says what is happening. */
 export function Skeleton({ rows = 3, height = 64 }: { rows?: number; height?: number }) {
   const { c } = useApp();
   const reduce = useReducedMotion();
@@ -659,7 +670,7 @@ export function Skeleton({ rows = 3, height = 64 }: { rows?: number; height?: nu
     return () => loop.stop();
   }, [o, reduce]);
   return (
-    <View accessibilityLabel="…" style={{ gap: LAYOUT.list }}>
+    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ gap: LAYOUT.list }}>
       {Array.from({ length: rows }, (_, i) => <Animated.View key={i} style={{ height, borderRadius: RADIUS.lg, backgroundColor: c.fill, opacity: o }} />)}
     </View>
   );
@@ -670,7 +681,7 @@ export function EmptyState({ text, title, action, icon = 'search' }: { text: str
   return (
     <View style={{ alignItems: 'center', paddingVertical: SPACE.x3, gap: SPACE.md }}>
       <Icon name={icon} size={ICON.hero} color={c.tx2} />
-      {title ? <T role="h3" center>{title}</T> : null}
+      {title ? <T role="h3" center header>{title}</T> : null}
       <T muted center>{text}</T>
       {/* The action spans the column (up to 320 pt) like other primary buttons: a content-sized button wrapped
           "ابدأ / الاختبار" onto two lines in Arabic, Hindi and Bengali (QA_1 #001, #005, #006). */}
@@ -685,14 +696,17 @@ export function Dialog({ visible, text, title, actions, onClose, icon }: { visib
   const reduce = useReducedMotion();
   return (
     <Modal visible={visible} transparent animationType={reduce ? 'none' : 'fade'} onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={[styles.scrim, { backgroundColor: c.scrim }]} onPress={onClose} accessibilityRole="button" accessibilityLabel={t.common.close}>
-        <Pressable style={[styles.dialog, ELEVATION.overlay, { backgroundColor: c.elevated, borderColor: c.ln, shadowColor: c.shadow }]} onPress={() => {}} accessible={false} accessibilityViewIsModal>
+      {/* The scrim is a sibling behind the dialog, not its parent: an accessible parent would hide the dialog's text and
+          buttons from VoiceOver (it merges its children into one "Close" button). */}
+      <View style={[styles.scrim, { backgroundColor: c.scrim }]}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityRole="button" accessibilityLabel={t.common.close} />
+        <View style={[styles.dialog, ELEVATION.overlay, { backgroundColor: c.elevated, borderColor: c.ln, shadowColor: c.shadow }]} accessibilityViewIsModal>
           {icon ? <View style={{ alignSelf: 'center', marginBottom: SPACE.sm }}><IconTile icon={icon} /></View> : null}
           {title ? <T role="h2" center header>{title}</T> : null}
           <T center style={{ marginVertical: SPACE.sm }}>{text}</T>
           <View style={{ gap: SPACE.sm }}>{actions}</View>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -771,7 +785,7 @@ export function IconTile({ icon, color, compact, bg }: { icon: IconName; color?:
 }
 
 /** List row (min 56): leading icon tile, title and caption, trailing value or chevron. */
-export function ListRow({ title, sub, icon, onPress, trailing, label, content, badge, tileBg, tileColor }: { title: string; sub?: string; icon?: IconName; onPress?: () => void; trailing?: React.ReactNode; label?: string; content?: boolean; badge?: React.ReactNode; tileBg?: string; tileColor?: string }) {
+export function ListRow({ title, sub, icon, onPress, trailing, label, content, badge, tileBg, tileColor, selected }: { title: string; sub?: string; icon?: IconName; onPress?: () => void; trailing?: React.ReactNode; label?: string; content?: boolean; badge?: React.ReactNode; tileBg?: string; tileColor?: string; selected?: boolean }) {
   const { c } = useApp();
   const d = useDir();
   const body = (
@@ -787,7 +801,7 @@ export function ListRow({ title, sub, icon, onPress, trailing, label, content, b
   );
   if (!onPress) return <View style={[styles.row, { backgroundColor: c.card, borderColor: c.ln }]}>{body}</View>;
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label ?? (sub ? `${title}, ${sub}` : title)} onPress={onPress} style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.fill : c.card, borderColor: c.ln }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label ?? (sub ? `${title}, ${sub}` : title)} accessibilityState={selected ? { selected: true } : undefined} onPress={onPress} style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.fill : c.card, borderColor: c.ln }]}>
       {body}
     </Pressable>
   );
@@ -832,15 +846,15 @@ const styles = StyleSheet.create({
   iconBtn: { width: TOUCH, height: TOUCH, borderRadius: TOUCH / 2, alignItems: 'center', justifyContent: 'center' },
   card: { borderRadius: RADIUS.lg, padding: LAYOUT.card, borderWidth: 1 },
   btn: { minHeight: 52, borderRadius: RADIUS.md, paddingHorizontal: LAYOUT.buttonX, paddingVertical: SPACE.sm, justifyContent: 'center', borderWidth: 1 },
-  btnSmall: { minHeight: TOUCH, paddingVertical: SPACE.xs, paddingHorizontal: SPACE.md },
+  btnSmall: { minHeight: TARGET, paddingVertical: SPACE.xs, paddingHorizontal: SPACE.md },
   // Text-only: no side padding, so the label lines up with the text above it; hitSlop keeps the touch target.
-  btnTertiary: { minHeight: TOUCH, paddingVertical: SPACE.xs, paddingHorizontal: 0 },
+  btnTertiary: { minHeight: TARGET, paddingVertical: SPACE.xs, paddingHorizontal: 0 },
   btnDense: { paddingHorizontal: SPACE.sm },
   chip: { minHeight: 36, paddingHorizontal: 14, paddingVertical: SPACE.xxs, borderRadius: RADIUS.pill, justifyContent: 'center', borderWidth: 1 },
   chipStatic: { minHeight: 28, paddingHorizontal: SPACE.sm, borderWidth: 0 },
   badge: { minHeight: 24, paddingHorizontal: SPACE.xs, borderRadius: RADIUS.sm, maxWidth: '100%' },
   seg: { padding: SPACE.xxs, borderRadius: RADIUS.pill, borderWidth: 1, gap: SPACE.xxs },
-  segBtn: { flex: 1, minHeight: TOUCH, borderRadius: RADIUS.pill, justifyContent: 'center', paddingHorizontal: SPACE.xs, borderWidth: 1, borderColor: 'transparent' },
+  segBtn: { flex: 1, minHeight: TARGET, borderRadius: RADIUS.pill, justifyContent: 'center', paddingHorizontal: SPACE.xs, borderWidth: 1, borderColor: 'transparent' },
   search: { alignItems: 'center', gap: SPACE.xs, borderRadius: RADIUS.md, borderWidth: 1, paddingHorizontal: SPACE.md, minHeight: 52 },
   clear: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   notice: { padding: SPACE.sm, paddingHorizontal: SPACE.md, borderRadius: RADIUS.md, alignItems: 'flex-start' },

@@ -86,7 +86,7 @@ describe('mock exam flow', () => {
     expect(screen.getByText('السؤال 1 من 30')).toBeTruthy();
     expect(screen.getAllByRole('radio')[0].props.accessibilityState.selected).toBe(true);
 
-    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getByLabelText(/، كل الأسئلة$|, كل الأسئلة$/));
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     expect(screen.getByText('لم تُجب عن 29 من الأسئلة. هل تريد التسليم؟')).toBeTruthy();
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
@@ -236,7 +236,7 @@ describe('exam timer and leaving', () => {
     await open('/practice');
     await fireEvent.press(screen.getByText('ابدأ الاختبار'));
     await settle();
-    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getByLabelText(/، كل الأسئلة$|, كل الأسئلة$/));
     await fireEvent.press(screen.getByLabelText('السؤال 5 من 30'));
     expect(screen.getByText('السؤال 5 من 30')).toBeTruthy();
     // With one answer there is something to lose, so leaving asks first.
@@ -362,7 +362,7 @@ describe('UI/UX audit fixes', () => {
     await open('/practice');
     await fireEvent.press(await screen.findByRole('button', { name: 'متابعة الاختبار · أجبت عن 1 من 30' }));
     await settle();
-    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getByLabelText(/، كل الأسئلة$|, كل الأسئلة$/));
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await settle();
@@ -386,7 +386,7 @@ describe('UI/UX audit fixes', () => {
     await open('/practice');
     await fireEvent.press(screen.getByText('ابدأ الاختبار'));
     await settle();
-    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getByLabelText(/، كل الأسئلة$|, كل الأسئلة$/));
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     expect(screen.getByText('لم تُجب عن أي سؤال. هل تريد الخروج من الاختبار؟ لن يُحفظ شيء.')).toBeTruthy();
     await fireEvent.press(screen.getByText('إنهاء وحذف'));
@@ -440,7 +440,7 @@ describe('Road-ready redesign', () => {
     expect(screen.getByText('أجبت عن 1 من 30')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'متابعة الاختبار' }));
     await settle();
-    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
+    await fireEvent.press(screen.getByLabelText(/، كل الأسئلة$|, كل الأسئلة$/));
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await fireEvent.press(screen.getAllByText('تسليم').at(-1)!);
     await settle();
@@ -460,8 +460,8 @@ describe('Road-ready redesign', () => {
     await settle();
     expect(screen.getByRole('button', { name: 'إزالة العلامة' })).toBeTruthy();
     expect(JSON.parse((await AsyncStorage.getItem('exam.v1'))!).f).toHaveLength(1);
-    await fireEvent.press(screen.getByLabelText('كل الأسئلة'));
-    expect(screen.getByLabelText('السؤال 1 من 30 · عليه علامة')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText(/، كل الأسئلة$|, كل الأسئلة$/));
+    expect(screen.getByLabelText('السؤال 1 من 30, عليه علامة')).toBeTruthy();
   });
 
   it('mistakes practice: two right answers in a row take a question off the list', async () => {

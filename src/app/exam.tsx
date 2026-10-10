@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAnnounceStep } from '@/hooks/useAnnounceStep';
 import { useApp, useDir } from '@/state/AppProvider';
 import { MAX_CONTENT_WIDTH, RADIUS, SPACE } from '@/theme/tokens';
 import { useExam } from '@/state/ExamProvider';
@@ -17,6 +18,8 @@ export default function ExamScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [i, setI] = useState(0);
+  // Say the new question's number when Next/Previous/the grid moves on; focus stays on the footer (A11Y-28).
+  useAnnounceStep(i, (k) => t.test.qOf(k + 1, exam?.questions.length ?? 0));
   const [grid, setGrid] = useState(false);
   const [ask, setAsk] = useState<null | 'submit' | 'leave'>(null);
   const allowLeave = useRef(false);
@@ -89,7 +92,7 @@ export default function ExamScreen() {
         <IconButton icon="close" label={t.test.leave} onPress={() => (answered ? setAsk('leave') : leave())} />
         {/* The counter opens the question grid. */}
         <View style={{ flex: 1, alignItems: 'center' }}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t.test.grid} accessibilityHint={t.test.answered(answered, n)} onPress={() => setGrid(true)} hitSlop={6} style={({ pressed }) => [styles.counter, { flexDirection: d.row, backgroundColor: pressed ? c.ln : c.fill }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel={`${t.rd.counter(i + 1, n)}, ${t.test.grid}`} accessibilityHint={t.test.answered(answered, n)} onPress={() => setGrid(true)} hitSlop={6} style={({ pressed }) => [styles.counter, { flexDirection: d.row, backgroundColor: pressed ? c.ln : c.fill }]}>
             <T size={16} weight="semibold" maxScale={1.3} style={{ writingDirection: 'ltr', fontVariant: ['tabular-nums'] }}>{t.rd.counter(i + 1, n)}</T>
             <Icon name="down" size={16} color={c.tx2} />
           </Pressable>
@@ -101,7 +104,7 @@ export default function ExamScreen() {
       <ScrollView ref={scroll} contentContainerStyle={styles.body}>
         <QuestionSlide id={q.id}>
           <Row style={{ justifyContent: 'space-between' }}>
-            <T size={14} muted>{t.test.qOf(i + 1, n)}</T>
+            <T size={14} muted header>{t.test.qOf(i + 1, n)}</T>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={flagged ? t.rd.unflag : t.rd.flag}
@@ -145,7 +148,8 @@ export default function ExamScreen() {
               <Pressable
                 key={x.id}
                 accessibilityRole="button"
-                accessibilityLabel={`${t.test.qOf(k + 1, n)}${done ? ' ✓' : ''}${flag ? ` · ${t.rd.flagged}` : ''}`}
+                accessibilityLabel={`${t.test.qOf(k + 1, n)}${done ? `, ${t.rd.legendAnswered}` : ''}${flag ? `, ${t.rd.flagged}` : ''}`}
+                accessibilityState={{ selected: k === i }}
                 onPress={() => { setI(k); setGrid(false); }}
                 style={[styles.cell, { backgroundColor: done ? c.acSolid : c.card, borderColor: k === i ? c.tx : done ? c.acSolid : c.lnStrong, borderWidth: k === i ? 3 : 1 }]}
               >

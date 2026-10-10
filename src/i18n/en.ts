@@ -6,6 +6,7 @@ export const en = {
     more: 'Show more', search: 'Search', arabicOnly: 'This content is in Arabic.',
     official: 'From the official trainee guide', general: 'General information · verify on Absher',
     letters: ['A', 'B', 'C', 'D'],
+    clear: 'Clear search', signPicture: 'Picture of a traffic sign', photo: 'Picture for this question', pictureOption: 'Picture answer',
   },
   home: {
     title: 'Driving Guide', start: 'Start mock exam', quick: 'Quick tips',

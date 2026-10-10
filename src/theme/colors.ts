@@ -26,6 +26,8 @@ export type Palette = {
   info: string; infobg: string;
   /** color.brand.sand: XP, rank, stars and fees. The only accent besides green. */
   sand: string;
+  /** Fill of progress bars and rings: at least 3:1 against the `fill` track in both themes (WCAG 1.4.11). */
+  meter: string;
   /** Panel behind sign and question artwork: white by day, a soft off-white at night so it does not glare. */
   paper: string;
   scrim: string;
@@ -37,11 +39,12 @@ export const light: Palette = {
   bg: '#f6f7f5', bg2: '#eef0ec', card: '#ffffff', elevated: '#ffffff',
   tx: '#16201b', tx2: '#55615a', ln: '#e1e5e0', lnStrong: '#7c8680', fill: '#eef0ec',
   ac: '#006c35', acSolid: '#006c35', acPressed: '#00552a', acSoft: '#e3f0e7', onAcSoft: '#00552a', onAc: '#ffffff',
-  ok: '#1a7a3a', okbg: 'rgba(26,122,58,0.10)', okSolid: '#1a7a3a',
+  // ok is a step darker than okSolid so its text keeps 4.5:1 on its tint over the page background too.
+  ok: '#187538', okbg: 'rgba(26,122,58,0.10)', okSolid: '#1a7a3a',
   bad: '#c4291c', badbg: 'rgba(196,41,28,0.10)', badSolid: '#c4291c',
   warn: '#8a5a00', warnbg: 'rgba(201,140,0,0.14)',
   info: '#0b5cad', infobg: 'rgba(11,92,173,0.10)',
-  sand: '#8a6414', paper: '#ffffff', scrim: 'rgba(10,14,12,0.5)', shadow: '#000000',
+  sand: '#8a6414', meter: '#006c35', paper: '#ffffff', scrim: 'rgba(10,14,12,0.5)', shadow: '#000000',
 };
 
 export const dark: Palette = {
@@ -52,7 +55,7 @@ export const dark: Palette = {
   bad: '#ff6b5e', badbg: 'rgba(255,107,94,0.16)', badSolid: '#c4291c',
   warn: '#f2b84b', warnbg: 'rgba(242,184,75,0.16)',
   info: '#6aaeff', infobg: 'rgba(106,174,255,0.16)',
-  sand: '#e2b65a', paper: '#e6e9e5', scrim: 'rgba(0,0,0,0.6)', shadow: '#000000',
+  sand: '#e2b65a', meter: '#5fd08e', paper: '#e6e9e5', scrim: 'rgba(0,0,0,0.6)', shadow: '#000000',
 };
 
 /** The semantic token names used in the design system, mapped to palette keys. */

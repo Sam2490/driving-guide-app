@@ -1,8 +1,9 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { useAnnounceStep } from '@/hooks/useAnnounceStep';
 import { useApp, useDir } from '@/state/AppProvider';
 import { useStudy } from '@/state/StudyProvider';
 import { MAX_CONTENT_WIDTH, SPACE } from '@/theme/tokens';
@@ -11,6 +12,7 @@ import { Icon } from '@/components/Icon';
 import { ResultLayout } from '@/components/ResultLayout';
 import { OptionButton, OptionContent, QuestionBody, QuestionSlide } from '@/components/Quiz';
 import { QUESTIONS } from '@/data/questions';
+import { optionText } from '@/data/localize';
 import { prepareQuestion } from '@/features/quiz/engine';
 import { mistakeIds } from '@/features/progress/progress';
 
@@ -19,7 +21,7 @@ const ROUND = 10;
 
 /** Practise saved mistakes with instant feedback. Right twice in a row (across rounds) takes a question off the list. */
 export default function Drill() {
-  const { t, c } = useApp();
+  const { t, c, lang } = useApp();
   const { mistakes, addMisses, addCorrect } = useStudy();
   const d = useDir();
   const insets = useSafeAreaInsets();
@@ -35,6 +37,7 @@ export default function Drill() {
     [round],
   );
   const [i, setI] = useState(0);
+  useAnnounceStep(i, (k) => t.test.qOf(k + 1, questions.length));
   const [sel, setSel] = useState<string | null>(null);
   const [checked, setChecked] = useState<boolean | null>(null);
   const [right, setRight] = useState(0);
@@ -82,6 +85,9 @@ export default function Drill() {
   const check = () => {
     if (!sel) return;
     const good = sel === q.correctAnswerId;
+    // iOS has no live regions: say the verdict, and the right answer after a miss (a11y review A11Y-04).
+    const rightAnswer = q.options.find((o) => o.id === q.correctAnswerId)!;
+    AccessibilityInfo.announceForAccessibility(good ? t.levels.good : `${t.levels.bad}. ${t.levels.right} ${optionText(q, rightAnswer, lang) ?? t.common.pictureOption}`);
     Haptics.notificationAsync(good ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning).catch(() => {});
     if (good) {
       addCorrect([q.id]);
@@ -106,7 +112,7 @@ export default function Drill() {
         <IconButton icon="close" label={t.common.close} onPress={() => router.back()} />
         <View style={{ flex: 1, gap: SPACE.xxs }}>
           <T size={14} muted>{`${t.rd.drillTitle} · ${t.rd.counter(i + 1, questions.length)}`}</T>
-          <ProgressBar value={(i + (checked === null ? 0 : 1)) / questions.length} height={4} />
+          <ProgressBar value={(i + (checked === null ? 0 : 1)) / questions.length} height={4} label={t.rd.counter(i + 1, questions.length)} />
         </View>
       </View>
       <ScrollView ref={scroll} contentContainerStyle={styles.body}>
@@ -115,7 +121,7 @@ export default function Drill() {
           <View accessibilityRole="radiogroup" style={{ gap: SPACE.sm, marginTop: SPACE.xs }}>
             {q.options.map((o, k) => {
               const state = checked !== null ? (o.id === q.correctAnswerId ? 'ok' : o.id === sel ? 'bad' : 'dim') : sel === o.id ? 'selected' : 'idle';
-              return <OptionButton key={o.id} q={q} option={o} index={k} state={state} disabled={checked !== null} onPress={() => setSel(o.id)} />;
+              return <OptionButton key={o.id} q={q} option={o} index={k} state={state} picked={o.id === sel} disabled={checked !== null} onPress={() => setSel(o.id)} />;
             })}
           </View>
         </QuestionSlide>
@@ -126,7 +132,7 @@ export default function Drill() {
             <Icon name={checked ? 'check' : 'close'} size={24} color={checked ? c.ok : c.bad} />
             <View style={{ flex: 1, gap: SPACE.xxs }} accessibilityLiveRegion="polite">
               <T role="title" color={checked ? c.ok : c.bad}>{checked ? t.levels.good : t.levels.bad}</T>
-              {checked ? null : <OptionContent q={q} option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} />}
+              {checked ? null : <OptionContent q={q} option={q.options.find((o) => o.id === q.correctAnswerId)!} size={56} labelled />}
             </View>
           </Row>
         ) : null}

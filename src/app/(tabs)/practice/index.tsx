@@ -31,7 +31,7 @@ export default function Practice() {
       <Row>
         <IconTile icon="exam" />
         <View style={{ flex: 1 }}>
-          <T role="h3">{t.test.exTitle}</T>
+          <T role="h3" header>{t.test.exTitle}</T>
           <T size={14} muted>{t.test.exSub(DEFAULT_EXAM.count, DEFAULT_EXAM.minutes, DEFAULT_EXAM.passMark)}</T>
         </View>
       </Row>

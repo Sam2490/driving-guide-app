@@ -9,6 +9,7 @@ export const ar: Strings = {
     more: 'عرض المزيد', search: 'بحث', arabicOnly: 'هذا المحتوى باللغة العربية.',
     official: 'من دليل المتدرب الرسمي', general: 'معلومات عامة · تحقق منها عبر أبشر',
     letters: ['أ', 'ب', 'ج', 'د'],
+    clear: 'مسح البحث', signPicture: 'صورة علامة مرورية', photo: 'صورة السؤال', pictureOption: 'إجابة مصوّرة',
   },
   home: {
     title: 'دليل القيادة', start: 'ابدأ اختباراً تجريبياً', quick: 'إرشادات سريعة',

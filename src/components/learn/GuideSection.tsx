@@ -36,6 +36,7 @@ export function GuideSection({ onOpen, selected }: { onOpen: (id: string) => voi
         return (
           <View key={topic.id} style={selected === topic.id ? [styles.sel, { borderColor: c.acSolid }] : undefined}>
             <ListRow
+              selected={selected === topic.id}
               icon={topic.icon as IconName}
               title={title}
               content={lang === 'ar'}
@@ -70,8 +71,8 @@ export function GuideSection({ onOpen, selected }: { onOpen: (id: string) => voi
           <View style={[styles.tires, { flexDirection: d.row }]}>
             {TIRE_RATINGS.map(([letter, kmh]) => (
               <View key={letter} style={[styles.tire, { backgroundColor: c.fill }]} accessible accessibilityLabel={`${letter} ${kmh}`}>
-                <T size={18} weight="bold" center latin maxScale={1.3}>{letter}</T>
-                <T size={14} muted center maxScale={1.3}>{String(kmh)}</T>
+                <T size={18} weight="bold" center latin>{letter}</T>
+                <T size={14} muted center>{String(kmh)}</T>
               </View>
             ))}
           </View>

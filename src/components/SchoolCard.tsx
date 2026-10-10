@@ -46,7 +46,7 @@ export const SchoolCard = React.memo(function SchoolCard({ school, distance }: {
             <T size={14} muted>{distance ? t.schools.toCity(cityName(distance.city, lang)) : place}</T>
             {school.source === 'public' ? <View style={{ alignSelf: d.start }}><Badge tone="warn" text={t.schools.publicSource} /></View> : null}
           </View>
-          {km ? <T size={16} weight="bold" color={c.ac} maxScale={1.3}>{km}</T> : null}
+          {km ? <T size={16} weight="bold" color={c.ac}>{km}</T> : null}
         </Pressable>
         <IconButton icon="nav" label={t.schools.directions} onPress={async () => setFailed(!(await openInMaps(`${school.name} ${city}`)))} />
       </Row>

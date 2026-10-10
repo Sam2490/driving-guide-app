@@ -8,6 +8,7 @@ export const ur: Strings = {
     more: 'مزید دکھائیں', search: 'تلاش', arabicOnly: 'یہ مواد عربی میں ہے۔',
     official: 'سرکاری تربیتی گائیڈ سے', general: 'عمومی معلومات · ابشر پر تصدیق کریں',
     letters: ['ا', 'ب', 'ج', 'د'],
+    clear: 'تلاش صاف کریں', signPicture: 'ٹریفک نشان کی تصویر', photo: 'سوال کی تصویر', pictureOption: 'تصویری جواب',
   },
   home: {
     title: 'ڈرائیونگ گائیڈ', start: 'آزمائشی امتحان شروع کریں', quick: 'فوری ہدایات',

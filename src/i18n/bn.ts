@@ -8,6 +8,7 @@ export const bn: Strings = {
     more: 'আরও দেখুন', search: 'খুঁজুন', arabicOnly: 'এই বিষয়বস্তু আরবি ভাষায়।',
     official: 'অফিসিয়াল প্রশিক্ষণার্থী গাইড থেকে', general: 'সাধারণ তথ্য · আবশিরে যাচাই করুন',
     letters: ['ক', 'খ', 'গ', 'ঘ'],
+    clear: 'খোঁজ মুছুন', signPicture: 'ট্রাফিক চিহ্নের ছবি', photo: 'প্রশ্নের ছবি', pictureOption: 'ছবির উত্তর',
   },
   home: {
     title: 'ড্রাইভিং গাইড', start: 'মক পরীক্ষা শুরু করুন', quick: 'দরকারি টিপস',

@@ -33,10 +33,10 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
     };
     return (
       <Pressable key={route.key} accessibilityRole="tab" accessibilityState={{ selected: on }} accessibilityLabel={labels[route.name]} onPress={press} style={rail ? styles.railTab : styles.tab}>
-        <View style={[styles.pill, { backgroundColor: on ? c.acSoft : 'transparent' }]}>
+        <View style={[styles.pill, { backgroundColor: on ? c.acSoft : 'transparent', borderColor: on ? c.acSolid : 'transparent' }]}>
           <Icon name={ICONS[route.name] ?? 'home'} size={ICON.nav} color={on ? c.onAcSoft : c.tx2} />
         </View>
-        <T size={12} weight={on ? 'semibold' : 'medium'} color={on ? c.ac : c.tx2} center numberOfLines={1} maxScale={1.2} style={{ lineHeight: lang === 'ur' ? 24 : 16 }}>
+        <T size={12} weight={on ? 'semibold' : 'medium'} color={on ? c.ac : c.tx2} center numberOfLines={1} maxScale={1.3} style={{ lineHeight: lang === 'ur' ? 24 : 16 }}>
           {labels[route.name]}
         </T>
       </Pressable>
@@ -44,13 +44,13 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   });
   if (rail) {
     return (
-      <View style={[styles.rail, { backgroundColor: c.card, paddingTop: insets.top + SPACE.md, borderColor: c.ln }, d.rtl ? { borderLeftWidth: 1 } : { borderRightWidth: 1 }]}>
+      <View accessibilityRole="tablist" style={[styles.rail, { backgroundColor: c.card, paddingTop: insets.top + SPACE.md, borderColor: c.ln }, d.rtl ? { borderLeftWidth: 1 } : { borderRightWidth: 1 }]}>
         {items}
       </View>
     );
   }
   return (
-    <View style={[styles.bar, { backgroundColor: c.card, borderTopColor: c.ln, // Nastaliq hangs below the baseline: Urdu labels get a little more room above the gesture bar.
+    <View accessibilityRole="tablist" style={[styles.bar, { backgroundColor: c.card, borderTopColor: c.ln, // Nastaliq hangs below the baseline: Urdu labels get a little more room above the gesture bar.
       paddingBottom: Math.max(insets.bottom, SPACE.xs) + (lang === 'ur' ? SPACE.xs : 0), flexDirection: d.row }]}>
       {items}
     </View>
@@ -76,7 +76,8 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   bar: { borderTopWidth: 1, paddingTop: SPACE.xs, paddingHorizontal: SPACE.xs },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, minHeight: 56 },
-  pill: { width: 56, height: 30, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' },
+  // The active pill carries a 1.5 pt action-green outline so the selected tab stands out 3:1 (WCAG 1.4.11).
+  pill: { width: 56, height: 30, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
   rail: { width: 96, alignItems: 'center', gap: SPACE.md },
   railTab: { alignItems: 'center', justifyContent: 'center', gap: SPACE.xxs, minHeight: 64, width: 88 },
 });
