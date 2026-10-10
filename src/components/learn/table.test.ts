@@ -1,16 +1,16 @@
 import { GUIDE_TOPICS } from '@/data/licenseGuide';
 import { topicText } from '@/data/localize';
 import type { Lang } from '@/data/types';
-import { bulletParts, CELL_PAD, columnWidths, keepBrackets, keepUnits, textWidth } from './table';
+import { bulletParts, CELL_PAD, columnWidths, guideTableLayout, keepBrackets, keepUnits, nastaliqPad, TABLE_FONT, tableCellPad, textWidth } from './table';
 
 const LANGS: Lang[] = ['ar', 'en', 'ur', 'hi', 'bn'];
 // A 360 pt phone: screen gutters (2 × 16) and the card border.
 const PHONE = 360 - 32 - 2;
 
 describe('guide tables', () => {
-  it('keeps a number with its unit and a unit around its slash', () => {
-    expect(keepUnits('30 km/h')).toBe('30 km⁠/⁠h');
-    expect(keepUnits('30 كم / س')).toBe('30 كم⁠/⁠س');
+  it('keeps a number with its unit, and lets a unit wrap only after its slash', () => {
+    expect(keepUnits('30 km/h')).toBe('30\u00a0km\u2060/\u200bh');
+    expect(keepUnits('30 كم / س')).toBe('30\u00a0كم\u2060/\u200bس');
   });
 
   it('lets a number range wrap after its dash, never inside a number', () => {
@@ -39,17 +39,31 @@ describe('guide tables', () => {
       for (const t of GUIDE_TOPICS) {
         for (const b of topicText(t, lang).blocks) {
           if (!('table' in b)) continue;
-          const { widths } = columnWidths(b.table, PHONE);
+          // The same layout the app uses (Urdu measured as Nastaliq, with its padding).
+          const { widths, scroll } = guideTableLayout(b.table, PHONE, lang);
+          expect(`${lang}:${t.id}:${scroll}`).toBe(`${lang}:${t.id}:false`);
+          const ur = lang === 'ur';
           b.table.forEach((row, i) =>
             row.forEach((cell, k) => {
               for (const piece of keepUnits(cell).split(/[ \t\n​]+/)) {
-                expect(textWidth(piece, i === 0 ? 14 * 1.06 : 14) + 2 * CELL_PAD).toBeLessThanOrEqual(widths[k]);
+                const size = i === 0 ? TABLE_FONT * 1.06 : TABLE_FONT;
+                expect(textWidth(piece, size, ur) + 2 * tableCellPad(lang) + (ur ? nastaliqPad(TABLE_FONT) : 0)).toBeLessThanOrEqual(widths[k]);
               }
             }),
           );
         }
       }
     }
+  });
+});
+
+describe('text width estimate', () => {
+  it('counts spacing vowel signs, so Hindi and Bengali words are not measured too narrow', () => {
+    // ि ी ा take real width; before the re-audit fix they counted as zero and "किमी/घंटा" broke mid-word.
+    expect(textWidth('मीटर', 14)).toBeGreaterThan(textWidth('मटर', 14));
+    expect(textWidth('মিটার', 14)).toBeGreaterThan(textWidth('মটর', 14));
+    // Marks drawn above or below a letter still take none.
+    expect(textWidth('क्', 14)).toBe(textWidth('क', 14));
   });
 });
 
@@ -69,13 +83,13 @@ describe('guide bullets', () => {
 it('needs no sideways scrolling on the test phone (392 pt wide)', () => {
   const width = 392 - 32 - 2;
   const scrolling: string[] = [];
-  for (const lang of LANGS) for (const t of GUIDE_TOPICS) for (const b of topicText(t, lang).blocks) if ('table' in b && columnWidths(b.table, width).scroll) scrolling.push(`${lang}:${t.id}`);
+  for (const lang of LANGS) for (const t of GUIDE_TOPICS) for (const b of topicText(t, lang).blocks) if ('table' in b && guideTableLayout(b.table, width, lang).scroll) scrolling.push(`${lang}:${t.id}`);
   expect(scrolling).toEqual([]);
 });
 
 it('lists the tables that scroll sideways on a small 360 pt phone', () => {
   const scrolling: string[] = [];
-  for (const lang of LANGS) for (const t of GUIDE_TOPICS) for (const b of topicText(t, lang).blocks) if ('table' in b && columnWidths(b.table, PHONE).scroll) scrolling.push(`${lang}:${t.id}`);
+  for (const lang of LANGS) for (const t of GUIDE_TOPICS) for (const b of topicText(t, lang).blocks) if ('table' in b && guideTableLayout(b.table, PHONE, lang).scroll) scrolling.push(`${lang}:${t.id}`);
   // Snapshot: scrolling is the safe fallback, but a new entry means a table grew too wide.
   expect(scrolling).toMatchSnapshot();
 });

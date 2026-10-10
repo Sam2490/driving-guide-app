@@ -30,7 +30,7 @@ export const en = {
     note: 'Compiled from public service sources; fees and rules may change. Verify on Absher or the General Directorate of Traffic.',
   },
   signs: {
-    title: 'Traffic signs', sub: (n: number) => `${n} Saudi traffic ${n === 1 ? 'sign' : 'signs'}, grouped by type.`, search: 'Search signs…',
+    title: 'Traffic signs', sub: 'Saudi traffic signs, grouped by type.', search: 'Search signs…',
     practice: 'Practice mode', reveal: 'Tap to reveal', hint: 'Tap a sign to reveal its name; tap again to hide it.',
     count: (n: number) => `${n} ${n === 1 ? 'sign' : 'signs'}`, group: 'Type',
     groups: { 'تحذيرية': 'Warning', 'أولوية': 'Priority', 'ممنوعات': 'Prohibitory', 'إلزامية': 'Mandatory', 'إرشادية': 'Guide', 'لوحات الطرق': 'Route signs' } as Record<string, string>,
@@ -116,6 +116,7 @@ export const en = {
     noMistakes: 'No mistakes to review. Nice work.', noWrongHere: 'No wrong answers. The rest were left blank.', noBlankHere: 'You answered every question.', emptyExamAsk: 'You have not answered any questions. Leave the exam? Nothing will be saved.', clearMistakes: 'Clear saved mistakes', clearAsk: 'Remove every saved mistake? This cannot be undone.',
     drillTitle: 'Mistakes practice', drillDone: 'Practice complete', drillSub: (m: number, left: number, half: number) => `${m} mastered · ${half} ${half === 1 ? 'needs' : 'need'} one more correct answer · ${left} still to fix`,
     drillRule: 'A question leaves your list after two correct answers in a row.', drillLeft: 'Still on your list',
+    tableScroll: 'Swipe sideways to see the whole table.',
     flag: 'Flag for later', unflag: 'Remove flag', flagged: 'Flagged', legendAnswered: 'Answered', legendCurrent: 'Current',
     timeWarn: (m: number) => `${m} ${m === 1 ? 'minute' : 'minutes'} left`, ofTotal: (n: number) => `of ${n}`, stars: (n: number) => `${n} of 3 stars`,
     fee: (a: string) => `SAR ${a}`, more: 'More', less: 'Show less',

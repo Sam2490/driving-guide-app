@@ -2,13 +2,14 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
 import { useStudy } from '@/state/StudyProvider';
-import { Badge, Button, Card, Chip, EmptyState, nastaliqPad, Row, Section, SourceBadge, T } from '@/components/ui';
+import { Badge, Button, Card, Chip, EmptyState, Row, Section, SourceBadge, T } from '@/components/ui';
+import { Icon } from '@/components/Icon';
 import { SignImage } from '@/components/Media';
 import { SIGNS } from '@/data/signs';
 import { GUIDE_TOPICS } from '@/data/licenseGuide';
 import { signName, topicText } from '@/data/localize';
 import { LAYOUT, RADIUS, SPACE } from '@/theme/tokens';
-import { bulletParts, CELL_PAD, columnWidths, keepBrackets, keepUnits } from './table';
+import { bulletParts, guideTableLayout, keepBrackets, keepUnits, TABLE_FONT, tableCellPad } from './table';
 
 /** A sign's detail: the large sign, its names and type, related signs, and a way to practise its group. */
 export function SignDetailBody({ id, onOpen, onPractise, showTitle }: { id: string; onOpen: (id: string) => void; onPractise: (group: string) => void; showTitle?: boolean }) {
@@ -102,24 +103,32 @@ export function TopicBody({ id, onNav, showTitle }: { id: string; onNav: (id: st
  * column (learn/table.ts), so cells wrap between words only; if the columns can't fit, the table scrolls sideways.
  */
 function GuideTable({ rows }: { rows: string[][] }) {
-  const { c, lang } = useApp();
+  const { c, t, lang } = useApp();
   const d = useDir();
   const { fontScale } = useWindowDimensions();
   const [width, setWidth] = React.useState(0);
   const ar = lang === 'ar';
-  const fs = 14;
-  const layout = width ? columnWidths(rows, width - 2, fs * fontScale, lang === 'ur' ? 2 * nastaliqPad(fs) : 0, lang === 'ur') : null;
+  const fs = TABLE_FONT;
+  const layout = width ? guideTableLayout(rows, width - 2, lang, fontScale) : null;
   const scroller = React.useRef<ScrollView>(null);
   const body = rows.map((row, r) => (
     <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
       {row.map((cell, k) => (
-        <View key={k} style={[{ paddingVertical: SPACE.sm, paddingHorizontal: CELL_PAD }, layout ? { width: layout.widths[k] } : { flex: 1 }]}>
+        <View key={k} style={[{ paddingVertical: SPACE.sm, paddingHorizontal: tableCellPad(lang) }, layout ? { width: layout.widths[k] } : { flex: 1 }]}>
           <T content={ar} size={fs} weight={r === 0 ? 'semibold' : 'regular'}>{keepUnits(cell)}</T>
         </View>
       ))}
     </View>
   ));
   return (
+    <View style={{ gap: SPACE.xxs }}>
+    {/* Only at large text sizes can a table still be too wide; then say so, since a sideways scroll is easy to miss. */}
+    {layout?.scroll ? (
+      <Row gap={SPACE.xs} style={{ alignItems: 'flex-start' }}>
+        <Icon name="info" size={16} color={c.tx2} />
+        <View style={{ flex: 1 }}><T size={14} muted>{t.rd.tableScroll}</T></View>
+      </Row>
+    ) : null}
     <Card style={{ padding: 0, overflow: 'hidden', borderColor: c.info }}>
       <View onLayout={(e) => setWidth(Math.floor(e.nativeEvent.layout.width))}>
         {layout?.scroll ? (
@@ -132,6 +141,7 @@ function GuideTable({ rows }: { rows: string[][] }) {
         )}
       </View>
     </Card>
+    </View>
   );
 }
 

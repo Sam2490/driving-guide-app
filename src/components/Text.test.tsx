@@ -3,23 +3,34 @@ import { StyleSheet } from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AppProvider } from '@/state/AppProvider';
 import type { Lang } from '@/data/types';
-import { EmptyState, ltrNumbers, nastaliqPad, Segmented, SnugText, T } from './ui';
+import { EmptyState, ltrNumbers, nastaliqPad, nastaliqPads, Segmented, SnugText, T } from './ui';
 
 jest.mock('expo-font', () => ({ loadAsync: jest.fn(() => Promise.resolve()), isLoaded: () => true }));
 
 const inLang = (lang: Lang, node: React.ReactElement) => render(<AppProvider initial={{ settings: { lang, theme: 'light' } }}>{node}</AppProvider>);
 
 describe('Urdu text keeps room for Nastaliq overhangs (QA_1 U1: "کی" drawn as "لی")', () => {
-  it('pads Urdu text on both sides, in proportion to its size', async () => {
-    await inLang('ur', <T size={16}>کی سائیڈ پر</T>);
-    const style = StyleSheet.flatten(screen.getByText('کی سائیڈ پر').props.style);
-    expect(style.paddingHorizontal).toBe(nastaliqPad(16));
-    expect(nastaliqPad(16)).toBeGreaterThanOrEqual(4);
+  it('pads Urdu text on both sides, more at the line start (right), in proportion to its size', async () => {
+    await inLang('ur', <T size={16}>کرنا، موبائل فون کا استعمال</T>);
+    const style = StyleSheet.flatten(screen.getByText('کرنا، موبائل فون کا استعمال').props.style);
+    // A line-initial ک reaches about 0.6 em past the start edge ("کرنا" read "لرنا" with 0.3 em, re-audit P1-1).
+    expect(style.paddingRight).toBe(nastaliqPads(16).start);
+    expect(style.paddingLeft).toBe(nastaliqPads(16).end);
+    expect(nastaliqPads(16).start).toBeGreaterThanOrEqual(Math.ceil(16 * 0.6));
+    expect(nastaliqPad(16)).toBe(nastaliqPads(16).start + nastaliqPads(16).end);
+  });
+
+  it("keeps a caller's wider side padding (CenteredLabel's icon slot) on both sides (review)", async () => {
+    await inLang('ur', <T size={16} style={{ paddingHorizontal: 30 }}>دوبارہ کوشش کریں</T>);
+    const style = StyleSheet.flatten(screen.getByText('دوبارہ کوشش کریں').props.style);
+    expect(style.paddingRight).toBe(30);
+    expect(style.paddingLeft).toBe(30);
   });
 
   it('leaves other languages and Latin runs inside Urdu unpadded', async () => {
     await inLang('ar', <T size={16}>منعطف</T>);
-    expect(StyleSheet.flatten(screen.getByText('منعطف').props.style).paddingHorizontal).toBeUndefined();
+    const ar = StyleSheet.flatten(screen.getByText('منعطف').props.style);
+    expect(ar.paddingHorizontal ?? ar.paddingRight ?? ar.paddingLeft).toBeUndefined();
   });
 
   it('adds the padding to the width SnugText measures, so the label does not wrap', async () => {
@@ -29,7 +40,7 @@ describe('Urdu text keeps room for Nastaliq overhangs (QA_1 U1: "کی" drawn as 
       fireEvent(probe, 'textLayout', { nativeEvent: { lines: [{ width: 60 }] } });
     });
     // 60 drawn + 4 slack + padding on both sides.
-    expect(StyleSheet.flatten(shown.props.style).width).toBe(60 + 4 + 2 * nastaliqPad(14));
+    expect(StyleSheet.flatten(shown.props.style).width).toBe(60 + 4 + nastaliqPad(14));
   });
 });
 

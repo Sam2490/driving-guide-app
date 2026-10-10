@@ -22,23 +22,29 @@ export const SchoolCard = React.memo(function SchoolCard({ school, distance }: {
   const town = cityName(city, lang);
   const region = regionName(school.region, lang);
   const place = region !== town ? `${town} · ${region}` : town;
+  const gender = school.gender === 'men' ? t.schools.men : t.schools.women;
+  // Screen readers hear the badges too, so same-name branches stay distinguishable (QA re-audit P3-4).
+  const tags = school.source === 'public' ? `${gender}, ${t.schools.publicSource}` : gender;
   const km = distance ? t.schools.km(Math.max(1, Math.round(distance.km))) : null;
   return (
     <View style={[styles.wrap, { backgroundColor: c.card, borderColor: c.ln }]}>
       <Row gap={SPACE.sm} style={{ alignItems: 'center' }}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={km ? `${name}, ${km}, ${place}` : `${name}, ${place}`}
+          accessibilityLabel={km ? `${name}, ${tags}, ${km}, ${place}` : `${name}, ${tags}, ${place}`}
           onPress={() => router.push({ pathname: '/schools/[id]', params: { id: school.id } })}
           style={({ pressed }) => [styles.main, { flexDirection: d.row, opacity: pressed ? 0.7 : 1 }]}
         >
           <View style={{ flex: 1, gap: SPACE.xxs }}>
-            <T role="title" size={16} content={ar}>{name}</T>
-            <T size={14} muted>{distance ? t.schools.toCity(cityName(distance.city, lang)) : place}</T>
-            <Row gap={SPACE.xs} style={{ flexWrap: 'wrap', alignSelf: d.start }}>
-              <Badge text={school.gender === 'men' ? t.schools.men : t.schools.women} />
-              {school.source === 'public' ? <Badge tone="warn" text={t.schools.publicSource} /> : null}
+            {/* The Men/Women badge sits on the name line, so two branches with the same name read apart at a glance
+                (QA re-audit P3-4). */}
+            <Row gap={SPACE.xs} style={{ alignItems: 'flex-start' }}>
+              <View style={{ flexShrink: 1 }}><T role="title" size={16} content={ar}>{name}</T></View>
+              {/* Badge aligns itself to d.start, which is vertical in a row; pin it to the first line in both directions. */}
+              <View style={{ alignSelf: 'flex-start' }}><Badge text={gender} /></View>
             </Row>
+            <T size={14} muted>{distance ? t.schools.toCity(cityName(distance.city, lang)) : place}</T>
+            {school.source === 'public' ? <View style={{ alignSelf: d.start }}><Badge tone="warn" text={t.schools.publicSource} /></View> : null}
           </View>
           {km ? <T size={16} weight="bold" color={c.ac} maxScale={1.3}>{km}</T> : null}
         </Pressable>

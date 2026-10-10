@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
-import { Button, Chip, EmptyState, Row, SearchBox, T, TAB_BAR_SPACE } from '@/components/ui';
+import { Button, Chip, EmptyState, Row, SearchBox, SnugText, T, TAB_BAR_SPACE } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { SignImage } from '@/components/Media';
 import { SIGNS, SIGN_GROUPS } from '@/data/signs';
@@ -29,7 +29,8 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
   const top = (
     <View style={{ gap: LAYOUT.list, paddingBottom: LAYOUT.list }}>
       {header}
-      <T muted>{t.signs.sub(SIGNS.length)}</T>
+      {/* The count shows once, in the row above the grid (QA re-audit P3-2). */}
+      <T muted>{t.signs.sub}</T>
       <SearchBox value={q} onChange={setQ} placeholder={t.signs.search} />
       {/* One scrollable row of filters; in RTL it starts scrolled to the right. */}
       <ScrollView
@@ -53,9 +54,17 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
         // The link sits under the hint, not beside it: beside it, "सभी / दिखाएँ" wrapped onto two lines (QA_1 #026, #062).
         <View style={{ gap: SPACE.xxs }}>
           <T size={14} muted>{t.signs.hint}</T>
-          <View style={{ alignSelf: d.start }}>
-            <Button small kind="tertiary" title={allShown ? t.ux.hideAll : t.ux.revealAll} onPress={() => setShown(allShown ? {} : Object.fromEntries(list.map((x) => [x.id, true])))} />
-          </View>
+          {/* A content-sized link: SnugText keeps the label on one line in every language (QA re-audit P3-1). */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={allShown ? t.ux.hideAll : t.ux.revealAll}
+            onPress={() => setShown(allShown ? {} : Object.fromEntries(list.map((x) => [x.id, true])))}
+            hitSlop={8}
+            style={({ pressed }) => [styles.link, { flexDirection: d.row, alignSelf: d.start, opacity: pressed ? 0.6 : 1 }]}
+          >
+            <Icon name="eye" size={16} color={c.ac} />
+            <SnugText size={14} weight="semibold" color={c.ac}>{allShown ? t.ux.hideAll : t.ux.revealAll}</SnugText>
+          </Pressable>
         </View>
       ) : null}
     </View>
@@ -90,7 +99,7 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
             {hidden ? (
               <Row gap={SPACE.xxs} style={{ justifyContent: 'center' }}>
                 <Icon name="eye" size={16} color={c.tx2} />
-                <T size={14} muted center>{t.signs.reveal}</T>
+                <SnugText size={14} muted center>{t.signs.reveal}</SnugText>
               </Row>
             ) : (
               <T size={14} center content={lang === 'ar'} numberOfLines={3}>{name(item)}</T>
@@ -104,5 +113,6 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
 
 const styles = StyleSheet.create({
   tile: { flex: 1, borderRadius: RADIUS.lg, padding: SPACE.sm, gap: SPACE.xs, minHeight: 170 },
+  link: { alignItems: 'center', gap: SPACE.xs, minHeight: 44, paddingVertical: SPACE.xs },
   img: { height: 108, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
 });

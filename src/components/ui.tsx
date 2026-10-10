@@ -8,6 +8,7 @@ import { LATIN_FONT, type Weight } from '@/theme/fonts';
 import { BREAKPOINTS, ELEVATION, ICON, LAYOUT, MAX_CONTENT_WIDTH, MOTION, RADIUS, SPACE, TEXT, TOUCH, type TextRole, type TypeSize } from '@/theme/tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Icon, type IconName } from './Icon';
+import { nastaliqPad, nastaliqPads } from './learn/table';
 import { LANGUAGES } from '@/i18n';
 
 /** Bottom padding under scrolling content. The tab bar is docked, so it no longer covers the last item. */
@@ -51,7 +52,7 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   // Noto Nastaliq draws some letters past the text box: the top stroke of a line-initial ک / گ / پ on the right and the
   // tail of a line-final ے on the left. Android clips at the box edge, so "کی" read as "لی" (QA_1 #090, #118).
   // A little room on both sides keeps every glyph whole.
-  const pad = lang === 'ur' && !latin ? nastaliqPad(fs) : 0;
+  const pad = lang === 'ur' && !latin ? nastaliqPads(fs) : null;
   // In right-to-left text a number range or percentage must read left to right ("150–300", "75%"); otherwise the
   // bidi algorithm shows "300–150" and "%75" (QA_1 #131–#133, #095).
   if ((lang === 'ar' || lang === 'ur') && typeof children === 'string') children = ltrNumbers(children);
@@ -68,11 +69,24 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
       maxFontSizeMultiplier={maxScale ?? spec?.maxScale}
       // Android's default "highQuality" line breaking measures a little wider than Yoga allots.
       textBreakStrategy="simple"
-      style={[{ fontFamily: latin ? LATIN_FONT[w] : font(w, content), fontSize: fs, lineHeight: latin ? Math.round(fs * 1.4) : lh(fs, content), color: color ?? (muted ? c.tx2 : c.tx), textAlign: center ? 'center' : content ? 'right' : d.align, writingDirection: content ? 'rtl' : d.writing }, pad ? { paddingHorizontal: pad } : null, style]}
+      style={[{ fontFamily: latin ? LATIN_FONT[w] : font(w, content), fontSize: fs, lineHeight: latin ? Math.round(fs * 1.4) : lh(fs, content), color: color ?? (muted ? c.tx2 : c.tx), textAlign: center ? 'center' : content ? 'right' : d.align, writingDirection: content ? 'rtl' : d.writing }, pad ? nastaliqStyle(pad, d.rtl, style) : null, style]}
     >
       {children}
     </Text>
   );
+}
+
+/**
+ * Side padding for Urdu Nastaliq text: more on the start side, where glyphs reach past the box (QA re-audit P1-1).
+ * A caller's own horizontal padding (e.g. CenteredLabel's icon slot) is a floor on both sides, so it is never lost:
+ * in React Native paddingLeft/Right would otherwise override the caller's paddingHorizontal.
+ */
+function nastaliqStyle(pad: { start: number; end: number }, rtl: boolean, style: StyleProp<TextStyle>) {
+  const f = StyleSheet.flatten(style) ?? {};
+  const base = typeof f.paddingHorizontal === 'number' ? f.paddingHorizontal : typeof f.padding === 'number' ? f.padding : 0;
+  const start = Math.max(base, pad.start);
+  const end = Math.max(base, pad.end);
+  return rtl ? { paddingRight: start, paddingLeft: end } : { paddingLeft: start, paddingRight: end };
 }
 
 const NUMBER_RUN = /\d[\d.,\u066b\u066c]*(?:[ \u00a0]?[\u2013\-]\u200b?[ \u00a0]?\d[\d.,\u066b\u066c]*)+(?:[ \u00a0]?[%\u066a])?|\d[\d.,]*[ \u00a0]?[%\u066a]|[%\u066a]\d[\d.,]*/g;
@@ -82,10 +96,7 @@ export function ltrNumbers(text: string): string {
   return text.replace(NUMBER_RUN, (m) => `\u2066${/^[%\u066a]/.test(m) ? m.slice(1) + m[0] : m}\u2069`);
 }
 
-/** Side padding for Urdu (Nastaliq) text of a given size; also added to measured widths (SnugText). */
-export function nastaliqPad(size: number): number {
-  return Math.max(4, Math.ceil(size * 0.3));
-}
+export { nastaliqPad, nastaliqPads };
 
 const MATH_SIGN = /[+\u2212\u00d7\u00f7=]/;
 const MATH_SPLIT = /([+\u2212\u00d7\u00f7=])/;
@@ -334,7 +345,7 @@ export function SnugText({ children, style, ...rest }: Omit<TProps, 'children' |
   const { lang } = useApp();
   const [drawn, setDrawn] = React.useState<{ text: string; w: number } | null>(null);
   // The measured line width excludes padding; T pads Urdu text on both sides.
-  const extra = lang === 'ur' && !rest.latin ? 2 * nastaliqPad(rest.size ?? (rest.role ? TEXT[rest.role].size : 16)) : 0;
+  const extra = lang === 'ur' && !rest.latin ? nastaliqPad(rest.size ?? (rest.role ? TEXT[rest.role].size : 16)) : 0;
   if (Platform.OS === 'web') return <T {...rest} style={style}>{children}</T>;
   const w = drawn?.text === children ? drawn.w : undefined;
   return (
