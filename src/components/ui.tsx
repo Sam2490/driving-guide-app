@@ -8,7 +8,7 @@ import { LATIN_FONT, type Weight } from '@/theme/fonts';
 import { BREAKPOINTS, ELEVATION, ICON, LAYOUT, MAX_CONTENT_WIDTH, MOTION, RADIUS, SPACE, TEXT, TOUCH, type TextRole, type TypeSize } from '@/theme/tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Icon, type IconName } from './Icon';
-import { nastaliqPad, nastaliqPads } from './learn/table';
+import { nastaliqHeadroom, nastaliqPad, nastaliqPads } from './learn/table';
 import { LANGUAGES } from '@/i18n';
 
 /** Bottom padding under scrolling content. The tab bar is docked, so it no longer covers the last item. */
@@ -44,6 +44,7 @@ type TProps = {
 export function T({ children, size, role, weight, color, muted, content, latin, center, style, numberOfLines, header, maxScale, onTextLayout, fit }: TProps) {
   const { c, font, lh, lang } = useApp();
   const d = useDir();
+  const { fontScale } = useWindowDimensions();
   const spec = role ? TEXT[role] : undefined;
   const fs = size ?? spec?.size ?? 16;
   const w = weight ?? spec?.weight ?? 'regular';
@@ -53,6 +54,10 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   // tail of a line-final ے on the left. Android clips at the box edge, so "کی" read as "لی" (QA_1 #090, #118).
   // A little room on both sides keeps every glyph whole.
   const pad = lang === 'ur' && !latin ? nastaliqPads(fs) : null;
+  // Headroom for tall Nastaliq strokes, in drawn points: text and its line height grow with the system font scale,
+  // padding does not (review of build 33).
+  const scale = Math.min(fontScale || 1, maxScale ?? spec?.maxScale ?? Infinity);
+  const room = pad && !content ? nastaliqHeadroom(fs * scale, lineHeightOf(style, lh(fs, content)) * scale) : null;
   // In right-to-left text a number range or percentage must read left to right ("150–300", "75%"); otherwise the
   // bidi algorithm shows "300–150" and "%75" (QA_1 #131–#133, #095).
   if ((lang === 'ar' || lang === 'ur') && typeof children === 'string') children = ltrNumbers(children);
@@ -62,6 +67,8 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   return (
     <Text
       accessibilityRole={header ? 'header' : undefined}
+      // The headroom reaches over the element above; it must not catch that element's taps. T itself has no onPress.
+      pointerEvents={room ? 'none' : undefined}
       numberOfLines={fit ? 1 : numberOfLines}
       adjustsFontSizeToFit={fit || undefined}
       minimumFontScale={fit ? 0.8 : undefined}
@@ -69,7 +76,7 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
       maxFontSizeMultiplier={maxScale ?? spec?.maxScale}
       // Android's default "highQuality" line breaking measures a little wider than Yoga allots.
       textBreakStrategy="simple"
-      style={[{ fontFamily: latin ? LATIN_FONT[w] : font(w, content), fontSize: fs, lineHeight: latin ? Math.round(fs * 1.4) : lh(fs, content), color: color ?? (muted ? c.tx2 : c.tx), textAlign: center ? 'center' : content ? 'right' : d.align, writingDirection: content ? 'rtl' : d.writing }, pad ? nastaliqStyle(pad, d.rtl, style) : null, style]}
+      style={[{ fontFamily: latin ? LATIN_FONT[w] : font(w, content), fontSize: fs, lineHeight: latin ? Math.round(fs * 1.4) : lh(fs, content), color: color ?? (muted ? c.tx2 : c.tx), textAlign: center ? 'center' : content ? 'right' : d.align, writingDirection: content ? 'rtl' : d.writing }, style, pad ? nastaliqStyle(pad, d.rtl, style, room) : null]}
     >
       {children}
     </Text>
@@ -81,12 +88,33 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
  * A caller's own horizontal padding (e.g. CenteredLabel's icon slot) is a floor on both sides, so it is never lost:
  * in React Native paddingLeft/Right would otherwise override the caller's paddingHorizontal.
  */
-function nastaliqStyle(pad: { start: number; end: number }, rtl: boolean, style: StyleProp<TextStyle>) {
+function nastaliqStyle(pad: { start: number; end: number }, rtl: boolean, style: StyleProp<TextStyle>, room: { top: number; bottom: number } | null) {
   const f = StyleSheet.flatten(style) ?? {};
-  const base = typeof f.paddingHorizontal === 'number' ? f.paddingHorizontal : typeof f.padding === 'number' ? f.padding : 0;
-  const start = Math.max(base, pad.start);
-  const end = Math.max(base, pad.end);
-  return rtl ? { paddingRight: start, paddingLeft: end } : { paddingLeft: start, paddingRight: end };
+  // A caller's own spacing is a floor, read the way Yoga resolves it (start/end and a side beat the shorthands).
+  const first = (...v: unknown[]) => v.find((x) => x !== undefined);
+  const left = first(rtl ? f.paddingEnd : f.paddingStart, f.paddingLeft, f.paddingHorizontal, f.padding);
+  const right = first(rtl ? f.paddingStart : f.paddingEnd, f.paddingRight, f.paddingHorizontal, f.padding);
+  const top = first(f.paddingTop, f.paddingVertical, f.padding);
+  const bottom = first(f.paddingBottom, f.paddingVertical, f.padding);
+  const mTop = first(f.marginTop, f.marginVertical, f.margin);
+  const mBottom = first(f.marginBottom, f.marginVertical, f.margin);
+  const num = (v: unknown) => (typeof v === 'number' ? v : 0);
+  // A percentage or 'auto' cannot be combined with a number, so that side keeps the caller's value.
+  const plain = (...v: unknown[]) => v.every((x) => x === undefined || typeof x === 'number');
+  const out: TextStyle = {};
+  if (plain(left)) out.paddingLeft = Math.max(num(left), rtl ? pad.end : pad.start);
+  if (plain(right)) out.paddingRight = Math.max(num(right), rtl ? pad.start : pad.end);
+  if (plain(left, right)) Object.assign(out, { paddingStart: undefined, paddingEnd: undefined });
+  // Headroom for Nastaliq ink (nastaliqHeadroom): extra padding that an equal negative margin takes back, so the text
+  // can draw its tall strokes without moving or growing in the layout.
+  if (room && plain(top, mTop)) Object.assign(out, { paddingTop: num(top) + room.top, marginTop: num(mTop) - room.top });
+  if (room && plain(bottom, mBottom)) Object.assign(out, { paddingBottom: num(bottom) + room.bottom, marginBottom: num(mBottom) - room.bottom });
+  return out;
+}
+
+function lineHeightOf(style: StyleProp<TextStyle>, fallback: number) {
+  const v = StyleSheet.flatten(style)?.lineHeight;
+  return typeof v === 'number' ? v : fallback;
 }
 
 const NUMBER_RUN = /\d[\d.,\u066b\u066c]*(?:[ \u00a0]?[\u2013\-]\u200b?[ \u00a0]?\d[\d.,\u066b\u066c]*)+(?:[ \u00a0]?[%\u066a])?|\d[\d.,]*[ \u00a0]?[%\u066a]|[%\u066a]\d[\d.,]*/g;
@@ -161,7 +189,7 @@ type ScreenProps = {
 
 /** Safe-area screen with a header, a centred readable column and an optional sticky footer. */
 export function Screen({ title, contentTitle, back, onBack, right, children, scroll = true, tabSpace = true, contentStyle, large, footer, maxWidth = MAX_CONTENT_WIDTH }: ScreenProps) {
-  const { c, t } = useApp();
+  const { c, t, lang } = useApp();
   const insets = useSafeAreaInsets();
   const d = useDir();
   const { width } = useWindowDimensions();
@@ -174,7 +202,8 @@ export function Screen({ title, contentTitle, back, onBack, right, children, scr
     </View>
   );
   const pad = { paddingBottom: (footer ? SPACE.md : tabSpace ? TAB_BAR_SPACE : SPACE.xl) + (footer ? 0 : insets.bottom * (tabSpace ? 0 : 1)) };
-  const column = [styles.content, { paddingHorizontal: gutter, maxWidth }, pad, contentStyle];
+  // A ScrollView clips at its top; Urdu's first line draws above its box (nastaliqHeadroom), so give it room there.
+  const column = [styles.content, { paddingHorizontal: gutter, maxWidth }, lang === 'ur' && { paddingTop: URDU_SCROLL_TOP }, pad, contentStyle];
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
       {header}
@@ -366,6 +395,8 @@ export function SnugText({ children, style, ...rest }: Omit<TProps, 'children' |
 }
 
 const SNUG_SLACK = 4;
+/** Top padding of an Urdu scroll column: covers the headroom of a body or heading first line (nastaliqHeadroom). */
+export const URDU_SCROLL_TOP = SPACE.md;
 
 /** A filter chip when it has `onPress` (44 pt target, selected = brand fill + check), otherwise a compact label. */
 export function Chip({ label, on, onPress, icon }: { label: string; on?: boolean; onPress?: () => void; icon?: IconName }) {

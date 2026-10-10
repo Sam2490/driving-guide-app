@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
-import { Button, Chip, EmptyState, Row, SearchBox, SnugText, T, TAB_BAR_SPACE } from '@/components/ui';
+import { Button, Chip, EmptyState, Row, SearchBox, SnugText, T, TAB_BAR_SPACE, URDU_SCROLL_TOP } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { SignImage } from '@/components/Media';
 import { SIGNS, SIGN_GROUPS } from '@/data/signs';
@@ -47,7 +47,8 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
         <View style={{ width: LAYOUT.gutter - SPACE.xs }} />
       </ScrollView>
       <Row style={{ justifyContent: 'space-between' }}>
-        <T size={14} muted>{t.signs.count(list.length)}</T>
+        {/* SnugText: "35টি চিহ্ন" wrapped onto two lines beside the chip (build 32 #42). */}
+        <SnugText size={14} muted>{t.signs.count(list.length)}</SnugText>
         <Chip label={t.signs.practice} icon="eye" on={practice} onPress={() => { setPractice(!practice); setShown({}); }} />
       </Row>
       {practice ? (
@@ -80,7 +81,7 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
       ListHeaderComponent={top}
       ListEmptyComponent={<EmptyState text={t.common.noResults} action={q ? <Button small kind="secondary" title={t.common.all} onPress={() => { setQ(''); setGroup(''); }} /> : undefined} />}
       columnWrapperStyle={cols > 1 ? { gap: LAYOUT.list, flexDirection: d.row } : undefined}
-      contentContainerStyle={{ paddingHorizontal: LAYOUT.gutter, gap: LAYOUT.list, paddingBottom: TAB_BAR_SPACE }}
+      contentContainerStyle={{ paddingHorizontal: LAYOUT.gutter, gap: LAYOUT.list, paddingBottom: TAB_BAR_SPACE, paddingTop: lang === 'ur' ? URDU_SCROLL_TOP : 0 }}
       initialNumToRender={10}
       windowSize={7}
       keyboardShouldPersistTaps="handled"
@@ -113,6 +114,7 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
 
 const styles = StyleSheet.create({
   tile: { flex: 1, borderRadius: RADIUS.lg, padding: SPACE.sm, gap: SPACE.xs, minHeight: 170 },
-  link: { alignItems: 'center', gap: SPACE.xs, minHeight: 44, paddingVertical: SPACE.xs },
+  // 36 pt tall plus an 8 pt hit slop keeps a 52 pt target without a wide gap above the grid.
+  link: { alignItems: 'center', gap: SPACE.xs, minHeight: 36 },
   img: { height: 108, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
 });

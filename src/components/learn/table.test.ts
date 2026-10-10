@@ -8,9 +8,11 @@ const LANGS: Lang[] = ['ar', 'en', 'ur', 'hi', 'bn'];
 const PHONE = 360 - 32 - 2;
 
 describe('guide tables', () => {
-  it('keeps a number with its unit, and lets a unit wrap only after its slash', () => {
-    expect(keepUnits('30 km/h')).toBe('30\u00a0km\u2060/\u200bh');
-    expect(keepUnits('30 كم / س')).toBe('30\u00a0كم\u2060/\u200bس');
+  it('keeps a number with its unit, and lets only a long unit wrap after its slash (build 32 #48)', () => {
+    expect(keepUnits('30 km/h')).toBe('30\u00a0km\u2060/\u2060h');
+    expect(keepUnits('30 كم / س')).toBe('30\u00a0كم\u2060/\u2060س');
+    expect(keepUnits('(किमी/घंटा)')).toBe('(किमी\u2060/\u200bघंटा)');
+    expect(keepUnits('কিমি/ঘণ্টা')).toBe('কিমি\u2060/\u200bঘণ্টা');
   });
 
   it('lets a number range wrap after its dash, never inside a number', () => {

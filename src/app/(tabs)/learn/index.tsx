@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp, useDir } from '@/state/AppProvider';
-import { Button, Notice, Segmented, StickyBar, T, TAB_BAR_SPACE } from '@/components/ui';
+import { Button, Notice, Segmented, StickyBar, T, TAB_BAR_SPACE, URDU_SCROLL_TOP } from '@/components/ui';
 import { SignsSection } from '@/components/learn/SignsSection';
 import { GuideSection } from '@/components/learn/GuideSection';
 import { StepsSection } from '@/components/learn/StepsSection';
@@ -21,7 +21,7 @@ type SectionKey = (typeof SECTIONS)[number];
  * Signs and Guide show the list on the reading-start side and the selected item beside it.
  */
 export default function Learn() {
-  const { t, c } = useApp();
+  const { t, c, lang } = useApp();
   const d = useDir();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ section?: string; group?: string; practice?: string }>();
@@ -56,7 +56,7 @@ export default function Learn() {
     section === 'signs' ? (
       <SignsSection key={`${signFilter.group}|${signFilter.practice}`} header={header} cols={cols} onOpen={openSign} selected={twoPane ? sign : undefined} group={signFilter.group} practice={signFilter.practice} />
     ) : (
-      <ScrollView contentContainerStyle={[styles.column, { paddingBottom: TAB_BAR_SPACE }]} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.column, lang === 'ur' && { paddingTop: URDU_SCROLL_TOP }, { paddingBottom: TAB_BAR_SPACE }]} keyboardShouldPersistTaps="handled">
         {header}
         {section === 'guide' ? <GuideSection onOpen={openTopic} selected={twoPane ? topic : undefined} /> : <StepsSection />}
       </ScrollView>

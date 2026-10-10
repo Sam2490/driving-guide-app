@@ -9,8 +9,10 @@ const ZWSP = '​';
 export function keepUnits(s: string): string {
   return s
     .replace(/(\d)[ \t]+(?=\S)/g, `$1${NBSP}`)
-    // A unit may wrap after its slash ("किमी/ | घंटा"), never before it and never inside a word (re-audit P1-2).
-    .replace(/[ \t]*\/[ \t]*/g, `${WORD_JOINER}/${ZWSP}`)
+    // A unit never wraps before its slash or inside a word (re-audit P1-2).
+    .replace(/[ \t]*\/[ \t]*/g, `${WORD_JOINER}/${WORD_JOINER}`)
+    // A long unit may wrap after its slash ("किमी/ | घंटा"), never a short one ("كم/ | س", "km/ | h"; build 32 #48).
+    .replace(/([A-Za-z\u0600-\u06ff\u0900-\u097f\u0980-\u09ff]{3,})\u2060\/\u2060(?=[A-Za-z\u0600-\u06ff\u0900-\u097f\u0980-\u09ff]{3,})/g, `$1${WORD_JOINER}/${ZWSP}`)
     // A number range may wrap after its dash ("1,000– | 2,000"), never inside a number ("1,000–2, | 000", QA_1 #206).
     .replace(/(\d)\u2013(?=\d)/g, `$1\u2013${ZWSP}`);
 }
@@ -23,6 +25,26 @@ export function bulletParts(s: string): string[] {
 /** A short bracket with a sum in it ("(السرعة ÷ 10)", "(speed ÷ 10)") stays on one line. It needs a maths sign: "(up to 3500 kg)" is prose (QA_1 #203). */
 export function keepBrackets(s: string): string {
   return s.replace(/\(([^()]{1,24})\)/g, (m, inner: string) => (/[÷×+=\u2212]/.test(inner) ? `(${inner.replace(/ /g, NBSP)})` : m));
+}
+
+/**
+ * Room above and below Urdu (Nastaliq) text. Noto Nastaliq's words climb from their start: shaped across every Urdu
+ * string in the app, the ink of a word like "کیٹیگری" or "کبھی" reaches 2.1-2.4 em above the baseline, while the
+ * first line of a 2.1 em line box keeps only about 1.7 em above it. Android cuts ink at the top of the text box, so
+ * the slanted stroke of ک / گ disappeared and "کیٹیگری" read "لیٹیگری" (QA build 32, P1-1). Marks under the last
+ * line reach 0.7 em against about 0.4 em of room. React Native splits the missing leading evenly between top and
+ * bottom (CustomLineHeightSpan: ascent + ceil(L/2), descent + floor(L/2), L = lineHeight - (ascent + descent)).
+ * Sizes are in device-independent points as drawn, so pass them already multiplied by the font scale.
+ */
+export const NASTALIQ_INK = { top: 2.45, bottom: 0.7, ascent: 1.904, descent: 0.596 } as const;
+export function nastaliqHeadroom(size: number, lineHeight: number): { top: number; bottom: number } {
+  const leading = lineHeight - (NASTALIQ_INK.ascent + NASTALIQ_INK.descent) * size;
+  const above = NASTALIQ_INK.ascent * size + Math.ceil(leading / 2);
+  const below = NASTALIQ_INK.descent * size + Math.floor(leading / 2);
+  return {
+    top: Math.max(0, Math.ceil(NASTALIQ_INK.top * size - above)),
+    bottom: Math.max(0, Math.ceil(NASTALIQ_INK.bottom * size - below)),
+  };
 }
 
 /**

@@ -1,9 +1,10 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AppProvider } from '@/state/AppProvider';
 import type { Lang } from '@/data/types';
 import { EmptyState, ltrNumbers, nastaliqPad, nastaliqPads, Segmented, SnugText, T } from './ui';
+import { nastaliqHeadroom } from './learn/table';
 
 jest.mock('expo-font', () => ({ loadAsync: jest.fn(() => Promise.resolve()), isLoaded: () => true }));
 
@@ -25,6 +26,37 @@ describe('Urdu text keeps room for Nastaliq overhangs (QA_1 U1: "کی" drawn as 
     const style = StyleSheet.flatten(screen.getByText('دوبارہ کوشش کریں').props.style);
     expect(style.paddingRight).toBe(30);
     expect(style.paddingLeft).toBe(30);
+  });
+
+  it('gives Urdu text headroom for tall strokes without moving it in the layout (build 32: "کیٹیگری" read "لیٹیگری")', async () => {
+    await inLang('ur', <T size={14} weight="semibold" style={{ marginTop: 4 }}>کیٹیگری</T>);
+    const text = screen.getByText('کیٹیگری');
+    const style = StyleSheet.flatten(text.props.style);
+    const lh = style.lineHeight as number;
+    // Measured as drawn: text and line height grow with the system font scale (the test window reports its own).
+    const k = Dimensions.get('window').fontScale || 1;
+    const room = nastaliqHeadroom(14 * k, lh * k);
+    // React Native splits the missing leading evenly; above the first baseline the line keeps ascent + ceil(L/2).
+    const above = 1.904 * 14 * k + Math.ceil((lh * k - 2.5 * 14 * k) / 2);
+    // Shaped with HarfBuzz, the semibold word's ink tops out at 2.104 em.
+    expect(above).toBeLessThan(2.104 * 14 * k);
+    expect(above + room.top).toBeGreaterThanOrEqual(2.104 * 14 * k);
+    expect(style.paddingTop).toBe(room.top);
+    expect(style.marginTop).toBe(4 - room.top);
+    expect((style.paddingBottom as number) + (style.marginBottom as number)).toBe(0);
+    // The headroom overlaps the element above, so it must not take its taps.
+    expect(text.props.pointerEvents).toBe('none');
+  });
+
+  it('grows the headroom with the system font scale', () => {
+    expect(nastaliqHeadroom(14 * 2, 29 * 2).top).toBeGreaterThan(nastaliqHeadroom(14, 29).top);
+  });
+
+  it("keeps a caller's percentage padding instead of overwriting it", async () => {
+    await inLang('ur', <T size={16} style={{ paddingTop: '10%' }}>سڑک</T>);
+    const style = StyleSheet.flatten(screen.getByText('سڑک').props.style);
+    expect(style.paddingTop).toBe('10%');
+    expect(style.marginTop).toBeUndefined();
   });
 
   it('leaves other languages and Latin runs inside Urdu unpadded', async () => {

@@ -111,10 +111,11 @@ function GuideTable({ rows }: { rows: string[][] }) {
   const fs = TABLE_FONT;
   const layout = width ? guideTableLayout(rows, width - 2, lang, fontScale) : null;
   const scroller = React.useRef<ScrollView>(null);
+  // The card clips (rounded corners), so the Urdu header row keeps room for its tall first-line strokes.
   const body = rows.map((row, r) => (
     <View key={r} style={[styles.tr, { flexDirection: d.row, backgroundColor: r === 0 ? c.infobg : 'transparent', borderTopColor: c.ln, borderTopWidth: r ? 1 : 0 }]}>
       {row.map((cell, k) => (
-        <View key={k} style={[{ paddingVertical: SPACE.sm, paddingHorizontal: tableCellPad(lang) }, layout ? { width: layout.widths[k] } : { flex: 1 }]}>
+        <View key={k} style={[{ paddingVertical: SPACE.sm, paddingHorizontal: tableCellPad(lang) }, r === 0 && lang === 'ur' && { paddingTop: SPACE.lg }, layout ? { width: layout.widths[k] } : { flex: 1 }]}>
           <T content={ar} size={fs} weight={r === 0 ? 'semibold' : 'regular'}>{keepUnits(cell)}</T>
         </View>
       ))}
