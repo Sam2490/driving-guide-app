@@ -112,7 +112,6 @@ const HAMZA_STEMS: Record<string, string> = {
   'اطراف': 'أطراف',
   'اجراءات': 'إجراءات',
   'ابيض': 'أبيض',
-  'احترمك': 'أحترمك',
   'اضاءة': 'إضاءة',
   'ارقام': 'أرقام',
   'اصلاح': 'إصلاح',
@@ -151,6 +150,12 @@ function inna(before: string, question: boolean): boolean {
   return /(^|[^\u0621-\u064a])(?:\u062d\u064a\u062b|\u0642\u0627\u0644|\u0642\u0627\u0644\u062a)[\s\u00a0]+$/.test(before);
 }
 
+/** A day in the app's own words: "3 October 2026", "3 أكتوبر 2026" (Western digits, as everywhere in the app). */
+export function formatDate(iso: string, months: readonly string[]): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return y && m && d ? `${d} ${months[m - 1] ?? m} ${y}` : iso;
+}
+
 /**
  * Display tidy-up for the Arabic question bank, which comes with typing habits of its source. The data stays as
  * published; the reader sees standard spelling:
@@ -161,12 +166,6 @@ function inna(before: string, question: boolean): boolean {
  * - no space before final punctuation or inside brackets, ".." before a question mark dropped;
  * - a question that stops mid-sentence ends with "…", as the translations do (`question` only).
  */
-/** A day in the app's own words: "3 October 2026", "3 أكتوبر 2026" (Western digits, as everywhere in the app). */
-export function formatDate(iso: string, months: readonly string[]): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  return y && m && d ? `${d} ${months[m - 1] ?? m} ${y}` : iso;
-}
-
 export function tidyArabic(s: string, question = true): string {
   let v = arabicLetters(s)
     .replace(HAMZA_RE, (_m, pre: string, w: string) => pre + HAMZA[w])
@@ -195,6 +194,7 @@ export function tidyArabic(s: string, question = true): string {
     .replace(/([\u0621-\u064a])\u00ab/g, '$1 \u00ab') // "أو«" → "أو «"
     .replace(/\u00ab[ \u00a0]+/g, '\u00ab')
     .replace(/[ \u00a0]+\u00bb/g, '\u00bb')
+    .replace(/(^|[\s\d])[\u064b-\u0652]+(?=\s|$)/g, '$1').replace(/ {2,}/g, ' ') // a stray vowel mark on its own ("24 ِ ساعة")
     .replace(/(\d)(?=[\u0621-\u064a])/g, '$1 ') // "10كلم" → "10 كلم"
     .replace(/:-$/, ':')
     // A dash between Arabic words stays on the line of the word before it, so no line starts with "- تحرك" (UI/UX b26 P3-4).

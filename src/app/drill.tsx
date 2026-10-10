@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -85,9 +85,10 @@ export default function Drill() {
   const check = () => {
     if (!sel) return;
     const good = sel === q.correctAnswerId;
-    // iOS has no live regions: say the verdict, and the right answer after a miss (a11y review A11Y-04).
+    // iOS has no live regions: say the verdict, and the right answer after a miss (a11y review A11Y-04). Android reads
+    // the feedback strip's live region, so it is not announced twice there; queued so the button change cannot cut it off.
     const rightAnswer = q.options.find((o) => o.id === q.correctAnswerId)!;
-    AccessibilityInfo.announceForAccessibility(good ? t.levels.good : `${t.levels.bad}. ${t.levels.right} ${optionText(q, rightAnswer, lang) ?? t.common.pictureOption}`);
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibilityWithOptions(good ? t.levels.good : `${t.levels.bad}. ${t.levels.right} ${optionText(q, rightAnswer, lang) ?? t.common.pictureOption}`, { queue: true });
     Haptics.notificationAsync(good ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning).catch(() => {});
     if (good) {
       addCorrect([q.id]);
@@ -112,7 +113,7 @@ export default function Drill() {
         <IconButton icon="close" label={t.common.close} onPress={() => router.back()} />
         <View style={{ flex: 1, gap: SPACE.xxs }}>
           <T size={14} muted>{`${t.rd.drillTitle} · ${t.rd.counter(i + 1, questions.length)}`}</T>
-          <ProgressBar value={(i + (checked === null ? 0 : 1)) / questions.length} height={4} label={t.rd.counter(i + 1, questions.length)} />
+          <ProgressBar value={(i + (checked === null ? 0 : 1)) / questions.length} height={4} label={t.rd.drillTitle} />
         </View>
       </View>
       <ScrollView ref={scroll} contentContainerStyle={styles.body}>

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
-import { Button, Chip, EmptyState, Row, SearchBox, SnugText, T, TAB_BAR_SPACE, URDU_SCROLL_TOP } from '@/components/ui';
+import { Button, Chip, CHIP_SLOP, EmptyState, Row, SearchBox, SnugText, T, TAB_BAR_SPACE, URDU_SCROLL_TOP } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { SignImage } from '@/components/Media';
 import { SIGNS, SIGN_GROUPS } from '@/data/signs';
@@ -38,7 +38,7 @@ export function SignsSection({ header, cols, onOpen, selected, group: initialGro
         horizontal
         showsHorizontalScrollIndicator={false}
         onContentSizeChange={() => d.rtl && chips.current?.scrollToEnd({ animated: false })}
-        contentContainerStyle={{ gap: SPACE.xs, flexDirection: d.row, paddingVertical: SPACE.xxs }}
+        contentContainerStyle={{ gap: SPACE.xs, flexDirection: d.row, paddingVertical: CHIP_SLOP }}
         style={{ marginHorizontal: -LAYOUT.gutter }}
       >
         <View style={{ width: LAYOUT.gutter - SPACE.xs }} />

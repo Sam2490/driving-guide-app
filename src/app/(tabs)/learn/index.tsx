@@ -38,7 +38,7 @@ export default function Learn() {
   const twoPane = width >= BREAKPOINTS.medium && section !== 'steps';
   const [sign, setSign] = useState<string>(SIGNS[0].id);
   const [topic, setTopic] = useState<string>(GUIDE_TOPICS[0].id);
-  const [absherFailed, setAbsherFailed] = useState(false);
+  const [absherFailed, setAbsherFailed] = useState(0);
   const listWidth = twoPane ? Math.min(460, width * 0.45) : width;
   const cols = Math.max(1, Math.min(4, Math.floor((Math.min(listWidth, 960) - 2 * LAYOUT.gutter + LAYOUT.list) / 160)));
 
@@ -78,8 +78,8 @@ export default function Learn() {
       </View>
       {section === 'steps' ? (
         <StickyBar inset={false}>
-          {absherFailed ? <Notice tone="bad" text={t.errors.generic} /> : null}
-          <Button title={t.license.absher} icon="globe" onPress={async () => setAbsherFailed(!(await openAbsher()))} />
+          {absherFailed ? <Notice key={absherFailed} tone="bad" text={t.errors.generic} /> : null}
+          <Button title={t.license.absher} icon="globe" onPress={async () => { const ok = await openAbsher(); setAbsherFailed((n) => (ok ? 0 : n + 1)); }} />
         </StickyBar>
       ) : null}
     </View>

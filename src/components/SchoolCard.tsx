@@ -15,7 +15,8 @@ import { Badge, IconButton, Notice, Row, T } from './ui';
 export const SchoolCard = React.memo(function SchoolCard({ school, distance }: { school: School; distance?: { km: number; city: string } }) {
   const { t, c, lang } = useApp();
   const d = useDir();
-  const [failed, setFailed] = useState(false);
+  // Failures are counted: a repeated failure remounts the notice, so screen readers hear it again.
+  const [failed, setFailed] = useState(0);
   const ar = lang === 'ar';
   const city = school.cities[0];
   const name = schoolText(school, lang).name;
@@ -48,9 +49,9 @@ export const SchoolCard = React.memo(function SchoolCard({ school, distance }: {
           </View>
           {km ? <T size={16} weight="bold" color={c.ac}>{km}</T> : null}
         </Pressable>
-        <IconButton icon="nav" label={t.schools.directions} onPress={async () => setFailed(!(await openInMaps(`${school.name} ${city}`)))} />
+        <IconButton icon="nav" label={t.schools.directions} onPress={async () => { const ok = await openInMaps(`${school.name} ${city}`); setFailed((n) => (ok ? 0 : n + 1)); }} />
       </Row>
-      {failed ? <Notice tone="bad" text={t.schools.mapsFailed} /> : null}
+      {failed ? <Notice key={failed} tone="bad" text={t.schools.mapsFailed} /> : null}
     </View>
   );
 });

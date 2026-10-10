@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { AppProvider } from '@/state/AppProvider';
 import type { Lang } from '@/data/types';
 import { QUESTIONS } from '@/data/questions';
@@ -50,7 +50,8 @@ describe('screen-reader names and states in the quiz (accessibility review)', ()
 
 describe('shared components (accessibility review)', () => {
   it('a dialog keeps its text and buttons reachable: the close scrim is a sibling, not a parent (A11Y-03)', async () => {
-    await inLang('en', <Dialog visible text="End the exam?" onClose={() => {}} actions={null} />);
+    const onClose = jest.fn();
+    await inLang('en', <Dialog visible text="End the exam?" onClose={onClose} actions={null} />);
     type Node = { props?: Record<string, unknown>; children?: (Node | string)[] | null };
     const find = (n: Node | Node[] | null, pred: (x: Node) => boolean): Node | undefined => {
       if (!n) return undefined;
@@ -65,6 +66,9 @@ describe('shared components (accessibility review)', () => {
     expect(scrim!.children ?? []).toHaveLength(0);
     const modal = find(tree, (x) => x.props?.accessibilityViewIsModal === true);
     expect(find(modal ?? null, (x) => (x.children ?? []).includes('End the exam?'))).toBeTruthy();
+    // Tapping the scrim still closes the dialog.
+    fireEvent.press(screen.getByLabelText('Close', { includeHiddenElements: true }));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('progress bars are accessibility elements on iOS too (A11Y-10)', async () => {
@@ -73,10 +77,14 @@ describe('shared components (accessibility review)', () => {
   });
 
   it('segment labels stay on one line and shrink instead of breaking a word (two-pane Learn at 600 pt)', async () => {
+    // At normal text size (the test window reports 2×, where labels may wrap between words).
     const RN = jest.requireActual<typeof import('react-native')>('react-native');
-    jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 600, height: 900, scale: 2, fontScale: 1 });
-    await inLang('ar', <Segmented options={['العلامات', 'الدليل', 'الخطوات']} value={0} onChange={() => {}} />);
-    expect(screen.getByText('العلامات').props.numberOfLines).toBe(1);
-    jest.restoreAllMocks();
+    const spy = jest.spyOn(RN, 'useWindowDimensions').mockReturnValue({ width: 600, height: 900, scale: 2, fontScale: 1 });
+    try {
+      await inLang('ar', <Segmented options={['العلامات', 'الدليل', 'الخطوات']} value={0} onChange={() => {}} />);
+      expect(screen.getByText('العلامات').props.numberOfLines).toBe(1);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

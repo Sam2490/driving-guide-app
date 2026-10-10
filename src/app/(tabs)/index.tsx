@@ -11,7 +11,6 @@ import { STEPS } from '@/data/steps';
 import { TIPS } from '@/data/tips';
 import { answeredCount, DEFAULT_EXAM, startExam } from '@/features/quiz/engine';
 import { currentLevel, levelCount } from '@/features/levels/levels';
-import { READINESS_WINDOW } from '@/features/progress/progress';
 import { BREAKPOINTS, SPACE } from '@/theme/tokens';
 
 const TOTAL_LEVELS = levelCount(QUESTIONS.length);
@@ -49,7 +48,7 @@ export default function Home() {
         </View>
       </Row>
       {/* What the number is, and what it is not (an official verdict or a promise). */}
-      {none ? null : <T size={12} muted>{t.rd.readyHow(READINESS_WINDOW)}</T>}
+      {none ? null : <T size={12} muted>{t.rd.readyHow(ready.counted)}</T>}
       <Button title={exam ? t.test.resume : t.home.start} icon={exam ? 'loop' : 'exam'} onPress={start} />
       {/* The exam in progress is resumed here only (no second "continue" row below), with its count under the button. */}
       {exam ? <T size={14} muted center style={{ marginTop: -SPACE.xs }}>{t.test.answered(answeredCount(exam), exam.questions.length)}</T> : null}

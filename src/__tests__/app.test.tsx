@@ -450,7 +450,7 @@ describe('Road-ready redesign', () => {
     await open('/');
     expect(screen.getByText('لم تُقس بعد')).toBeTruthy();
     expect(screen.getByText('أجرِ أول اختبار تجريبي لتعرف مدى جاهزيتك.')).toBeTruthy();
-    expect(screen.queryByText(/متوسط آخر 3/)).toBeNull(); // nothing to explain before the first exam
+    expect(screen.queryByText(/مؤشر للتدريب/)).toBeNull(); // nothing to explain before the first exam
     // The exam in progress is resumed from the readiness card only, with its count under the button.
     expect(screen.getByText('أجبت عن 1 من 30')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'متابعة الاختبار' }));
@@ -464,8 +464,8 @@ describe('Road-ready redesign', () => {
     await open('/');
     await waitFor(() => expect(screen.getByText('واصل التدريب')).toBeTruthy());
     expect(screen.getByText('نجحت في 0 من آخر اختبار')).toBeTruthy();
-    // The readiness card says what the number is and that it is no guarantee for the real test.
-    expect(screen.getByText(/متوسط آخر 3 اختبارات تجريبية.*ولا يضمن النجاح/)).toBeTruthy();
+    // The readiness card says what the number is (one exam so far: its score) and that it is no guarantee.
+    expect(screen.getByText('نتيجة آخر اختبار تجريبي. مؤشر للتدريب، ولا يضمن النجاح في الاختبار الفعلي.')).toBeTruthy();
     expect(screen.getByText('راجع خطأً واحداً')).toBeTruthy();
   });
 

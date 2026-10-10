@@ -432,7 +432,7 @@ const SNUG_SLACK = 4;
 /** Minimum touch target: 44 pt on iOS, Android's recommended 48 dp elsewhere. */
 const TARGET = Platform.select({ ios: TOUCH, default: TOUCH_ANDROID });
 /** A 36 pt chip reaches the touch target through its hit slop. */
-const CHIP_SLOP = (TARGET - 36) / 2;
+export const CHIP_SLOP = (TARGET - 36) / 2;
 const NO_INDENT: number[] = [];
 const FIRST_WORD: number[] = [0];
 /** Before any layout is known, only the text's first word (always a line start) is checked for an indent. */
@@ -496,7 +496,7 @@ export function Segmented({ options, value, onChange, counts }: { options: strin
         const on = value === i;
         const n = counts?.[i];
         return (
-          <Pressable key={o} accessibilityRole="tab" accessibilityLabel={n === undefined ? o : `${o}, ${n}`} accessibilityState={{ selected: on }} onPress={() => onChange(i)} style={[styles.segBtn, on && { backgroundColor: c.card, borderColor: c.acSolid, borderWidth: 2 }]}>
+          <Pressable key={o} accessibilityRole="tab" accessibilityLabel={n === undefined ? o : `${o}, ${n}`} accessibilityState={{ selected: on }} onPress={() => onChange(i)} style={[styles.segBtn, on && { backgroundColor: c.card, borderColor: c.acSolid }]}>
             <T size={16} weight="semibold" center color={on ? c.ac : c.tx2} maxScale={1.3} numberOfLines={oneLine ? 1 : 2} fit={oneLine}>{o}</T>
             {n !== undefined ? <T size={12} center color={on ? c.ac : c.tx2} maxScale={1.3} style={{ fontVariant: ['tabular-nums'] }}>{String(n)}</T> : null}
           </Pressable>
@@ -854,7 +854,7 @@ const styles = StyleSheet.create({
   chipStatic: { minHeight: 28, paddingHorizontal: SPACE.sm, borderWidth: 0 },
   badge: { minHeight: 24, paddingHorizontal: SPACE.xs, borderRadius: RADIUS.sm, maxWidth: '100%' },
   seg: { padding: SPACE.xxs, borderRadius: RADIUS.pill, borderWidth: 1, gap: SPACE.xxs },
-  segBtn: { flex: 1, minHeight: TARGET, borderRadius: RADIUS.pill, justifyContent: 'center', paddingHorizontal: SPACE.xs, borderWidth: 1, borderColor: 'transparent' },
+  segBtn: { flex: 1, minHeight: TARGET, borderRadius: RADIUS.pill, justifyContent: 'center', paddingHorizontal: SPACE.xs, borderWidth: 2, borderColor: 'transparent' },
   search: { alignItems: 'center', gap: SPACE.xs, borderRadius: RADIUS.md, borderWidth: 1, paddingHorizontal: SPACE.md, minHeight: 52 },
   clear: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   notice: { padding: SPACE.sm, paddingHorizontal: SPACE.md, borderRadius: RADIUS.md, alignItems: 'flex-start' },

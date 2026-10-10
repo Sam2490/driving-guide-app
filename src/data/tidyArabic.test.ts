@@ -8,6 +8,7 @@ describe('tidyArabic', () => {
     expect(tidyArabic('ولايؤدي ذلك إلى خطر', false)).toBe('ولا يؤدي ذلك إلى خطر');
     // Only the whole word: "لانه" and "علان" are left alone.
     expect(tidyArabic('علان', false)).toBe('علان');
+    expect(tidyArabic('لانه مهم', false)).toBe('لانه مهم');
   });
   it('keeps a dash with the word before it, so no line starts with "- تحرك" (UI/UX b26 P3-4)', () => {
     expect(tidyArabic('مرايا - إشارة - كتف - سرعة - تحرك', false)).toBe('مرايا\u00a0- إشارة\u00a0- كتف\u00a0- سرعة\u00a0- تحرك');
@@ -29,8 +30,8 @@ describe('tidyArabic', () => {
   });
   it('leaves no question with a space before its final mark, and changes no letters beyond spelling fixes', () => {
     // Skeleton: no alef forms, diacritics, spaces or punctuation; what is left must match the source letter for letter.
-    // ة and ه count as one letter here: the only change between them is the listed spelling fix ساعه → ساعة.
-    const skeleton = (s: string) => arabicLetters(s).replace(/\u0629/g, '\u0647').replace(/\u0623\u0644\u0651\u0627/g, 'انلا').replace(/[\u0621-\u0627\u064b-\u0652\u0640\s.…؟?:،؛!()\-«»]/g, '');
+    // The listed spelling fix ساعه → ساعة is undone before comparing; any other ه/ة change still fails.
+    const skeleton = (s: string) => arabicLetters(s).replace(/(^|[^\u0621-\u064a])\u0633\u0627\u0639\u0629(?=$|[^\u0621-\u064a])/g, '$1\u0633\u0627\u0639\u0647').replace(/\u0623\u0644\u0651\u0627/g, 'انلا').replace(/[\u0621-\u0627\u064b-\u0652\u0640\s.…؟?:،؛!()\-«»]/g, '');
     for (const q of QUESTIONS) {
       const out = questionText(q, 'ar');
       expect(out).not.toMatch(/\s[؟?:]$/);
@@ -130,4 +131,12 @@ it('writes dates in words in every language instead of "2026-10-03" (UI/UX b26 P
 
 it('separates a number from the word it was typed into and spells ساعة (q-bank "10كلم/ساعه")', () => {
   expect(tidyArabic('بمقدار 5 - 10كلم/ساعه', false)).toBe('بمقدار 5 - 10 كلم/ساعة');
+});
+
+it('drops a stray vowel mark typed on its own, and keeps "احترمك" (the drivers respected you) as written', () => {
+  expect(tidyArabic('مدة 24 ِ ساعة', false)).toBe('مدة 24 ساعة');
+  expect(tidyArabic('يجب أن ً تقف', false)).toBe('يجب أن تقف');
+  const q107 = QUESTIONS.find((q) => q.id === 'q107')!;
+  const raw = q107.options.map((o) => o.text ?? '').join(' ');
+  if (raw.includes('احترمك')) expect(q107.options.map((o) => optionText(q107, o, 'ar') ?? '').join(' ')).toContain('احترمك');
 });

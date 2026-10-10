@@ -13,7 +13,8 @@ export default function SchoolDetail() {
   const { t, lang, rtl } = useApp();
   const ar = lang === 'ar';
   const wide = useWindowDimensions().width >= BREAKPOINTS.medium;
-  const [failed, setFailed] = useState(false);
+  // Failures are counted: a repeated failure remounts the notice, so screen readers hear it again.
+  const [failed, setFailed] = useState(0);
   const s = SCHOOLS.find((x) => x.id === id);
   if (!s) return <Screen back><EmptyState text={t.common.noResults} /></Screen>;
   const city = s.cities[0];
@@ -40,12 +41,12 @@ export default function SchoolDetail() {
       </Card>
       {/* Booking is done on Absher. Phones stack the two actions full width; from 600 pt they share a row. */}
       <Row gap={SPACE.sm} style={[{ alignItems: 'stretch' }, !wide && { flexDirection: 'column' }]}>
-        <View style={wide ? { flex: 1 } : undefined}><Button title={t.ux.bookAbsher} icon="globe" onPress={async () => setFailed(!(await openAbsher()))} /></View>
-        <View style={wide ? { flex: 1 } : undefined}><Button kind="secondary" title={t.schools.directions} icon="nav" onPress={async () => setFailed(!(await openInMaps(`${s.name} ${city}`)))} /></View>
+        <View style={wide ? { flex: 1 } : undefined}><Button title={t.ux.bookAbsher} icon="globe" onPress={async () => { const ok = await openAbsher(); setFailed((n) => (ok ? 0 : n + 1)); }} /></View>
+        <View style={wide ? { flex: 1 } : undefined}><Button kind="secondary" title={t.schools.directions} icon="nav" onPress={async () => { const ok = await openInMaps(`${s.name} ${city}`); setFailed((n) => (ok ? 0 : n + 1)); }} /></View>
       </Row>
-      {failed ? <Notice tone="bad" text={t.schools.mapsFailed} /> : null}
+      {failed ? <Notice key={failed} tone="bad" text={t.schools.mapsFailed} /> : null}
       {/* Only what applies to this school: no distance (none is shown here), its own gender, a readable date. */}
-      <T size={14} muted>{t.schools.detailNote(formatDate(SCHOOLS_CHECKED, t.common.months), s.gender === 'women')}</T>
+      <T size={14} muted>{t.schools.detailNote(formatDate(SCHOOLS_CHECKED, t.common.months), s.source === 'public')}</T>
     </Screen>
   );
 }

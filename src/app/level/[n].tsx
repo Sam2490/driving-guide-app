@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -74,9 +74,10 @@ export default function LevelScreen() {
   const check = () => {
     if (!sel) return;
     const good = sel === q.correctAnswerId;
-    // iOS has no live regions: say the verdict, and the right answer after a miss (a11y review A11Y-04).
+    // iOS has no live regions: say the verdict, and the right answer after a miss (a11y review A11Y-04). Android reads
+    // the feedback strip's live region, so it is not announced twice there; queued so the button change cannot cut it off.
     const rightAnswer = q.options.find((o) => o.id === q.correctAnswerId)!;
-    AccessibilityInfo.announceForAccessibility(good ? L.good : `${L.bad}. ${L.right} ${optionText(q, rightAnswer, lang) ?? t.common.pictureOption}`);
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibilityWithOptions(good ? L.good : `${L.bad}. ${L.right} ${optionText(q, rightAnswer, lang) ?? t.common.pictureOption}`, { queue: true });
     const { run: next, gain } = answerRun(run, good);
     Haptics.notificationAsync(good ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning).catch(() => {});
     if (good) addCorrect([q.id]);

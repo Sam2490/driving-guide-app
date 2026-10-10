@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, Platform } from 'react-native';
 import { useApp, useDir } from '@/state/AppProvider';
 import * as Font from 'expo-font';
 import { fontFor, lineHeightFor, loadFontsFor } from '@/theme/fonts';
@@ -36,8 +36,9 @@ export function LanguageList({ value, onPick, pending }: { value: Lang; onPick: 
             key={`${l.id}-${loaded ? 'font' : 'system'}`}
             accessibilityRole="radio"
             accessibilityState={{ selected: on, busy: pending === l.id }}
-            accessibilityLabel={l.id === 'en' ? l.name : `${l.name}, ${l.english}`}
-            // iOS reads each language's own name with that language's voice.
+            // iOS reads each language's own name in that language's voice; Android has no per-element voice, so it
+            // also hears the English name.
+            accessibilityLabel={l.id === 'en' || Platform.OS === 'ios' ? l.name : `${l.name}, ${l.english}`}
             accessibilityLanguage={l.id}
             onPress={() => onPick(l.id)}
             style={({ pressed }) => [styles.row, { flexDirection: d.row, backgroundColor: on ? c.acSoft : 'transparent', borderColor: on ? c.acSolid : 'transparent', opacity: pressed ? 0.85 : 1 }]}
