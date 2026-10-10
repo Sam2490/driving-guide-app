@@ -10,7 +10,10 @@ const ZWSP = '​';
  */
 export function keepUnits(s: string): string {
   return s
-    .replace(/(\d)[ \t]+(?=\S)/g, `$1${NBSP}`)
+    // Before Arabic script the number keeps an ordinary space and a word joiner (no break either way): with a no-break
+    // space, Android drew a cell that starts with a number, "50 سے زیادہ", with the number far apart (build 34).
+    .replace(/(\d)[ \t]+(?=[\u0600-\u06ff])/g, `$1 ${WORD_JOINER}`)
+    .replace(/(\d)[ \t]+(?=[^\s\u2060])/g, `$1${NBSP}`)
     // A unit never wraps before its slash or inside a word (re-audit P1-2).
     .replace(/[ \t]*\/[ \t]*/g, `${WORD_JOINER}/${WORD_JOINER}`)
     // A long unit may wrap after its slash ("किमी/ | घंटा"), never a short one ("كم/ | س", "km/ | h"; build 32 #48).
@@ -165,7 +168,8 @@ export function columnWidths(rows: string[][], available: number, fontSize = 14,
       const cell = keepUnits(r[k] ?? '');
       // In Urdu any piece may start a line and carry its line-start indent (lineStartIndent).
       const indent = (w: string) => (nastaliq ? lineStartIndent(w) * NBSP_EM * size : 0);
-      for (const piece of cell.split(/[ \t\n\u200b]+/)) lo = Math.max(lo, textWidth(piece, size, nastaliq) + indent(piece));
+      // A space before a word joiner does not break, so it stays inside its piece.
+      for (const piece of cell.split(/[\t\n\u200b]+| (?!\u2060)/)) lo = Math.max(lo, textWidth(piece, size, nastaliq) + indent(piece));
       hi = Math.max(hi, textWidth(cell, size, nastaliq) + indent(cell));
     });
     min.push(lo + 2 * cellPad + extraPad + 2);
