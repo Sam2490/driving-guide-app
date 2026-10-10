@@ -22,8 +22,8 @@ describe('guide tables', () => {
     expect(keepUnits('30 km/h')).toBe('30\u00a0km\u2060/\u2060h');
   });
 
-  it('lets a number range wrap after its dash, never inside a number', () => {
-    expect(keepUnits('1,000–2,000')).toBe('1,000–​2,000');
+  it('keeps a number range in one piece (build 38: "1000– | 2000" in the Urdu fines table)', () => {
+    expect(keepUnits('1,000–2,000')).toBe('1,000–\u20602,000');
   });
 
   it('gives every column room for its widest unbreakable piece', () => {
@@ -34,7 +34,7 @@ describe('guide tables', () => {
     const { widths, scroll } = columnWidths(rows, PHONE);
     expect(scroll).toBe(false);
     expect(widths[0]).toBeGreaterThanOrEqual(textWidth('Category', 14 * 1.06) + 2 * CELL_PAD);
-    expect(widths[1]).toBeGreaterThanOrEqual(textWidth('1,000–', 14) + 2 * CELL_PAD);
+    expect(widths[1]).toBeGreaterThanOrEqual(textWidth('1,000–2,000', 14) + 2 * CELL_PAD);
     expect(widths.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(PHONE);
   });
 

@@ -8,7 +8,7 @@ describe('readiness text after one exam', () => {
     expect(STRINGS.hi.rd.readySub(0, 1)).toBe('पिछली 1 परीक्षा में पास नहीं');
     expect(STRINGS.hi.rd.readySub(1, 3)).toBe('पिछली 3 परीक्षाओं में से 1 में पास');
     expect(STRINGS.ur.rd.readySub(1, 1)).toBe('آخری امتحان میں کامیاب');
-    expect(STRINGS.ur.rd.readySub(0, 2)).toBe('آخری 2 امتحانات میں سے 0 میں کامیاب');
+    expect(STRINGS.ur.rd.readySub(0, 2)).toBe('آخری 2 میں سے 0 امتحان پاس');
     expect(STRINGS.ar.rd.readyA11y(6, 0, 1)).toBe('الجاهزية 6 بالمئة. نجحت في 0 من آخر اختبار.');
     for (const s of Object.values(STRINGS)) {
       expect(s.rd.readyA11y(6, 0, 1)).not.toMatch(/\b1 exams|1 اختبارات|1 परीक्षाओं|1 امتحانات/);

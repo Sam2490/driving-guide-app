@@ -19,8 +19,9 @@ export function keepUnits(s: string, urdu = false): string {
     .replace(/[ \t]*\/[ \t]*/g, `${WORD_JOINER}/${WORD_JOINER}`)
     // A long unit may wrap after its slash ("किमी/ | घंटा"), never a short one ("كم/ | س", "km/ | h"; build 32 #48).
     .replace(/([A-Za-z\u0600-\u06ff\u0900-\u097f\u0980-\u09ff]{3,})\u2060\/\u2060(?=[A-Za-z\u0600-\u06ff\u0900-\u097f\u0980-\u09ff]{3,})/g, `$1${WORD_JOINER}/${ZWSP}`)
-    // A number range may wrap after its dash ("1,000– | 2,000"), never inside a number ("1,000–2, | 000", QA_1 #206).
-    .replace(/(\d)\u2013(?=\d)/g, `$1\u2013${ZWSP}`);
+    // A number range stays in one piece, never "1000– | 2000" (build 38, Urdu fines table) nor "1,000–2, | 000" (QA_1
+    // #206): its column is sized to hold it whole.
+    .replace(/(\d)\u2013(?=\d)/g, `$1\u2013${WORD_JOINER}`);
 }
 
 /** A guide bullet that packs two formulas ("A = … · B = …") becomes one bullet per formula. */
