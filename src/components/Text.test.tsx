@@ -4,7 +4,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AppProvider } from '@/state/AppProvider';
 import type { Lang } from '@/data/types';
 import { EmptyState, ltrNumbers, nastaliqPad, nastaliqPads, Segmented, SnugText, T } from './ui';
-import { nastaliqHeadroom } from './learn/table';
+import { indentWords, lineStartIndent, lineStartWords, nastaliqHeadroom } from './learn/table';
 
 jest.mock('expo-font', () => ({ loadAsync: jest.fn(() => Promise.resolve()), isLoaded: () => true }));
 
@@ -57,6 +57,50 @@ describe('Urdu text keeps room for Nastaliq overhangs (QA_1 U1: "کی" drawn as 
     const style = StyleSheet.flatten(screen.getByText('سڑک').props.style);
     expect(style.paddingTop).toBe('10%');
     expect(style.marginTop).toBeUndefined();
+  });
+
+  it('starts a line a little inside the edge when its first word draws past it (build 33: "لیٹیگری")', async () => {
+    // Measured per word with HarfBuzz: "کیٹیگری" overhangs 0.44 em; "میں" and "کے" need nothing.
+    expect(lineStartIndent('کیٹیگری')).toBe(4);
+    expect(lineStartIndent('میں')).toBe(0);
+    expect(lineStartIndent('کے')).toBe(0);
+    expect(lineStartIndent('کیٹیگری،')).toBe(4); // trailing punctuation does not change the start
+    await inLang('ur', <T size={14} weight="semibold">کیٹیگری</T>);
+    expect(screen.getByText(/کیٹیگری/).props.children).toBe('\u00a0'.repeat(4) + 'کیٹیگری');
+  });
+
+  it('indents exactly the line starts Android reports, and drops an indent a reflow left mid-line', async () => {
+    const text = 'ڈرائیور کو بائیں جانب رکنا چاہیے اور کار کو احتیاط سے چلانا چاہیے';
+    await inLang('ur', <T size={16}>{text}</T>);
+    const layout = async (lines: string[]) => {
+      const node = screen.getByText(/احتیاط/);
+      await act(async () => fireEvent(node, 'textLayout', { nativeEvent: { lines: lines.map((l) => ({ text: l })) } }));
+      return screen.getByText(/احتیاط/).props.children as string;
+    };
+    // The second line starts with "کو" (word 8).
+    const first = ['ڈرائیور کو بائیں جانب رکنا چاہیے اور کار ', 'کو احتیاط سے چلانا چاہیے'];
+    expect(lineStartWords(text, first)).toEqual([8]);
+    const drawn = await layout(first);
+    expect(drawn).toBe(indentWords(text, [8]));
+    expect(drawn.startsWith('ڈرائیور کو بائیں')).toBe(true); // mid-line "کو" stays as it was
+    // A reflow moves "کار" down: now "کار" (word 7) starts the line and "کو" is mid-line again, so its indent goes.
+    const reflow = drawn.split('اور ');
+    const again = await layout([reflow[0] + 'اور ', reflow[1]]);
+    expect(lineStartIndent('کار')).toBeGreaterThan(0);
+    expect(again).toBe(indentWords(text, [7]));
+    expect(again).toContain(' کو احتیاط');
+    // Lines that are not this text (an event from an earlier render) are ignored.
+    expect(lineStartWords(text, ['something else'])).toBeNull();
+  });
+
+  it('leaves centred Urdu text without indents', async () => {
+    await inLang('ur', <T size={14} center>کیٹیگری</T>);
+    expect(screen.getByText('کیٹیگری').props.children).toBe('کیٹیگری');
+  });
+
+  it('leaves other languages without line-start indents', async () => {
+    await inLang('ar', <T size={14}>كيف تتجاوز</T>);
+    expect(screen.getByText('كيف تتجاوز').props.children).toBe('كيف تتجاوز');
   });
 
   it('leaves other languages and Latin runs inside Urdu unpadded', async () => {

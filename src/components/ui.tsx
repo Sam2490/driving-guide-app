@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Animated, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type LayoutChangeEvent, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Animated, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, type LayoutChangeEvent, type NativeSyntheticEvent, type TextLayoutEventData, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
@@ -8,7 +8,7 @@ import { LATIN_FONT, type Weight } from '@/theme/fonts';
 import { BREAKPOINTS, ELEVATION, ICON, LAYOUT, MAX_CONTENT_WIDTH, MOTION, RADIUS, SPACE, TEXT, TOUCH, type TextRole, type TypeSize } from '@/theme/tokens';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Icon, type IconName } from './Icon';
-import { nastaliqHeadroom, nastaliqPad, nastaliqPads } from './learn/table';
+import { indentWords, lineStartIndent, lineStartWords, mayNeedIndent, nastaliqHeadroom, nastaliqPad, nastaliqPads } from './learn/table';
 import { LANGUAGES } from '@/i18n';
 
 /** Bottom padding under scrolling content. The tab bar is docked, so it no longer covers the last item. */
@@ -58,9 +58,42 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
   // padding does not (review of build 33).
   const scale = Math.min(fontScale || 1, maxScale ?? spec?.maxScale ?? Infinity);
   const room = pad && !content ? nastaliqHeadroom(fs * scale, lineHeightOf(style, lh(fs, content)) * scale) : null;
-  // In right-to-left text a number range or percentage must read left to right ("150–300", "75%"); otherwise the
-  // bidi algorithm shows "300–150" and "%75" (QA_1 #131–#133, #095).
+  // A word whose first letter draws past the line start is set a little inside it: the text's first word at once, and
+  // later line starts once Android reports its lines (lineStartIndent: "کیٹیگری" read "لیٹیگری", build 33). Centred
+  // text is left alone: its lines rarely touch the edge, and an indent would push it off centre.
+  const source = typeof children === 'string' ? children : null;
+  const indentable = pad !== null && !content && !center && source !== null;
+  const [indents, setIndents] = React.useState<{ text: string; at: number[]; passes: number } | null>(null);
+  const at = indentable && source !== null ? (indents?.text === source ? indents.at : firstIndent(source)) : NO_INDENT;
+  if (indentable && source !== null) children = indentWords(source, at);
   if ((lang === 'ar' || lang === 'ur') && typeof children === 'string') children = ltrNumbers(children);
+  const drawn = typeof children === 'string' ? children : null;
+  // Only multi-line text with a later word that could need an indent listens to its lines (each pass is a re-layout).
+  const followLines = indentable && drawn !== null && source !== null && numberOfLines !== 1 && !fit && mayNeedIndent(source);
+  const textLayout = followLines
+    ? (e: NativeSyntheticEvent<TextLayoutEventData>) => {
+        onTextLayout?.(e);
+        const need = lineStartWords(drawn as string, e.nativeEvent.lines.map((l) => l.text));
+        if (!need) return; // lines from an earlier render
+        setIndents((prev) => {
+          const cur = prev?.text === source ? prev : { text: source as string, at, passes: 0 };
+          // Exactly the line starts that need room: an indent left mid-line by a reflow would show as a wide gap. After
+          // a few passes, only add, so an unlucky width cannot keep the text reflowing.
+          const next = cur.passes < 4 ? need : [...new Set([...cur.at, ...need])];
+          const same = next.length === cur.at.length && next.every((i) => cur.at.includes(i));
+          return same ? prev : { text: source as string, at: next, passes: cur.passes + 1 };
+        });
+      }
+    : onTextLayout;
+  // A new width (rotation, split screen) is a fresh layout: the pass budget starts again.
+  const width = React.useRef(0);
+  const onLayout = followLines
+    ? (e: LayoutChangeEvent) => {
+        const w = Math.round(e.nativeEvent.layout.width);
+        if (width.current && w !== width.current) setIndents((prev) => (prev && prev.passes ? { ...prev, passes: 0 } : prev));
+        width.current = w;
+      }
+    : undefined;
   if (lang === 'ur' && !latin && typeof children === 'string' && MATH_SIGN.test(children)) {
     children = children.split(MATH_SPLIT).map((part, i) => (i % 2 ? <Text key={i} style={{ fontFamily: LATIN_FONT[w] }}>{part}</Text> : part));
   }
@@ -72,7 +105,8 @@ export function T({ children, size, role, weight, color, muted, content, latin, 
       numberOfLines={fit ? 1 : numberOfLines}
       adjustsFontSizeToFit={fit || undefined}
       minimumFontScale={fit ? 0.8 : undefined}
-      onTextLayout={onTextLayout}
+      onTextLayout={textLayout}
+      onLayout={onLayout}
       maxFontSizeMultiplier={maxScale ?? spec?.maxScale}
       // Android's default "highQuality" line breaking measures a little wider than Yoga allots.
       textBreakStrategy="simple"
@@ -395,6 +429,12 @@ export function SnugText({ children, style, ...rest }: Omit<TProps, 'children' |
 }
 
 const SNUG_SLACK = 4;
+const NO_INDENT: number[] = [];
+const FIRST_WORD: number[] = [0];
+/** Before any layout is known, only the text's first word (always a line start) is checked for an indent. */
+function firstIndent(text: string): number[] {
+  return lineStartIndent(text) > 0 ? FIRST_WORD : NO_INDENT;
+}
 /** Top padding of an Urdu scroll column: covers the headroom of a body or heading first line (nastaliqHeadroom). */
 export const URDU_SCROLL_TOP = SPACE.md;
 
