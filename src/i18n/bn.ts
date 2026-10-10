@@ -111,6 +111,7 @@ export const bn: Strings = {
     readyTitle: 'প্রস্তুতি', readyLevels: { none: 'এখনও মাপা হয়নি', practise: 'অনুশীলন চালিয়ে যান', almost: 'প্রায় প্রস্তুত', ready: 'পরীক্ষার জন্য প্রস্তুত' },
     readySub: (passed, n) => `শেষ ${n}টি পরীক্ষার ${passed}টিতে পাস`,
     readyEmpty: 'আপনি কতটা প্রস্তুত জানতে প্রথম মক পরীক্ষা দিন।',
+    readyHow: (n) => `আপনার শেষ ${n}টি মক পরীক্ষার গড়। এটি অনুশীলনের নির্দেশক, আসল পরীক্ষায় পাসের নিশ্চয়তা নয়।`,
     readyA11y: (p, passed, n) => `প্রস্তুতি ${p} শতাংশ। শেষ ${n}টি পরীক্ষার ${passed}টিতে পাস।`,
     readyDelta: (before, after) => `প্রস্তুতি ${before}% → ${after}%`,
     continueT: 'চালিয়ে যান', levelRow: (n) => `লেভেল ${n}`, levelSub: 'আপনার পরের লেভেল', mistakesRow: (n) => `${n}টি ভুলের অনুশীলন করুন`,

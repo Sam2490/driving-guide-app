@@ -109,6 +109,7 @@ export const en = {
     readyTitle: 'Readiness', readyLevels: { none: 'Not measured yet', practise: 'Keep practising', almost: 'Almost ready', ready: 'Ready for the test' },
     readySub: (passed: number, n: number) => `Passed ${passed} of your last ${n} ${n === 1 ? 'exam' : 'exams'}`,
     readyEmpty: 'Take your first mock exam to see how ready you are.',
+    readyHow: (n: number) => `The average of your last ${n} mock exams. A practice guide, not a guarantee for the real test.`,
     readyA11y: (p: number, passed: number, n: number) => `Readiness ${p} percent. Passed ${passed} of your last ${n} ${n === 1 ? 'exam' : 'exams'}.`,
     readyDelta: (before: number, after: number) => `Readiness ${before}% → ${after}%`,
     continueT: 'Continue', levelRow: (n: number) => `Level ${n}`, levelSub: 'Your next level', mistakesRow: (n: number) => `Retry ${n} ${n === 1 ? 'mistake' : 'mistakes'}`,

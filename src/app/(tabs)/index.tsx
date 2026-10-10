@@ -11,6 +11,7 @@ import { STEPS } from '@/data/steps';
 import { TIPS } from '@/data/tips';
 import { answeredCount, DEFAULT_EXAM, startExam } from '@/features/quiz/engine';
 import { currentLevel, levelCount } from '@/features/levels/levels';
+import { READINESS_WINDOW } from '@/features/progress/progress';
 import { BREAKPOINTS, SPACE } from '@/theme/tokens';
 
 const TOTAL_LEVELS = levelCount(QUESTIONS.length);
@@ -40,13 +41,15 @@ export default function Home() {
   const readiness = (
     <Card style={{ gap: SPACE.md, flex: wide ? 1 : undefined }}>
       <Row gap={SPACE.md} style={{ alignItems: 'center' }}>
-        {none ? null : <Ring value={ready.percent / 100} size={96} label={`${ready.percent}%`} a11y={t.rd.readyA11y(ready.percent, ready.passed, ready.counted)} color={ready.level === 'practise' ? c.warn : c.acSolid} />}
+        {none ? null : <Ring value={ready.percent / 100} size={96} label={`${ready.percent}%`} a11y={t.rd.readyA11y(ready.percent, ready.passed, ready.counted)} color={ready.level === 'practise' ? c.warn : c.meter} />}
         <View style={{ flex: 1, gap: SPACE.xxs }}>
           <T size={14} weight="semibold" muted header>{t.rd.readyTitle}</T>
           <T role="h3">{t.rd.readyLevels[ready.level]}</T>
           <T size={14} muted>{none ? t.rd.readyEmpty : t.rd.readySub(ready.passed, ready.counted)}</T>
         </View>
       </Row>
+      {/* What the number is, and what it is not (an official verdict or a promise). */}
+      {none ? null : <T size={12} muted>{t.rd.readyHow(READINESS_WINDOW)}</T>}
       <Button title={exam ? t.test.resume : t.home.start} icon={exam ? 'loop' : 'exam'} onPress={start} />
       {/* The exam in progress is resumed here only (no second "continue" row below), with its count under the button. */}
       {exam ? <T size={14} muted center style={{ marginTop: -SPACE.xs }}>{t.test.answered(answeredCount(exam), exam.questions.length)}</T> : null}

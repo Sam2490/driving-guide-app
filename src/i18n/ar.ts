@@ -112,6 +112,7 @@ export const ar: Strings = {
     readyTitle: 'الجاهزية', readyLevels: { none: 'لم تُقس بعد', practise: 'واصل التدريب', almost: 'قريب من الجاهزية', ready: 'جاهز للاختبار' },
     readySub: (passed, n) => `نجحت في ${passed} من آخر ${arCount(n, AR.examGen)}`,
     readyEmpty: 'أجرِ أول اختبار تجريبي لتعرف مدى جاهزيتك.',
+    readyHow: (n) => `متوسط آخر ${n} اختبارات تجريبية. مؤشر للتدريب، ولا يضمن النجاح في الاختبار الفعلي.`,
     readyA11y: (p, passed, n) => `الجاهزية ${p} بالمئة. نجحت في ${passed} من آخر ${arCount(n, AR.examGen)}.`,
     readyDelta: (before, after) => `الجاهزية ${before}٪ ← ${after}٪`,
     continueT: 'متابعة', levelRow: (n) => `المستوى ${n}`, levelSub: 'مستواك التالي', mistakesRow: (n) => `راجع ${arCount(n, AR.mistakeAcc)}`,
