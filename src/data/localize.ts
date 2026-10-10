@@ -185,6 +185,7 @@ export function tidyArabic(s: string, question = true): string {
     })
     .replace(/(\d[ \u00a0]+\u0645\u062a\u0631)\u0627\u064b(?=[ \u00a0]+\u0645(?:\u0631\u0628\u0639|\u0643\u0639\u0628))/g, '$1') // an adjective follows: leave "20 متر مربع"
     .replace(/\s*\.{2,}\s*([؟?])/g, '$1')
+    .replace(/[ \u00a0]*\.{3,}$/, '…') // a blank to complete ends in "…", like the stems the tidy-up completes
     .replace(/[ \u00a0]+([؟?:،!؛])/g, '$1')
     .replace(/[ \u00a0]+\.(?!\.)/g, '.')
     .replace(/\([ \u00a0]+/g, '(')

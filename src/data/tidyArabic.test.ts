@@ -26,7 +26,8 @@ describe('tidyArabic', () => {
     expect(tidyArabic('ماذا تعني هذه الإشارة .. ؟')).toBe('ماذا تعني هذه الإشارة؟');
   });
   it('keeps a trailing ellipsis that marks a blank to complete', () => {
-    expect(tidyArabic('يجب على السائق ...')).toBe('يجب على السائق ...');
+    expect(tidyArabic('يجب على السائق ...')).toBe('يجب على السائق…');
+    expect(tidyArabic('من المهم أن يكون الحمل .....')).toBe('من المهم أن يكون الحمل…');
   });
   it('leaves no question with a space before its final mark, and changes no letters beyond spelling fixes', () => {
     // Skeleton: no alef forms, diacritics, spaces or punctuation; what is left must match the source letter for letter.
@@ -42,7 +43,7 @@ describe('tidyArabic', () => {
   it('restores the hamza on common words, whole words only (QA_1 A1)', () => {
     expect(tidyArabic('يمكن ان تزيد السرعة الى 70 كلم/س', false)).toBe('يمكن أن تزيد السرعة إلى 70 كلم/س');
     expect(tidyArabic('تغيير مسارك الى مسار اخر', false)).toBe('تغيير مسارك إلى مسار آخر');
-    expect(tidyArabic('ان مخالفة قيادة المركبة قبل الحصول على رخصة قيادة هي ...')).toBe('إن مخالفة قيادة المركبة قبل الحصول على رخصة قيادة هي ...');
+    expect(tidyArabic('ان مخالفة قيادة المركبة قبل الحصول على رخصة قيادة هي ...')).toBe('إن مخالفة قيادة المركبة قبل الحصول على رخصة قيادة هي…');
     expect(tidyArabic('ان تقف وتقدم ما تستطيع', false)).toBe('أن تقف وتقدم ما تستطيع');
     expect(tidyArabic('الانعطاف والاتجاه', false)).toBe('الانعطاف والاتجاه');
   });
