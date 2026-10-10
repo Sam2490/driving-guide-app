@@ -50,6 +50,9 @@ const HAMZA: Record<string, string> = {
   '\u0627\u0644\u0649': '\u0625\u0644\u0649', // الى → إلى
   '\u0627\u0648': '\u0623\u0648', // او → أو
   '\u0627\u0630\u0627': '\u0625\u0630\u0627', // اذا → إذا
+  '\u0633\u0627\u0639\u0647': '\u0633\u0627\u0639\u0629', // ساعه → ساعة
+  '\u0644\u0627\u0646': '\u0644\u0623\u0646', // لان → لأن (all 8 uses mean "because"; linguistic audit AR-2)
+  '\u0628\u0625\u0633\u062a\u062e\u0631\u0627\u062c': '\u0628\u0627\u0633\u062a\u062e\u0631\u0627\u062c', // بإستخراج → باستخراج (q022)
   '\u0627\u0642\u0635\u0649': '\u0623\u0642\u0635\u0649', // اقصى → أقصى
   '\u0627\u0639\u0644\u0627\u0647': '\u0623\u0639\u0644\u0627\u0647', // اعلاه → أعلاه
   '\u0627\u0646\u062a': '\u0623\u0646\u062a', // انت → أنت
@@ -127,7 +130,7 @@ const HAMZA_STEMS: Record<string, string> = {
 const STEM_RE = new RegExp(`(^|[^${L}])(\u0648\u0627\u0644|\u0628\u0627\u0644|\u0641\u0627\u0644|\u0643\u0627\u0644|\u0648\u0644\u0644|\u0644\u0644|\u0627\u0644|\u0648|\u0641|\u0628|\u0644|\u0643)?(${Object.keys(HAMZA_STEMS).join('|')})(?=$|[^${L}])`, 'g');
 
 /** "لا" run into the next verb (QA_1 A2): لايسمح → لا يسمح. */
-const LA_RE = word('\u0648?\u0644\u0627(?:\u062a\u0642\u0644|\u064a\u0633\u0645\u062d|\u062a\u0643\u0648\u0646|\u064a\u0645\u0643\u0646|\u064a\u062c\u0628|\u064a\u0648\u062c\u062f|\u062a\u0648\u062c\u062f|\u064a\u0631\u0627\u0642\u0628\u0648\u0646|\u064a\u0633\u062a\u0637\u064a\u0639\u0648\u0646|\u062a\u0639\u0648\u062f)');
+const LA_RE = word('\u0648?\u0644\u0627(?:\u062a\u0642\u0644|\u064a\u0633\u0645\u062d|\u062a\u0643\u0648\u0646|\u064a\u0645\u0643\u0646|\u064a\u062c\u0628|\u064a\u0648\u062c\u062f|\u062a\u0648\u062c\u062f|\u064a\u0631\u0627\u0642\u0628\u0648\u0646|\u064a\u0633\u062a\u0637\u064a\u0639\u0648\u0646|\u062a\u0639\u0648\u062f|\u064a\u0624\u062f\u064a)'); // … تعود, يؤدي (ولايؤدي, q261)
 
 /** After 11–99 the counted noun is singular and accusative (QA_1 A3): "20 متر" → "20 متراً". */
 const TAMYIZ: Record<string, string> = {
@@ -158,6 +161,12 @@ function inna(before: string, question: boolean): boolean {
  * - no space before final punctuation or inside brackets, ".." before a question mark dropped;
  * - a question that stops mid-sentence ends with "…", as the translations do (`question` only).
  */
+/** A day in the app's own words: "3 October 2026", "3 أكتوبر 2026" (Western digits, as everywhere in the app). */
+export function formatDate(iso: string, months: readonly string[]): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return y && m && d ? `${d} ${months[m - 1] ?? m} ${y}` : iso;
+}
+
 export function tidyArabic(s: string, question = true): string {
   let v = arabicLetters(s)
     .replace(HAMZA_RE, (_m, pre: string, w: string) => pre + HAMZA[w])
@@ -186,7 +195,10 @@ export function tidyArabic(s: string, question = true): string {
     .replace(/([\u0621-\u064a])\u00ab/g, '$1 \u00ab') // "أو«" → "أو «"
     .replace(/\u00ab[ \u00a0]+/g, '\u00ab')
     .replace(/[ \u00a0]+\u00bb/g, '\u00bb')
+    .replace(/(\d)(?=[\u0621-\u064a])/g, '$1 ') // "10كلم" → "10 كلم"
     .replace(/:-$/, ':')
+    // A dash between Arabic words stays on the line of the word before it, so no line starts with "- تحرك" (UI/UX b26 P3-4).
+    .replace(/[ \u00a0]*-[ \u00a0]+(?=[\u0621-\u064a])/g, '\u00a0- ')
     .replace(/(^|[\u0621-\u064a]{2}[\s\u060c]+)\u0648\s+(?=[\u0621-\u064a])/g, '$1\u0648') // "و أكثر" → "وأكثر"; not "أ و ب"
     .trim();
   // A one-letter preposition that ends the stem keeps its joining stroke: "يقصد ب" → "يقصد بـ…".

@@ -1,7 +1,22 @@
 import { QUESTIONS } from './questions';
-import { arabicLetters, optionText, questionText, tidyArabic } from './localize';
+import { arabicLetters, formatDate, optionText, questionText, tidyArabic } from './localize';
 
 describe('tidyArabic', () => {
+  it('fixes the spelling slips left after build 26: لأن, باستخراج, ولا يؤدي (linguistic audit AR-2)', () => {
+    expect(tidyArabic('لان السرعة عالية', false)).toBe('لأن السرعة عالية');
+    expect(tidyArabic('يقوم بإستخراج الرخصة', false)).toBe('يقوم باستخراج الرخصة');
+    expect(tidyArabic('ولايؤدي ذلك إلى خطر', false)).toBe('ولا يؤدي ذلك إلى خطر');
+    // Only the whole word: "لانه" and "علان" are left alone.
+    expect(tidyArabic('علان', false)).toBe('علان');
+  });
+  it('keeps a dash with the word before it, so no line starts with "- تحرك" (UI/UX b26 P3-4)', () => {
+    expect(tidyArabic('مرايا - إشارة - كتف - سرعة - تحرك', false)).toBe('مرايا\u00a0- إشارة\u00a0- كتف\u00a0- سرعة\u00a0- تحرك');
+    // A number range is not touched.
+    expect(tidyArabic('5 - 10 كلم', false)).toContain('5 - 10');
+    const q324 = QUESTIONS.find((q) => q.id === 'q324')!;
+    // The dash follows a no-break space (U+00A0), never a breakable one.
+    for (const o of q324.options) expect(optionText(q324, o, 'ar') ?? '').not.toMatch(/(^|[ \t])-/);
+  });
   it('drops the space before a final question mark or colon', () => {
     expect(tidyArabic('أي مركبة يجب أن تفسح الطريق ؟')).toBe('أي مركبة يجب أن تفسح الطريق؟');
     expect(tidyArabic('هناك قواعد للتجاوز تتمثل في الاتي :')).toBe('هناك قواعد للتجاوز تتمثل في الآتي:');
@@ -14,7 +29,8 @@ describe('tidyArabic', () => {
   });
   it('leaves no question with a space before its final mark, and changes no letters beyond spelling fixes', () => {
     // Skeleton: no alef forms, diacritics, spaces or punctuation; what is left must match the source letter for letter.
-    const skeleton = (s: string) => arabicLetters(s).replace(/\u0623\u0644\u0651\u0627/g, 'انلا').replace(/[\u0621-\u0627\u064b-\u0652\u0640\s.…؟?:،؛!()\-«»]/g, '');
+    // ة and ه count as one letter here: the only change between them is the listed spelling fix ساعه → ساعة.
+    const skeleton = (s: string) => arabicLetters(s).replace(/\u0629/g, '\u0647').replace(/\u0623\u0644\u0651\u0627/g, 'انلا').replace(/[\u0621-\u0627\u064b-\u0652\u0640\s.…؟?:،؛!()\-«»]/g, '');
     for (const q of QUESTIONS) {
       const out = questionText(q, 'ar');
       expect(out).not.toMatch(/\s[؟?:]$/);
@@ -104,4 +120,14 @@ describe('tidyArabic edge cases from the independent review', () => {
     expect(tidyArabic('اترك « حق الأولوية »', false)).toBe('اترك «حق الأولوية»');
     expect(tidyArabic('أي واحدة منها؟ (الأسهم الصغيرة)')).toBe('أي واحدة منها؟ (الأسهم الصغيرة)');
   });
+});
+
+it('writes dates in words in every language instead of "2026-10-03" (UI/UX b26 P3-6)', () => {
+  expect(formatDate('2026-10-03', ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'])).toBe('3 October 2026');
+  expect(formatDate('2026-10-03', ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'])).toBe('3 أكتوبر 2026');
+  expect(formatDate('not a date', [])).toBe('not a date');
+});
+
+it('separates a number from the word it was typed into and spells ساعة (q-bank "10كلم/ساعه")', () => {
+  expect(tidyArabic('بمقدار 5 - 10كلم/ساعه', false)).toBe('بمقدار 5 - 10 كلم/ساعة');
 });

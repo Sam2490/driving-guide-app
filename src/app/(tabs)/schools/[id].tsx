@@ -5,7 +5,7 @@ import { useApp } from '@/state/AppProvider';
 import { Badge, Button, Card, EmptyState, Notice, Row, Screen, SourceBadge, T } from '@/components/ui';
 import { SCHOOLS, SCHOOLS_CHECKED } from '@/data/schools';
 import { openAbsher, openInMaps } from '@/services/maps';
-import { cityName, regionName, schoolText } from '@/data/localize';
+import { cityName, formatDate, regionName, schoolText } from '@/data/localize';
 import { BREAKPOINTS, SPACE } from '@/theme/tokens';
 
 export default function SchoolDetail() {
@@ -44,7 +44,8 @@ export default function SchoolDetail() {
         <View style={wide ? { flex: 1 } : undefined}><Button kind="secondary" title={t.schools.directions} icon="nav" onPress={async () => setFailed(!(await openInMaps(`${s.name} ${city}`)))} /></View>
       </Row>
       {failed ? <Notice tone="bad" text={t.schools.mapsFailed} /> : null}
-      <T size={14} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>
+      {/* Only what applies to this school: no distance (none is shown here), its own gender, a readable date. */}
+      <T size={14} muted>{t.schools.detailNote(formatDate(SCHOOLS_CHECKED, t.common.months), s.gender === 'women')}</T>
     </Screen>
   );
 }

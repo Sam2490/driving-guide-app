@@ -288,6 +288,9 @@ describe('level outcomes', () => {
   it('ends the level after 5 wrong answers, and a retry starts it fresh', async () => {
     await play(false, 5);
     expect(screen.getByText('لم تكتمل هذه المرة')).toBeTruthy();
+    // Lives ran out after 5 of 8: the subtitle says so, and the ring counts the 5 questions reached, like the tiles.
+    expect(screen.getByText('نفدت المحاولات بعد 5 من 8 أسئلة.')).toBeTruthy();
+    expect(screen.getByText(/^من 5/)).toBeTruthy();
     await fireEvent.press(screen.getByText('إعادة المستوى'));
     await settle();
     expect(screen.getByText('تأكيد الإجابة')).toBeTruthy();
@@ -312,6 +315,17 @@ function unlabelledControls(node: unknown): string[] {
   walk(node);
   return out;
 }
+
+describe('school details note (UI/UX b26 P3-6)', () => {
+  it('names only what applies to the school: no distance, its own listing, a date in words', async () => {
+    await open('/schools/b01');
+    const note = screen.getByText(/الحجز عبر أبشر|تحقّق منها واحجز عبر أبشر/);
+    const text = String(note.props.children);
+    expect(text).not.toMatch(/المسافات/);
+    expect(text).toMatch(/\d{1,2} [\u0621-\u064a]+ 20\d\d/);
+    expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+  });
+});
 
 describe('accessibility', () => {
   it.each(['/', '/learn', '/learn?section=guide', '/learn?section=steps', '/practice', '/practice/mistakes', '/schools', '/schools/b01', '/settings', '/about', '/level/1'])('all controls on %s have a role and a name', async (url) => {

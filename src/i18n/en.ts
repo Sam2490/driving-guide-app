@@ -6,6 +6,7 @@ export const en = {
     more: 'Show more', search: 'Search', arabicOnly: 'This content is in Arabic.',
     official: 'From the official trainee guide', general: 'General information · verify on Absher',
     letters: ['A', 'B', 'C', 'D'],
+    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
     clear: 'Clear search', signPicture: 'Picture of a traffic sign', photo: 'Picture for this question', pictureOption: 'Picture answer',
   },
   home: {
@@ -73,7 +74,8 @@ export const en = {
     unavailable: 'Could not get your location. Try again, or choose a region and city.',
     nearbyTitle: 'Nearest schools', km: (k: number) => `${k} km`, toCity: (c: string) => `to ${c} centre`,
     directions: 'Get directions', details: 'View details', branches: 'Cities', mapsFailed: 'Could not open a map app.',
-    note: (d: string) => `Men's branches as listed in Absher's driving-licence booking (checked ${d}). Women's schools come from public sources. Distances are to the city centre. Book through Absher.`,
+    note: (d: string) => `Men's branches as listed in Absher's driving-licence booking (checked ${d}). Women's schools come from public sources. Book through Absher.`,
+    detailNote: (d: string, women: boolean) => (women ? `This school comes from public sources and is not confirmed on Absher (checked ${d}). Confirm and book through Absher.` : `Listed in Absher's driving-licence booking (checked ${d}). Book through Absher.`),
     checked: (d: string) => `List checked on ${d}`,
   },
   settings: { title: 'Settings', language: 'Language', theme: 'Appearance', system: 'System', light: 'Light', dark: 'Dark', contentNote: 'Questions, answers, the trainee guide, signs and schools follow the language you choose. Arabic is the original; English, Urdu, Hindi and Bengali are translations to help you study.' },

@@ -40,3 +40,4 @@ Docs: https://docs.expo.dev/eas/index.md
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
 - After changing Urdu text, regenerate the line-start indent table: `pip install uharfbuzz && python3 scripts/nastaliq-indent.py` (writes `src/data/nastaliqIndent.ts`; Android clips Nastaliq ink past the line start).
+- Translations: `scripts/generated/*.ts` are the source of the per-language tables (`node scripts/split-i18n.js` splits them). The JSON drafts in `scripts/translations*/` are older and still contain terms the glossary forbids; never rebuild from them. `src/data/glossary.test.ts` fails if a banned term reaches the app.

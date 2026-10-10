@@ -8,7 +8,7 @@ import { SCHOOLS, SCHOOLS_CHECKED } from '@/data/schools';
 import { CITIES } from '@/data/cities';
 import { citiesIn, filterSchools, nearbySchools, regionsOf, type NearbySchool } from '@/features/schools/search';
 import { getPositionOnce, type LocationResult } from '@/services/location';
-import { cityName, regionName, schoolText } from '@/data/localize';
+import { cityName, formatDate, regionName, schoolText } from '@/data/localize';
 import { RADIUS, SPACE } from '@/theme/tokens';
 
 function Select({ label, value, onPress }: { label: string; value: string; onPress: () => void }) {
@@ -119,7 +119,7 @@ export default function Schools() {
           <Grid cols={cols}>{list.map((s) => <SchoolCard key={s.id} school={s} />)}</Grid>
         </View>
       )}
-      <T size={14} muted>{t.schools.note(SCHOOLS_CHECKED)}</T>
+      <T size={14} muted>{t.schools.note(formatDate(SCHOOLS_CHECKED, t.common.months))}</T>
 
       {/* Permission is explained before the system prompt, in a sheet with Allow / Not now. */}
       <BottomSheet visible={loc.phase === 'explain'} title={t.schools.permTitle} onClose={reset}>

@@ -169,3 +169,12 @@ it('isolates guide-table ranges that carry a zero-width break, and a range follo
   expect(ltrNumbers('5–​10')).toBe('⁦5–​10⁩');
   expect(ltrNumbers('10–20% أو أكثر')).toBe('⁦10–20%⁩ أو أكثر');
 });
+
+it('draws Urdu maths signs in the Latin font, so "+" does not read as a minus (UI/UX b26 P1-3)', async () => {
+  await inLang('ur', <T size={16}>رکنے کا فاصلہ = ردِعمل کا فاصلہ + بریک کا فاصلہ</T>);
+  const node = screen.getByText(/رکنے کا فاصلہ/);
+  const parts = node.props.children as React.ReactElement<{ children: string; style: { fontFamily: string } }>[];
+  const plus = parts.find((p) => typeof p === 'object' && p.props.children === '+');
+  expect(plus).toBeTruthy();
+  expect(plus!.props.style.fontFamily).not.toMatch(/Nastaliq/);
+});
