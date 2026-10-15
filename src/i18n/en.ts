@@ -42,7 +42,7 @@ export const en = {
     title: 'Theory test', modes: ['Mock exam', 'Level challenge'],
     disclaimer: 'Practice simulator, not the official test.',
     exTitle: 'Mock exam', exSub: (n: number, m: number, p: number) => `${n}\u00a0${n === 1 ? 'question' : 'questions'} · ${m}\u00a0${m === 1 ? 'minute' : 'minutes'} · pass mark\u00a0${p}`,
-    rules: ['Answers are shown only after you submit.', 'You can go back and change answers before submitting.'],
+    rules: ['Answers are shown after you submit.', 'You can go back and change answers before submitting.'],
     start: 'Start exam', resume: 'Resume exam', qOf: (i: number, n: number) => `Question ${i} of ${n}`,
     prev: 'Previous', next: 'Next', submit: 'Submit', grid: 'All questions', answered: (n: number, m: number) => `${n} of ${m} answered`,
     submitAsk: (n: number) => (n ? `${n} ${n === 1 ? 'question' : 'questions'} unanswered. Submit anyway?` : 'Submit your answers?'),
