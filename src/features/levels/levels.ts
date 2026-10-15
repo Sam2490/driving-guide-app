@@ -28,8 +28,14 @@ export function stageCount(bankSize: number): number {
   return Math.ceil(levelCount(bankSize) / LEVELS_PER_STAGE);
 }
 
-export function levelQuestions(bank: readonly Question[], level: number, rng: Rng = Math.random): Question[] {
-  const order = levelOrder(bank.length);
+const NONE: ReadonlySet<string> = new Set();
+
+/**
+ * The questions of a level. The order is drawn over the whole bank (so it matches the web app); held-out questions are
+ * then skipped, which moves only the levels after them by a question or two.
+ */
+export function levelQuestions(bank: readonly Question[], level: number, rng: Rng = Math.random, exclude: ReadonlySet<string> = NONE): Question[] {
+  const order = levelOrder(bank.length).filter((i) => !exclude.has(bank[i].id));
   return order.slice((level - 1) * QUESTIONS_PER_LEVEL, level * QUESTIONS_PER_LEVEL).map((i) => prepareQuestion(bank[i], rng));
 }
 

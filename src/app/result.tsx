@@ -5,7 +5,7 @@ import { useApp } from '@/state/AppProvider';
 import { useExam } from '@/state/ExamProvider';
 import { Badge, Button, EmptyState, Notice, Row, Screen, T } from '@/components/ui';
 import { ResultLayout } from '@/components/ResultLayout';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { DEFAULT_EXAM, formatClock, scoreExam, startExam } from '@/features/quiz/engine';
 import { readinessChange } from '@/features/progress/progress';
 
@@ -31,7 +31,7 @@ export default function Result() {
   const delta = history[0]?.at === finishedAt ? readinessChange(history) : null;
   const again = () => {
     setExamDone(null);
-    setExam(startExam(QUESTIONS, DEFAULT_EXAM));
+    setExam(startExam(POOL, DEFAULT_EXAM));
     router.replace('/exam');
   };
   const perfect = r.correct === r.total;

@@ -12,10 +12,11 @@ import { Icon } from '@/components/Icon';
 import { ResultLayout } from '@/components/ResultLayout';
 import { OptionButton, OptionContent, QuestionBody, QuestionSlide } from '@/components/Quiz';
 import { QUESTIONS } from '@/data/questions';
+import { HELD_OUT, POOL } from '@/data/pool';
 import { optionText } from '@/data/localize';
 import { answerRun, ATTEMPTS, completeLevel, isFailed, isUnlocked, levelCount, levelQuestions, startRun, type Run } from '@/features/levels/levels';
 
-const TOTAL = levelCount(QUESTIONS.length);
+const TOTAL = levelCount(POOL.length);
 
 export default function LevelScreen() {
   const params = useLocalSearchParams<{ n: string }>();
@@ -27,7 +28,7 @@ export default function LevelScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [attempt, setAttempt] = useState(0);
-  const questions = useMemo(() => levelQuestions(QUESTIONS, level), [level, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
+  const questions = useMemo(() => levelQuestions(QUESTIONS, level, Math.random, HELD_OUT), [level, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
   const [run, setRun] = useState<Run>(() => startRun(level));
   const [sel, setSel] = useState<string | null>(null);
   const [checked, setChecked] = useState<null | { good: boolean; gain: number }>(null);

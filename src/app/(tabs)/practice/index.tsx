@@ -7,7 +7,7 @@ import { useStudy } from '@/state/StudyProvider';
 import { Button, Card, IconTile, ListRow, Row, Screen, Section, SnugText, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
 import { LevelPath, RankCard } from '@/components/Journey';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { answeredCount, DEFAULT_EXAM, startExam } from '@/features/quiz/engine';
 import { BREAKPOINTS, SPACE } from '@/theme/tokens';
 
@@ -23,7 +23,7 @@ export default function Practice() {
   const missed = Object.keys(mistakes).length;
   const begin = () => {
     setExamDone(null);
-    setExam(startExam(QUESTIONS, DEFAULT_EXAM));
+    setExam(startExam(POOL, DEFAULT_EXAM));
     router.push('/exam');
   };
   const examCard = (

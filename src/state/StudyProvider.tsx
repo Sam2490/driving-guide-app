@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { EMPTY_LEARN, storage, type LearnState, type MistakeBook } from '@/services/storage';
 import { recordCorrect, recordMisses } from '@/features/progress/progress';
 
@@ -26,7 +26,7 @@ export function StudyProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let alive = true;
-    storage.loadMistakes(QUESTIONS).then((m) => {
+    storage.loadMistakes(POOL).then((m) => {
       if (!alive || touched.current.m) return;
       book.current = m;
       setMistakes(m);

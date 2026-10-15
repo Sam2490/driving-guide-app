@@ -38,14 +38,14 @@ export const SIGNS: Sign[] = [
  {
   "id": "s004",
   "group": "تحذيرية",
-  "nameAr": "منعطفات أولها لليمين",
-  "nameEn": "Curves — first to the right"
+  "nameAr": "منعطفات أولها لليسار",
+  "nameEn": "Curves — first to the left"
  },
  {
   "id": "s005",
   "group": "تحذيرية",
-  "nameAr": "منعطفات أولها لليسار",
-  "nameEn": "Curves — first to the left"
+  "nameAr": "منعطفات أولها لليمين",
+  "nameEn": "Curves — first to the right"
  },
  {
   "id": "s006",

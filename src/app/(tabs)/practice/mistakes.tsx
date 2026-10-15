@@ -5,11 +5,11 @@ import { useStudy } from '@/state/StudyProvider';
 import { View } from 'react-native';
 import { Badge, Button, Dialog, EmptyState, Grid, Screen, T, useListColumns } from '@/components/ui';
 import { MistakeCard } from '@/components/Quiz';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { MASTERED_AFTER, mistakeIds } from '@/features/progress/progress';
 import { SPACE } from '@/theme/tokens';
 
-const BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]));
+const BY_ID = new Map(POOL.map((q) => [q.id, q]));
 
 /** Saved mistakes from exams, levels and practice. Each leaves the list after two correct answers in a row. */
 export default function Mistakes() {

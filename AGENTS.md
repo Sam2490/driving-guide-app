@@ -41,3 +41,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
 - After changing Urdu text, regenerate the line-start indent table: `pip install uharfbuzz && python3 scripts/nastaliq-indent.py` (writes `src/data/nastaliqIndent.ts`; Android clips Nastaliq ink past the line start).
 - Translations: `scripts/generated/*.ts` are the source of the per-language tables (`node scripts/split-i18n.js` splits them). The JSON drafts in `scripts/translations*/` are older and still contain terms the glossary forbids; never rebuild from them. `src/data/glossary.test.ts` fails if a banned term reaches the app.
+
+## Content decisions made by the owner (2026-10-15)
+- q140, q469 and q565 are held out of every practice mode (`src/data/pool.ts`) until a driving expert rules on their keys. They stay in `questions.ts` unchanged. Use `POOL` for anything that asks questions; `QUESTIONS` only for integrity checks and the level order.
+- Signs s004 and s005 had their names swapped to match their pictures (s004 = curves, first to the left). If `signs.ts`, `i18n/signs.ts` or the signs JSON drafts are ever regenerated, keep this swap; `pool.test.ts` fails otherwise.

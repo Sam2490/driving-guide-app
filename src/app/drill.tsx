@@ -11,12 +11,12 @@ import { Button, EmptyState, IconButton, ProgressBar, Row, StickyBar, T } from '
 import { Icon } from '@/components/Icon';
 import { ResultLayout } from '@/components/ResultLayout';
 import { OptionButton, OptionContent, QuestionBody, QuestionSlide } from '@/components/Quiz';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { optionText } from '@/data/localize';
 import { prepareQuestion } from '@/features/quiz/engine';
 import { mistakeIds } from '@/features/progress/progress';
 
-const BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]));
+const BY_ID = new Map(POOL.map((q) => [q.id, q]));
 const ROUND = 10;
 
 /** Practise saved mistakes with instant feedback. Right twice in a row (across rounds) takes a question off the list. */

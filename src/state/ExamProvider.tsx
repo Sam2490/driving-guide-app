@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import { answeredCount, DEFAULT_EXAM, isCorrect, scoreExam, type ExamSession } from '@/features/quiz/engine';
 import { readiness, type Readiness } from '@/features/progress/progress';
 import { useStudy } from './StudyProvider';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { storage, type ExamRecord } from '@/services/storage';
 
 export type ExamDone = { session: ExamSession; finishedAt: number; timedOut: boolean };
@@ -34,7 +34,7 @@ export function ExamProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let alive = true;
     storage.loadHistory().then((h) => alive && setHistory(h));
-    storage.loadExam(QUESTIONS).then((saved) => {
+    storage.loadExam(POOL).then((saved) => {
       // Don't overwrite an exam the user started while the saved one was loading.
       if (alive && saved && !touched.current) setExamState(saved);
     });

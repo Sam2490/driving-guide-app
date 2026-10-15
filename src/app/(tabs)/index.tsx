@@ -6,14 +6,14 @@ import { useExam } from '@/state/ExamProvider';
 import { useStudy } from '@/state/StudyProvider';
 import { Button, Card, IconButton, LanguagePill, ListRow, Ring, Row, Screen, Section, T } from '@/components/ui';
 import { Icon } from '@/components/Icon';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { STEPS } from '@/data/steps';
 import { TIPS } from '@/data/tips';
 import { answeredCount, DEFAULT_EXAM, startExam } from '@/features/quiz/engine';
 import { currentLevel, levelCount } from '@/features/levels/levels';
 import { BREAKPOINTS, SPACE } from '@/theme/tokens';
 
-const TOTAL_LEVELS = levelCount(QUESTIONS.length);
+const TOTAL_LEVELS = levelCount(POOL.length);
 
 /** Home answers "how close am I to passing?" and offers the next useful step. The tabs do the routing. */
 export default function Home() {
@@ -25,7 +25,7 @@ export default function Home() {
   const start = () => {
     if (!exam) {
       setExamDone(null);
-      setExam(startExam(QUESTIONS, DEFAULT_EXAM));
+      setExam(startExam(POOL, DEFAULT_EXAM));
     }
     router.push('/exam');
   };

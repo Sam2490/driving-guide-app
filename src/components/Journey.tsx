@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useApp, useDir } from '@/state/AppProvider';
-import { QUESTIONS } from '@/data/questions';
+import { POOL } from '@/data/pool';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { currentLevel, levelCount, LEVELS_PER_STAGE, RANK_XP, rankFor, rankProgress, stageCount } from '@/features/levels/levels';
 import { RADIUS, SPACE } from '@/theme/tokens';
 import { Button, Card, IconTile, ProgressBar, Row, SnugText, Stars, T } from './ui';
 import { Icon } from './Icon';
 
-const TOTAL = levelCount(QUESTIONS.length);
-const STAGES = stageCount(QUESTIONS.length);
+const TOTAL = levelCount(POOL.length);
+const STAGES = stageCount(POOL.length);
 
 /** Rank, XP (sand) and progress to the next rank. */
 export function RankCard() {
